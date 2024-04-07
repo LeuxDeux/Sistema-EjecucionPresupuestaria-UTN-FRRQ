@@ -5,31 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro</title>
     <link rel="stylesheet" href="resources/css/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 </head>
 <body>
-    <div class="register-form">
-        <h1>Formulario de Registro</h1>
-        <form action="register" method="post">
-            <label for="">Usuario</label>
-            <input type="text" name="usuario" id="" required>
-
-            <label for="">Nombre Completo</label>
-            <input type="text" name="nombres" id="" required>
-
-            <label for="">Rol</label>
-            <select name="rol" id="rol" class="select-css">
-                <option value="admin" selected>Admin</option>
-                <option value="data-entry" selected>Data Entry</option>
-            </select>
-
-            <label for="">Contraseña</label>
-            <input type="password" name="pass" id="" required>
-
-            <div style="display: inline;">
-                <a href="/" class="btn-cancel">Cancelar</a><input type="submit" value="Enviar" class="btn-save">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 shadow-lg p-3 mb-5">
+                    <div class="card border-primary">
+                        <div class="card-header bg-primary text-white">Registrarse</div>
+                        <div class="card-body text-primary">
+                            <form action="/register" method="post">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Nombre Completo</label>
+                                    <input type="text" id="nombres" name="nombres" class="form-control">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="user" class="form-label">Usuario</label>
+                                    <input type="text" id="usuario" name="usuario" class="form-control">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="pass" class="form-label">Contraseña</label>
+                                    <input type="password" id="contraseña" name="contraseña" class="form-control">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="">Secretaria</label>
+                                        <select name="secretaria" id="secretaria" class="select-css">
+                                            <% results.forEach((secretaria) => { %>
+                                                <option value="<%= secretaria.id %>"><%= secretaria.nombre %></option>
+                                            <% }); %>
+                                        </select>
+                                </div>
+                                
+                                <div class="card-footer bg-transparent border-primary">
+                                    <a href="/" type="button" class="btn btn-secondary">Cancelar</a>
+                                    <button type="submit" class="btn btn-primary">Registrar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </form>
+        </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </body>
 </html>

@@ -13,6 +13,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); //permite recibir json en las rutas
 //variables entorno
 dotenv.config({path: './env/.env'});
+
+const connection = require('./database/db');
 //cookies
 // app.use(cookieParser());
 // //eliminar cache
@@ -35,8 +37,14 @@ app.listen(3000, ()=>{
 app.get('/', (req, res)=>{
     res.render('login');
 });
-app.get('/categorias', (req, res)=>{
-    res.render('categorias');
+app.get('/registro', (req, res)=>{
+    connection.query('SELECT * FROM secretarias', (error, results)=>{
+        if(error){
+            throw error;
+        }else{
+            res.render('registro', {results:results});
+        }
+    });
 });
 const crud = require('./controllers/controllers');
 app.post('/crear-categorias', crud.crearCategorias);
