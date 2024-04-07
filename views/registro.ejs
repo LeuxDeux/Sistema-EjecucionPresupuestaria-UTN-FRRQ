@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro</title>
+    <link rel="stylesheet" href="resources/css/styles.css">
+</head>
+<body>
+    <div class="register-form">
+        <h1>Formulario de Registro</h1>
+        <form action="register" method="post">
+            <label for="">Usuario</label>
+            <input type="text" name="usuario" id="" required>
+
+            <label for="">Nombre Completo</label>
+            <input type="text" name="nombres" id="" required>
+
+            <label for="">Rol</label>
+            <select name="rol" id="rol" class="select-css">
+                <option value="admin" selected>Admin</option>
+                <option value="data-entry" selected>Data Entry</option>
+            </select>
+
+            <label for="">Contraseña</label>
+            <input type="password" name="pass" id="" required>
+
+            <div style="display: inline;">
+                <a href="/" class="btn-cancel">Cancelar</a><input type="submit" value="Enviar" class="btn-save">
+            </div>
+        </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
+const mysql = require('mysql2');
 
 const app = express();
 //motor plantillas
@@ -34,3 +35,9 @@ app.listen(3000, ()=>{
 app.get('/', (req, res)=>{
     res.render('login');
 });
+app.get('/categorias', (req, res)=>{
+    res.render('categorias');
+});
+const crud = require('./controllers/controllers');
+app.post('/crear-categorias', crud.crearCategorias);
+
