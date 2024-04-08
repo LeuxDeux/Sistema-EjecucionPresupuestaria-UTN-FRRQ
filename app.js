@@ -47,11 +47,13 @@ app.get('/', (req, res)=>{
         res.render('index', {
             login: true,
             nombre: req.session.nombre,
+            secretaria: req.session.secretaria
         });
     }else{
         res.render('index', {
             login: false,
-            nombre: 'Debe iniciar sesión'
+            nombre: 'Debe iniciar sesión',
+            secretaria: ''
         });
     }
 });
@@ -170,6 +172,11 @@ app.post('/auth', async (req, res)=>{
         });
     }
 });
+app.get('/logout', (req, res)=>{
+    req.session.destroy(()=>{
+        res.redirect('/')
+    })
+})
 const crud = require('./controllers/controllers');
 app.post('/crear-categorias', crud.crearCategorias);
 

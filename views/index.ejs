@@ -10,6 +10,7 @@
     <h1>Bienvenido</h1>
     <% if (login) { %>
         <h1>El usuario conectado es: <strong><%= nombre %></strong></h1>
+        <p style="display: none;"><%= secretaria %></p>
         <a href="logout" class="a-logout">Cerrar Sesión</a>
     <%} else { %>
         <h1><strong><%= nombre %></strong></h1>
