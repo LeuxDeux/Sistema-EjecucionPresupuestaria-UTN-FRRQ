@@ -91,6 +91,69 @@ app.post('/register', async (req, res) => {
         }
     });
 });
+app.post('/login', async (req, res)=>{
+    const usuario = req.body.usuario;
+    const contraseña = req.body.contraseña;
+    let contraseñaHash = await bcryptjs.hash(contraseña, 8);
+    if(usuario && contraseña){
+        connection.query('SELECT * FROM usuarios WHERE usuario = ?', [usuario], async (error, results)=>{
+            if(results.length == 0 || !(await bcryptjs.compare(contraseña, results[0].password))) { // si la longitud del select es 0 o si no coincide la contraseña
+                res.render('login', {
+                    alert: true,
+                    alertTitle: "Error",
+                    alertMessage: "¡Usuario y/o contraseña incorrectas!",
+                    alertIcon: 'error',
+                    showConfirmButton: true,
+                    timer: false,
+                    ruta: 'login'
+                });
+            }else{
+                req.session.loggedin = true; //estado de log
+                req.session.nombre = results[0].nombres;
+                req.session.secretaria = results[0].secretaria_id;
+                console.log(req.session.secretaria);
+                if(req.session.secretaria == '1'){
+                    res.render('menu-admin', {
+                        login: true,
+                        nombre: req.session.nombre,
+                        secretaria: req.session.secretaria,
+                        alert: true,
+                        alertTitle: "Conexión Exitosa",
+                        alertMessage: "¡Login Correcto!",
+                        alertIcon: 'success',
+                        showConfirmButton: false,
+                        timer: 1500,
+                        ruta: '',
+                    });
+                }else{
+                    console.log(req.session.secretaria);
+                    res.render('menu', {
+                        login: true,
+                        nombre: req.session.nombre,
+                        secretaria: req.session.secretaria,
+                        alert: true,
+                        alertTitle: "Conexion Exitosa",
+                        alertMessage: "¡Login Correcto!",
+                        alertIcon: 'success',
+                        showConfirmButton: false,
+                        timer: 1500,
+                        ruta: ''
+                        });
+                }
+            }
+        });
+    }else{
+        res.render('login', {
+            alert: true,
+            alertTitle: "Advertencia",
+            alertMessage: "Por favor ingrese un usuario y contraseña",
+            alertIcon: 'warning',
+            showConfirmButton: true,
+            timer: 1500,
+            ruta: 'login'
+        });
+    }
+});
 const crud = require('./controllers/controllers');
 app.post('/crear-categorias', crud.crearCategorias);
 
