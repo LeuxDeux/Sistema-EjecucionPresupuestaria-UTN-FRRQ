@@ -177,21 +177,30 @@ app.get('/logout', (req, res)=>{
         res.redirect('/')
     })
 })
-app.get('/categorias', (req, res)=>{
-    if(req.session.loggedin){
-        res.render('categorias', {
-            login: true,
-            nombre: req.session.nombre,
-            secretaria: req.session.secretaria
+app.get('/categorias', (req, res) => {
+    if (req.session.loggedin) {
+        // Consulta SQL para seleccionar los nombres de las categorías con secretaria_id igual al req.session.secretaria
+        connection.query('SELECT nombre FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, results) => {
+            if (error) {
+                throw error;
+            } else {
+                // Renderiza la plantilla 'categorias.ejs' y pasa los resultados de la consulta
+                res.render('categorias', {
+                    login: true,
+                    nombre: req.session.nombre,
+                    secretaria: req.session.secretaria,
+                    categorias: results // Aquí pasamos los resultados de la consulta
+                });
+            }
         });
-    }else{
+    } else {
         res.render('index', {
             login: false,
             nombre: 'Debe iniciar sesión',
             secretaria: ''
         });
     }
-})
+});
 const crud = require('./controllers/controllers');
 app.post('/crear-categorias', crud.crearCategorias);
 
