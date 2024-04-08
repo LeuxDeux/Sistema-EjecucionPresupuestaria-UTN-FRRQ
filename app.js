@@ -43,7 +43,23 @@ app.listen(3000, ()=>{
 // app.use('/', require('./routes/router'));
 
 app.get('/', (req, res)=>{
+    if(req.session.loggedin){
+        res.render('index', {
+            login: true,
+            nombre: req.session.nombre,
+        });
+    }else{
+        res.render('index', {
+            login: false,
+            nombre: 'Debe iniciar sesión'
+        });
+    }
+});
+app.get('/login', (req, res) => {
     res.render('login');
+});
+app.get('/menu-admin', (req, res) => {
+    res.render('menu-admin');
 });
 app.get('/registro', (req, res)=>{
     connection.query('SELECT * FROM secretarias', (error, results)=>{
@@ -91,7 +107,7 @@ app.post('/register', async (req, res) => {
         }
     });
 });
-app.post('/login', async (req, res)=>{
+app.post('/auth', async (req, res)=>{
     const usuario = req.body.usuario;
     const contraseña = req.body.contraseña;
     let contraseñaHash = await bcryptjs.hash(contraseña, 8);
@@ -113,11 +129,11 @@ app.post('/login', async (req, res)=>{
                 req.session.secretaria = results[0].secretaria_id;
                 console.log(req.session.secretaria);
                 if(req.session.secretaria == '1'){
-                    res.render('menu-admin', {
+                    res.render('login', {
+                        alert: true,
                         login: true,
                         nombre: req.session.nombre,
                         secretaria: req.session.secretaria,
-                        alert: true,
                         alertTitle: "Conexión Exitosa",
                         alertMessage: "¡Login Correcto!",
                         alertIcon: 'success',
@@ -128,10 +144,10 @@ app.post('/login', async (req, res)=>{
                 }else{
                     console.log(req.session.secretaria);
                     res.render('menu', {
+                        alert: true,
                         login: true,
                         nombre: req.session.nombre,
                         secretaria: req.session.secretaria,
-                        alert: true,
                         alertTitle: "Conexion Exitosa",
                         alertMessage: "¡Login Correcto!",
                         alertIcon: 'success',
@@ -156,4 +172,5 @@ app.post('/login', async (req, res)=>{
 });
 const crud = require('./controllers/controllers');
 app.post('/crear-categorias', crud.crearCategorias);
+
 

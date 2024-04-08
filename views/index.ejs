@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="resources/css/styles.css">
+</head>
+<body>
+    <h1>Bienvenido</h1>
+    <% if (login) { %>
+        <h1>El usuario conectado es: <strong><%= nombre %></strong></h1>
+        <a href="logout" class="a-logout">Cerrar Sesión</a>
+    <%} else { %>
+        <h1><strong><%= nombre %></strong></h1>
+        <a href="login" class="a-login">Ir a Inicio</a>
+    <% } %>  
+</body>
+</html>
+</html>

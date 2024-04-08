@@ -24,3 +24,29 @@
 .select-css option {
     font-weight: normal;
 }
+.a-login:link, .a-login:visited {
+    background-color: white;
+    color: black;
+    border: 2px solid #10b981;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+}
+.a-login:hover, .a-login:active {
+    background-color: #10b981;
+    color: white;
+}
+.a-logout:link, .a-logout:visited {
+    background-color: #fff;
+    color: #000;
+    border: 2px solid #f87171;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+}
+.a-logout:hover, .a-logout:active {
+    background-color: #f87171;
+    color: white;
+}

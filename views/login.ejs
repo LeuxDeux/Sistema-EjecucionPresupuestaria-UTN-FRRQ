@@ -21,7 +21,7 @@
   <body class="text-center">
     
 <main class="form-signin text-center shadow-lg p-3 mb-5">
-  <form id="formLogin" action="/login" method="POST">
+  <form id="formLogin" action="/auth" method="POST">
     <img class="mb-4" src="img/UTN_logo.jpg" alt="" width="72" height="57">
     <h1 class="h3 mb-3 fw-normal">Por favor ingrese</h1>
 
@@ -39,20 +39,21 @@
   <!--<a href="/register" type="button" class="w-100 btn btn-lg btn-primary">Registrarse</a>-->
 </main>
 
-    <!--
+    
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    < if(alert) { >
+    <% if(typeof alert != "undefined"){%>
       <script>
-        Swal.fire({
-          title: '<= alertTitle >',
-          text: '<= alertMessage >',
-          icon: '<= alertIcon >',
-          showConfirmButton: <= showConfirmButton >,
-          timer: <= timer >
-        }).then(()=>{
-          window.location = '/<= ruta >'
-        })
+          Swal.fire({
+              title: '<%= alertTitle%>',
+              text: '<%= alertMessage %>',
+              icon: '<%= alertIcon %>',
+              showConfirmButton: <%= showConfirmButton %>,
+              timer: <%= timer %>
+          }).then(()=>{
+              window.location='/<%= ruta %>'
+          })
       </script>
-    < } >-->
+
+  <% } %>
   </body>
 </html>
