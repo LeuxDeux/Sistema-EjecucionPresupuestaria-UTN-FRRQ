@@ -145,7 +145,7 @@ app.post('/auth', async (req, res)=>{
                     });
                 }else{
                     console.log(req.session.secretaria);
-                    res.render('menu', {
+                    res.render('login', {
                         alert: true,
                         login: true,
                         nombre: req.session.nombre,
@@ -176,6 +176,21 @@ app.get('/logout', (req, res)=>{
     req.session.destroy(()=>{
         res.redirect('/')
     })
+})
+app.get('/categorias', (req, res)=>{
+    if(req.session.loggedin){
+        res.render('categorias', {
+            login: true,
+            nombre: req.session.nombre,
+            secretaria: req.session.secretaria
+        });
+    }else{
+        res.render('index', {
+            login: false,
+            nombre: 'Debe iniciar sesión',
+            secretaria: ''
+        });
+    }
 })
 const crud = require('./controllers/controllers');
 app.post('/crear-categorias', crud.crearCategorias);
