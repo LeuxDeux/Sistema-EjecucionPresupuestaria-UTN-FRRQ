@@ -29,3 +29,30 @@ exports.crearCategorias = (req, res) => {
         }
     });
 };
+exports.editarCategoria = (req, res) => {
+    const categoriaId = req.body.id; // Obtenemos el ID de la categoría desde el cuerpo de la solicitud
+    const nuevoNombre = req.body.nuevoNombre; // Obtenemos el nuevo nombre de la categoría desde el cuerpo de la solicitud
+    // Realizamos la actualización en la base de datos
+    connection.query('UPDATE categorias SET nombre = ? WHERE id = ?', [nuevoNombre, categoriaId], (error, results) => {
+        if (error) {
+            throw error;
+        } else {
+            console.log('Categoría actualizada con éxito');
+            // Después de actualizar la categoría, consultamos nuevamente las categorías de la base de datos
+            connection.query('SELECT * FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, categorias) => {
+                if (error) {
+                    throw error;
+                } else {
+                    // Renderizamos la vista 'categorias.ejs' nuevamente con las categorías actualizadas
+                    res.render('categorias', {
+                        login: true,
+                        nombre: req.session.nombre,
+                        secretaria: req.session.secretaria,
+                        categorias: categorias
+                    });
+                }
+            });
+        }
+    });
+};
+

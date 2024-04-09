@@ -180,7 +180,7 @@ app.get('/logout', (req, res)=>{
 app.get('/categorias', (req, res) => {
     if (req.session.loggedin) {
         // Consulta SQL para seleccionar los nombres de las categorías con secretaria_id igual al req.session.secretaria
-        connection.query('SELECT nombre FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, results) => {
+        connection.query('SELECT id, nombre FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, results) => {
             if (error) {
                 throw error;
             } else {
@@ -189,7 +189,7 @@ app.get('/categorias', (req, res) => {
                     login: true,
                     nombre: req.session.nombre,
                     secretaria: req.session.secretaria,
-                    categorias: results // Aquí pasamos los resultados de la consulta
+                    categorias: results // Aquí pasa los resultados de la consulta
                 });
             }
         });
@@ -203,5 +203,6 @@ app.get('/categorias', (req, res) => {
 });
 const crud = require('./controllers/controllers');
 app.post('/crear-categorias', crud.crearCategorias);
+app.post('/editar-categorias', crud.editarCategoria);
 //
 
