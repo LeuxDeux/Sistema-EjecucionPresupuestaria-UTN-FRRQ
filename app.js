@@ -203,5 +203,5 @@ app.get('/categorias', (req, res) => {
 });
 const crud = require('./controllers/controllers');
 app.post('/crear-categorias', crud.crearCategorias);
-
+//
 
