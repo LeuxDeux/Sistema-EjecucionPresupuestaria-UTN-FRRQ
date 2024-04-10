@@ -47,13 +47,14 @@ app.get('/', (req, res)=>{
         res.render('index', {
             login: true,
             nombre: req.session.nombre,
-            secretaria: req.session.secretaria
+            secretaria: req.session.secretaria,
+            id_usuario: req.session.id_usuario
         });
     }else{
         res.render('index', {
             login: false,
             nombre: 'Debe iniciar sesión',
-            secretaria: ''
+            secretaria: '',
         });
     }
 });
@@ -129,13 +130,16 @@ app.post('/auth', async (req, res)=>{
                 req.session.loggedin = true; //estado de log
                 req.session.nombre = results[0].nombres;
                 req.session.secretaria = results[0].secretaria_id;
+                req.session.id_usuario = results[0].id;
                 console.log(req.session.secretaria);
+                console.log(req.session.id_usuario);
                 if(req.session.secretaria == '1'){
                     res.render('login', {
                         alert: true,
                         login: true,
                         nombre: req.session.nombre,
                         secretaria: req.session.secretaria,
+                        id_usuario: req.session.id_usuario,
                         alertTitle: "Conexión Exitosa",
                         alertMessage: "¡Login Correcto!",
                         alertIcon: 'success',
@@ -150,6 +154,7 @@ app.post('/auth', async (req, res)=>{
                         login: true,
                         nombre: req.session.nombre,
                         secretaria: req.session.secretaria,
+                        id_usuario: req.session.id_usuario,
                         alertTitle: "Conexion Exitosa",
                         alertMessage: "¡Login Correcto!",
                         alertIcon: 'success',
@@ -189,6 +194,7 @@ app.get('/categorias', (req, res) => {
                     login: true,
                     nombre: req.session.nombre,
                     secretaria: req.session.secretaria,
+                    id_usuario: req.session.id_usuario,
                     categorias: results // Aquí pasa los resultados de la consulta
                 });
             }
