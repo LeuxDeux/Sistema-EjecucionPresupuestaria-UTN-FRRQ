@@ -16,7 +16,7 @@
     <a href="/" id="volver" class="btn btn-outline-primary mt-4"><i class="bx bxs-chevron-left bx-md"></i></a>
     <a href="#" id="btnCrearCategoria" class="btn btn-outline-primary mt-4" data-secretaria="<%= secretaria %>"><i class="bx bxs-plus-circle bx-md"></i></a>
     <% if(login) { %>
-        <p><%= secretaria %></p>
+        <p><%= secretaria %> <%= id_usuario %></p>
         <% } %>
     <table class="table table-bordered table-striped text-center mt-4">
         <thead>
@@ -117,7 +117,7 @@
                     <div class="mb-3">
                         <label for="nombreUsuario" class="form-label">Nombre del Usuario</label>
                         <input type="text" id="nombreUsuario" name="nombreUsuario" class="form-control" readonly value="<%= nombre %>">
-                        <input type="hidden" name="idUsuario" class="form-control" readonly value="<%= id_usuario %>">
+                        <input type="text" name="idUsuario" class="form-control" readonly value="<%= id_usuario %>">
                     </div>
                     <div class="mb-3">
                         <label for="fechaActual" class="form-label">Fecha Actual</label>

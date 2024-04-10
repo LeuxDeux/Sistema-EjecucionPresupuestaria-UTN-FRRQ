@@ -22,7 +22,8 @@ exports.crearCategorias = (req, res) => {
                         login: true,
                         nombre: req.session.nombre,
                         secretaria: req.session.secretaria,
-                        categorias: categorias
+                        categorias: categorias,
+                        id_usuario: req.session.id_usuario
                     });
                 }
             });
@@ -48,7 +49,8 @@ exports.editarCategoria = (req, res) => {
                         login: true,
                         nombre: req.session.nombre,
                         secretaria: req.session.secretaria,
-                        categorias: categorias
+                        categorias: categorias,
+                        id_usuario: req.session.id_usuario
                     });
                 }
             });
