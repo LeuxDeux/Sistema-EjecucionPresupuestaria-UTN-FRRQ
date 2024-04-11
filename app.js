@@ -1,7 +1,10 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
-
+const mysql = require('mysql2');
+const multer = require('multer'); // Importar Multer para manejar la carga de archivos
+const path = require('path'); // Importar Path para manejar rutas de archivos
+const fs = require('fs'); // Importar FileSystem para operaciones de archivos
 const app = express();
 //motor plantillas
 app.set('view engine', 'ejs');
@@ -22,7 +25,7 @@ app.use(session({
     resave: true,            //guarda la sesion aunque no haya cambios
     saveUninitialized:true   //guarda la cookie aunque no haya sido inicializada previamente
 }));
-const mysql = require('mysql2');
+
 //cookies
 // app.use(cookieParser());
 // //eliminar cache
@@ -31,7 +34,17 @@ const mysql = require('mysql2');
 //         res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
 //     next();
 // });
+// Configuración de almacenamiento para Multer
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads'); // Directorio donde se almacenarán los archivos
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.originalname); // Nombre original del archivo
+    }
+});
 
+const upload = multer({ storage: storage }); // Configurar Multer con la configuración de almacenamiento
 app.listen(3000, ()=>{
     console.log("Server is running on port http://localhost:3000");
 });
@@ -207,6 +220,43 @@ app.get('/categorias', (req, res) => {
         });
     }
 });
+// Manejar la solicitud POST para cargar una factura
+app.post('/cargar-factura', upload.single('pdf'), (req, res) => {
+    const uploadedFile = req.file; // Obtener el archivo subido
+    const nombreFactura = uploadedFile.originalname; // Usar el nombre original del archivo como nombre de factura
+    const categoriaId = req.body.categoria; // Obtener el ID de la categoría seleccionada del cuerpo de la solicitud
+    const monto = req.body.monto; // Obtener el monto del cuerpo de la solicitud
+    const estado = 'en proceso'; // Valor predeterminado para el estado de la factura
+    const usuarioId = req.body.idUsuario; // Obtener el ID de usuario del cuerpo de la solicitud
+
+    if (uploadedFile) { // Verificar si se ha subido un archivo
+        const newPath = path.join('uploads', uploadedFile.originalname); // Construir la ruta completa del nuevo archivo
+
+        // Renombrar el archivo en el sistema de archivos
+        fs.rename(uploadedFile.path, newPath, (err) => {
+            if (err) { // Manejar errores si ocurren al renombrar el archivo
+                console.error('Error al renombrar el archivo:', err);
+                res.status(500).send({ error: 'Error interno del servidor' });
+            } else { // Si el archivo se ha renombrado correctamente
+                const fechaCarga = new Date().toISOString().slice(0, 19).replace('T', ' '); // Obtener la fecha actual
+                const sql = 'INSERT INTO facturas (fecha_carga, nombre_factura, categoria_id, monto, estado, usuario_id, archivo_factura) VALUES (?, ?, ?, ?, ?, ?, ?)';
+                // Insertar los datos de la factura en la base de datos
+                connection.query(sql, [fechaCarga, nombreFactura, categoriaId, monto, estado, usuarioId, newPath], (err, result) => {
+                    if (err) { // Manejar errores si ocurren al insertar datos en la base de datos
+                        console.error('Error al insertar datos en la base de datos:', err);
+                        res.status(500).send({ error: 'Error interno del servidor' });
+                    } else { // Si los datos se insertaron correctamente en la base de datos
+                        console.log('Datos insertados correctamente en la base de datos');
+                        res.redirect('categorias'); // Redirigir a la página de inicio después de cargar la factura
+                    }
+                });
+            }
+        });
+    } else { // Si no se ha subido ningún archivo
+        res.status(400).send({ error: 'No se pudo subir el archivo' }); // Enviar un error al cliente
+    }
+});
+
 const crud = require('./controllers/controllers');
 app.post('/crear-categorias', crud.crearCategorias);
 app.post('/editar-categorias', crud.editarCategoria);

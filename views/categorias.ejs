@@ -16,7 +16,7 @@
     <a href="/" id="volver" class="btn btn-outline-primary mt-4"><i class="bx bxs-chevron-left bx-md"></i></a>
     <a href="#" id="btnCrearCategoria" class="btn btn-outline-primary mt-4" data-secretaria="<%= secretaria %>"><i class="bx bxs-plus-circle bx-md"></i></a>
     <% if(login) { %>
-        <p>id categoria: <%= secretaria %> id usuario :<%= id_usuario %></p>
+        <p>id secretaria: <%= secretaria %> id usuario :<%= id_usuario %></p>
         <% } %>
     <table class="table table-bordered table-striped text-center mt-4">
         <thead>
@@ -95,7 +95,7 @@
             </div>
             <div class="modal-body">
                 <!-- Formulario para cargar la factura -->
-                <form id="formCargarFactura" action="/cargar-factura" method="post">
+                <form id="formCargarFactura" action="/cargar-factura" method="post" enctype="multipart/form-data">
                     <div class="mb-3">
                         <label for="categoria" class="form-label">Categoría</label>
                         <select name="categoria" id="categoria" class="form-select">
