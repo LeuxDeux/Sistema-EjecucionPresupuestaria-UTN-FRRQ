@@ -220,6 +220,31 @@ app.get('/categorias', (req, res) => {
         });
     }
 });
+app.get('/facturas', (req, res) => {
+    if (req.session.loggedin) {
+        // Consulta SQL para seleccionar las facturas asociadas al usuario logueado
+        connection.query('SELECT f.* FROM facturas f JOIN usuarios u ON f.usuario_id = u.id WHERE u.secretaria_id = ?', [req.session.secretaria], (error, results) => {
+            if (error) {
+                throw error;
+            } else {
+                // Renderiza la plantilla 'facturas.ejs' y pasa los resultados de la consulta
+                res.render('facturas', {
+                    login: true,
+                    nombre: req.session.nombre,
+                    id_usuario: req.session.id_usuario,
+                    secretaria: req.session.secretaria,
+                    facturas: results // Aquí pasa los resultados de la consulta
+                });
+            }
+        });
+    } else {
+        res.render('index', {
+            login: false,
+            nombre: 'Debe iniciar sesión',
+            secretaria: ''
+        });
+    }
+});
 // Manejar la solicitud POST para cargar una factura
 app.post('/cargar-factura', upload.single('pdf'), (req, res) => {
     const uploadedFile = req.file; // Obtener el archivo subido
