@@ -284,9 +284,35 @@ app.post('/cargar-factura', upload.single('pdf'), (req, res) => {
         res.status(400).send({ error: 'No se pudo subir el archivo' }); // Enviar un error al cliente
     }
 });
+//BORRAR 
+// app.get('/descargar-archivo/:id', (req, res) => {
+//     const fileId = req.params.id; // Obtener el ID del archivo de la solicitud
 
+//     // Consultar la base de datos para obtener la información del archivo y su nombre
+//     const sql = 'SELECT nombre_factura, archivo_factura FROM facturas WHERE id = ?';
+//     connection.query(sql, [fileId], (err, result) => {
+//         if (err) { // Manejar errores si ocurren al realizar la consulta en la base de datos
+//             console.error('Error al obtener el archivo de la base de datos:', err);
+//             res.status(500).send({ error: 'Error interno del servidor' });
+//         } else {
+//             if (result.length > 0) { // Si se encontró el archivo en la base de datos
+//                 const nombreFactura = result[0].nombre_factura; // Obtener el nombre de la factura
+//                 const rutaArchivo = result[0].archivo_factura; // Obtener la ruta del archivo
+//                 // Configurar los encabezados de la respuesta para indicar que es un archivo PDF
+//                 res.setHeader('Content-Type', 'application/pdf');
+//                 // Utilizar el nombre de la factura como nombre de archivo para la descarga
+//                 res.setHeader('Content-Disposition', `attachment; filename="${nombreFactura}.pdf"`);
+//                 // enviar el contenido del archivo como respuesta
+//                 fs.createReadStream(rutaArchivo).pipe(res);
+//             } else { // Si no se encontró el archivo con el ID proporcionado
+//                 res.status(404).send({ error: 'Archivo no encontrado' }); // Enviar un error
+//             }
+//         }
+//     });
+// });
 const crud = require('./controllers/controllers');
 app.post('/crear-categorias', crud.crearCategorias);
 app.post('/editar-categorias', crud.editarCategoria);
+app.get('/descargar-archivo/:id', crud.descargarArchivo);
 //
 

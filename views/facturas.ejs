@@ -48,7 +48,7 @@
                     <td style="display: none;"><%= factura.archivo_factura %></td>
                     <td>
                         <a href="#" class="btn btn-outline-info" id="btn-borrar-factura" data-id="<%= factura.id %>">Borrar</a>
-                        <a href="#" class="btn btn-outline-info" data-id="<%= factura.id %>">Descargar</a>
+                        <a href="/descargar-archivo/<%= factura.id %>" class="btn btn-outline-info" data-id="<%= factura.id %>">Descargar</a>
                     </td>
                 </tr>
             <% }); %>
