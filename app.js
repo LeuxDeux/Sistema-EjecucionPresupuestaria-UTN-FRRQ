@@ -220,21 +220,54 @@ app.get('/categorias', (req, res) => {
         });
     }
 });
+// app.get('/facturas', (req, res) => {
+//     if (req.session.loggedin) {
+//         // Consulta SQL para seleccionar las facturas asociadas al usuario logueado
+//         //connection.query('SELECT f.* FROM facturas f JOIN usuarios u ON f.usuario_id = u.id WHERE u.secretaria_id = ?', [req.session.secretaria], (error, results) => {
+//         connection.query('SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada FROM facturas f JOIN usuarios u ON f.usuario_id = u.id WHERE u.secretaria_id = ?', [req.session.secretaria], (error, results) => {  
+//             if (error) {
+//                 throw error;
+//             } else {
+//                 // Renderiza la plantilla 'facturas.ejs' y pasa los resultados de la consulta
+//                 res.render('facturas', {
+//                     login: true,
+//                     nombre: req.session.nombre,
+//                     id_usuario: req.session.id_usuario,
+//                     secretaria: req.session.secretaria,
+//                     facturas: results // Aquí pasa los resultados de la consulta
+//                 });
+//             }
+//         });
+//     } else {
+//         res.render('index', {
+//             login: false,
+//             nombre: 'Debe iniciar sesión',
+//             secretaria: ''
+//         });
+//     }
+// });
 app.get('/facturas', (req, res) => {
     if (req.session.loggedin) {
         // Consulta SQL para seleccionar las facturas asociadas al usuario logueado
-        //connection.query('SELECT f.* FROM facturas f JOIN usuarios u ON f.usuario_id = u.id WHERE u.secretaria_id = ?', [req.session.secretaria], (error, results) => {
-        connection.query('SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada FROM facturas f JOIN usuarios u ON f.usuario_id = u.id WHERE u.secretaria_id = ?', [req.session.secretaria], (error, results) => {  
+        connection.query('SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario FROM facturas f JOIN usuarios u ON f.usuario_id = u.id WHERE u.secretaria_id = ?', [req.session.secretaria], (error, resultsFacturas) => {  
             if (error) {
                 throw error;
             } else {
-                // Renderiza la plantilla 'facturas.ejs' y pasa los resultados de la consulta
-                res.render('facturas', {
-                    login: true,
-                    nombre: req.session.nombre,
-                    id_usuario: req.session.id_usuario,
-                    secretaria: req.session.secretaria,
-                    facturas: results // Aquí pasa los resultados de la consulta
+                // Consulta SQL para seleccionar las categorías asociadas a la secretaría del usuario logueado
+                connection.query('SELECT id, nombre FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, resultsCategorias) => {
+                    if (error) {
+                        throw error;
+                    } else {
+                        // Renderiza la plantilla 'facturas.ejs' y pasa los resultados de ambas consultas
+                        res.render('facturas', {
+                            login: true,
+                            nombre: req.session.nombre,
+                            id_usuario: req.session.id_usuario,
+                            secretaria: req.session.secretaria,
+                            facturas: resultsFacturas, // Resultados de la consulta de facturas
+                            categorias: resultsCategorias // Resultados de la consulta de categorías
+                        });
+                    }
                 });
             }
         });
@@ -275,7 +308,7 @@ app.post('/cargar-factura', upload.single('pdf'), (req, res) => {
                         res.status(500).send({ error: 'Error interno del servidor' });
                     } else { // Si los datos se insertaron correctamente en la base de datos
                         console.log('Datos insertados correctamente en la base de datos');
-                        res.redirect('categorias'); // Redirigir a la página de inicio después de cargar la factura
+                        res.redirect('facturas'); // Redirigir a la página de inicio después de cargar la factura
                     }
                 });
             }

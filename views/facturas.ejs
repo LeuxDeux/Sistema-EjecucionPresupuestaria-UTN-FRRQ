@@ -14,7 +14,7 @@
 
 <div class="container">
     <a href="#" class="btn btn-outline-primary mt-4 disabled"><i class="bx bxs-chevron-left bx-md"></i></a>
-    <a href="#" class="btn btn-outline-primary mt-4 disabled"><i class="bx bxs-plus-circle bx-md"></i></a>
+    <a href="#" class="btn btn-outline-primary mt-4 btnCargarFactura"><i class="bx bxs-plus-circle bx-md"></i></a>
     <!-- Sección para mostrar información -->
     <% if(login) { %>
         <p>id secretaria: <%= secretaria %> id usuario :<%= id_usuario %></p>
@@ -44,7 +44,7 @@
                     <td style="display: none;"><%= factura.categoria_id %></td>
                     <td><%= factura.monto %></td>
                     <td><%= factura.estado %></td>
-                    <td><%= nombre %></td>
+                    <td><%= factura.nombre_usuario %></td>
                     <td style="display: none;"><%= factura.archivo_factura %></td>
                     <td>
                         <a href="#" class="btn btn-outline-info" id="btn-borrar-factura" data-id="<%= factura.id %>">Borrar</a>
@@ -54,6 +54,50 @@
             <% }); %>
         </tbody>
     </table>
+</div>
+<!-- Modal de carga de facturas -->
+<div class="modal fade" id="modalCargarFactura" tabindex="-1" aria-labelledby="modalCargarFacturaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCargarFacturaLabel">Cargar Factura</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Formulario para cargar la factura -->
+                <form id="formCargarFactura" action="/cargar-factura" method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="categoria" class="form-label">Categoría</label>
+                        <select name="categoria" id="categoria" class="form-select">
+                            <!-- Iteración sobre las categorías disponibles -->
+                            <% categorias.forEach((categoria) => { %>
+                                <option value="<%= categoria.id %>"><%= categoria.nombre %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="monto" class="form-label">Monto</label>
+                        <input type="text" id="monto" name="monto" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="pdf" class="form-label">Archivo PDF</label>
+                        <input type="file" id="pdf" name="pdf" class="form-control" accept=".pdf" required>
+                    </div>
+                    <!-- Campos para mostrar el nombre del usuario y la fecha actual -->
+                    <div class="mb-3">
+                        <label for="nombreUsuario" class="form-label">Nombre del Usuario</label>
+                        <input type="text" id="nombreUsuario" name="nombreUsuario" class="form-control" readonly value="<%= nombre %>">
+                        <input type="hidden" name="idUsuario" class="form-control" readonly value="<%= id_usuario %>">
+                    </div>
+                    <div class="mb-3">
+                        <label for="fechaActual" class="form-label">Fecha Actual</label>
+                        <input type="text" id="fechaActual" name="fechaActual" class="form-control" readonly>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Cargar</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -68,7 +112,28 @@
             // y luego recargar la tabla de facturas.
         });
     });
-    
+    $(document).ready(function() {
+        $('.btnCargarFactura').click(function() {
+        // Obtener el ID de la categoría asociada al botón "Seleccionar" clickeado
+        var categoriaId = $(this).data('id');
+        // Preseleccionar la categoría en el formulario de carga de facturas
+        $('#categoria').val(categoriaId);
+        var fechaInput = document.getElementById('fechaActual');
+        // Obtener la fecha actual como un objeto de fecha
+        var fechaActual = new Date();
+        // Formatear la fecha actual como una cadena en el formato deseado 
+        var fechaFormateada = fechaActual.getFullYear() + '-' +
+                              ('0' + (fechaActual.getMonth() + 1)).slice(-2) + '-' +
+                              ('0' + fechaActual.getDate()).slice(-2) + ' ' +
+                              ('0' + fechaActual.getHours()).slice(-2) + ':' +
+                              ('0' + fechaActual.getMinutes()).slice(-2) + ':' +
+                              ('0' + fechaActual.getSeconds()).slice(-2);
+
+        // Asignar la fecha formateada al campo de entrada de texto
+        fechaInput.value = fechaFormateada;
+        $('#modalCargarFactura').modal('show');
+        });
+    });
 </script>
 </body>
 </html>
