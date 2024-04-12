@@ -223,7 +223,8 @@ app.get('/categorias', (req, res) => {
 app.get('/facturas', (req, res) => {
     if (req.session.loggedin) {
         // Consulta SQL para seleccionar las facturas asociadas al usuario logueado
-        connection.query('SELECT f.* FROM facturas f JOIN usuarios u ON f.usuario_id = u.id WHERE u.secretaria_id = ?', [req.session.secretaria], (error, results) => {
+        //connection.query('SELECT f.* FROM facturas f JOIN usuarios u ON f.usuario_id = u.id WHERE u.secretaria_id = ?', [req.session.secretaria], (error, results) => {
+        connection.query('SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada FROM facturas f JOIN usuarios u ON f.usuario_id = u.id WHERE u.secretaria_id = ?', [req.session.secretaria], (error, results) => {  
             if (error) {
                 throw error;
             } else {

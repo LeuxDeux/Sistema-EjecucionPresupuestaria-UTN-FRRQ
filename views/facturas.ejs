@@ -22,31 +22,33 @@
     <table class="table table-bordered table-striped text-center mt-4">
         <thead>
             <tr class="bg-primary text-white">
-                <th scope="col">ID</th>
+                <th scope="col" style="display: none;">ID</th>
                 <th scope="col">Fecha de Carga</th>
                 <th scope="col">Nombre de la Factura</th>
-                <th scope="col">Categoría ID</th>
+                <th scope="col" style="display: none;">Categoría ID</th>
                 <th scope="col">Monto</th>
                 <th scope="col">Estado</th>
-                <th scope="col">Usuario ID</th>
-                <th scope="col">Archivo de la Factura</th>
+                <th scope="col">Personal</th>
+                <th scope="col" style="display: none;">Archivo de la Factura</th>
                 <th scope="col">ACCIONES</th>
             </tr>
         </thead>
         <tbody>
             <!-- Iterar sobre las facturas -->
-            <% facturas.forEach(function(factura) { %>
+            <!-- facturas.forEach(function(factura) { -->
+                <% facturas.sort((a, b) => new Date(b.fecha_carga) - new Date(a.fecha_carga)).forEach(function(factura) { %>
                 <tr>
-                    <td><%= factura.id %></td>
-                    <td><%= factura.fecha_carga %></td>
+                    <td style="display: none;"><%= factura.id %></td>
+                    <td><%= factura.fecha_formateada %></td>
                     <td><%= factura.nombre_factura %></td>
-                    <td><%= factura.categoria_id %></td>
+                    <td style="display: none;"><%= factura.categoria_id %></td>
                     <td><%= factura.monto %></td>
                     <td><%= factura.estado %></td>
-                    <td><%= factura.usuario_id %></td>
-                    <td><%= factura.archivo_factura %></td>
+                    <td><%= nombre %></td>
+                    <td style="display: none;"><%= factura.archivo_factura %></td>
                     <td>
-                        <a href="#" class="btn btn-outline-info" data-id="<%= factura.id %>">Borrar</a>
+                        <a href="#" class="btn btn-outline-info" id="btn-borrar-factura" data-id="<%= factura.id %>">Borrar</a>
+                        <a href="#" class="btn btn-outline-info" data-id="<%= factura.id %>">Descargar</a>
                     </td>
                 </tr>
             <% }); %>
@@ -58,14 +60,15 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 <script>
     $(document).ready(function() {
-        $('.btn-outline-info').click(function(event) {
+        $('#btn-borrar-factura').click(function(event) {
             event.preventDefault(); // Evitar que el enlace recargue la página
             var facturaId = $(this).data('id');
             // Realizar aquí la lógica para eliminar la factura con ID facturaId
-            // Por ejemplo, podrías hacer una petición AJAX al servidor para eliminar la factura
+            // Por ejemplo, hacer una petición AJAX al servidor para eliminar la factura
             // y luego recargar la tabla de facturas.
         });
     });
+    
 </script>
 </body>
 </html>
