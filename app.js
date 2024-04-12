@@ -144,8 +144,8 @@ app.post('/auth', async (req, res)=>{
                 req.session.nombre = results[0].nombres;
                 req.session.secretaria = results[0].secretaria_id;
                 req.session.id_usuario = results[0].id;
-                console.log(req.session.secretaria);
-                console.log(req.session.id_usuario);
+                console.log('id_secretaria: ', req.session.secretaria);
+                console.log('id_usuario: ', req.session.id_usuario);
                 if(req.session.secretaria == '1'){
                     res.render('login', {
                         alert: true,
