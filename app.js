@@ -238,10 +238,12 @@ app.post('/cargar-factura', upload.single('pdf'), (req, res) => {
                 console.error('Error al renombrar el archivo:', err);
                 res.status(500).send({ error: 'Error interno del servidor' });
             } else { // Si el archivo se ha renombrado correctamente
-                const fechaCarga = new Date().toISOString().slice(0, 19).replace('T', ' '); // Obtener la fecha actual
+                const fechaActual = new Date();
+                const fechaLocal = new Date(fechaActual.getTime() - (fechaActual.getTimezoneOffset() * 60000));
+                const fechaFormateada = fechaLocal.toISOString().slice(0, 19).replace('T', ' ');
                 const sql = 'INSERT INTO facturas (fecha_carga, nombre_factura, categoria_id, monto, estado, usuario_id, archivo_factura) VALUES (?, ?, ?, ?, ?, ?, ?)';
                 // Insertar los datos de la factura en la base de datos
-                connection.query(sql, [fechaCarga, nombreFactura, categoriaId, monto, estado, usuarioId, newPath], (err, result) => {
+                connection.query(sql, [fechaFormateada, nombreFactura, categoriaId, monto, estado, usuarioId, newPath], (err, result) => {
                     if (err) { // Manejar errores si ocurren al insertar datos en la base de datos
                         console.error('Error al insertar datos en la base de datos:', err);
                         res.status(500).send({ error: 'Error interno del servidor' });
