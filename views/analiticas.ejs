@@ -8,13 +8,12 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <title>Facturas</title>
+    <title>Facturas-Analiticas</title>
 </head>
 <body>
-<h1>FACTURAS CARGADAS</h1>
+<h1>FACTURAS - ANALITICAS</h1>
 <div class="container">
     <a href="/" class="btn btn-outline-primary mt-4" id="volver"><i class="bx bxs-chevron-left bx-md"></i></a>
-    <a href="#" class="btn btn-outline-primary mt-4 btnCargarFactura"><i class="bx bxs-plus-circle bx-md"></i></a>
     <!-- Sección para mostrar información -->
     <% if(login) { %>
         <p>Hola: <%= nombre %> id secretaria: <%= secretaria %> id usuario :<%= id_usuario %></p>
@@ -25,79 +24,33 @@
                 <th scope="col" style="display: none;">ID</th>
                 <th scope="col">Fecha de Carga</th>
                 <th scope="col">Nombre de la Factura</th>
-                <th scope="col" style="display: none;">Categoría ID</th>
+                <th scope="col">Categoría</th>
                 <th scope="col">Monto</th>
                 <th scope="col">Estado</th>
                 <th scope="col">Personal</th>
-                <th scope="col" style="display: none;">Archivo de la Factura</th>
-                <th scope="col">ACCIONES</th>
+                <th scope="col">Secretaria</th>
+                <th scope="col">Acciones</th>
             </tr>
         </thead>
         <tbody>
             <!-- Iterar sobre las facturas -->
-            <!-- facturas.forEach(function(factura) { -->
-                <% facturas.sort((a, b) => new Date(b.fecha_carga) - new Date(a.fecha_carga)).forEach(function(factura) { %>
+            <% facturas.sort((a, b) => new Date(b.fecha_carga) - new Date(a.fecha_carga)).forEach(function(factura) { %>
                 <tr>
                     <td style="display: none;"><%= factura.id %></td>
                     <td><%= factura.fecha_formateada %></td>
                     <td><%= factura.nombre_factura %></td>
-                    <td style="display: none;"><%= factura.categoria_id %></td>
+                    <td><%= factura.nombre_categoria %></td>
                     <td><%= factura.monto %></td>
                     <td><%= factura.estado %></td>
                     <td><%= factura.nombre_usuario %></td>
-                    <td style="display: none;"><%= factura.archivo_factura %></td>
+                    <td><%= factura.nombre_secretaria %></td>
                     <td>
-                        <a href="#" class="btn btn-outline-info" id="btn-borrar-factura" data-id="<%= factura.id %>">Borrar</a>
                         <a href="/descargar-archivo/<%= factura.id %>" class="btn btn-outline-info" data-id="<%= factura.id %>">Descargar</a>
                     </td>
                 </tr>
             <% }); %>
         </tbody>
     </table>
-</div>
-<!-- Modal de carga de facturas -->
-<div class="modal fade" id="modalCargarFactura" tabindex="-1" aria-labelledby="modalCargarFacturaLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalCargarFacturaLabel">Cargar Factura</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <!-- Formulario para cargar la factura -->
-                <form id="formCargarFactura" action="/cargar-factura" method="post" enctype="multipart/form-data">
-                    <div class="mb-3">
-                        <label for="categoria" class="form-label">Categoría</label>
-                        <select name="categoria" id="categoria" class="form-select">
-                            <!-- Iteración sobre las categorías disponibles -->
-                            <% categorias.forEach((categoria) => { %>
-                                <option value="<%= categoria.id %>"><%= categoria.nombre %></option>
-                            <% }); %>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="monto" class="form-label">Monto</label>
-                        <input type="text" id="monto" name="monto" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="pdf" class="form-label">Archivo PDF</label>
-                        <input type="file" id="pdf" name="pdf" class="form-control" accept=".pdf" required>
-                    </div>
-                    <!-- Campos para mostrar el nombre del usuario y la fecha actual -->
-                    <div class="mb-3">
-                        <label for="nombreUsuario" class="form-label">Nombre del Usuario</label>
-                        <input type="text" id="nombreUsuario" name="nombreUsuario" class="form-control" readonly value="<%= nombre %>">
-                        <input type="hidden" name="idUsuario" class="form-control" readonly value="<%= id_usuario %>">
-                    </div>
-                    <div class="mb-3">
-                        <label for="fechaActual" class="form-label">Fecha Actual</label>
-                        <input type="text" id="fechaActual" name="fechaActual" class="form-control" readonly>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Cargar</button>
-                </form>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

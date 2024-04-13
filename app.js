@@ -74,9 +74,23 @@ app.get('/', (req, res)=>{
 app.get('/login', (req, res) => {
     res.render('login');
 });
-app.get('/menu-admin', (req, res) => {
-    res.render('menu-admin');
+app.get('/analiticas', (req, res) => {
+    connection.query('SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id', (error, results) => {  
+        if (error) {
+            throw error;
+        } else {
+            // Renderiza la plantilla 'analiticas.ejs' y pasa los resultados de la consulta
+            res.render('analiticas', {
+                login: true,
+                nombre: req.session.nombre,
+                id_usuario: req.session.id_usuario,
+                secretaria: req.session.secretaria,
+                facturas: results // Resultados de la consulta de facturas
+            });
+        }
+    });
 });
+
 app.get('/registro', (req, res)=>{
     connection.query('SELECT * FROM secretarias', (error, results)=>{
         if(error){
