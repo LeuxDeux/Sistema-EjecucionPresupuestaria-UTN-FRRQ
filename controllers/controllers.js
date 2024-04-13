@@ -11,7 +11,7 @@ exports.crearCategorias = (req, res) => {
         if (error) {
             throw error;
         } else {
-            console.log('Categoría creada con éxito');
+            console.log('Categoría creada con éxito: ', nombre);
             
             // Después de agregar la categoría, consulta nuevamente las categorías de la base de datos
             connection.query('SELECT * FROM categorias WHERE secretaria_id = ?', [secretaria_id], (error, categorias) => {

@@ -189,6 +189,14 @@
     // Asignar la fecha formateada al campo de entrada de texto
     fechaInput.value = fechaFormateada;
     */ 
+   // Esperar a que el documento esté completamente cargado
+   $(document).ready(function() {
+        // Mostrar el modalCrearCategoria
+        $('#modalCrearCategoria').on('shown.bs.modal', function () {
+            // Enfocar el input
+            $('#nombreCategoria').focus();
+        });
+    });
 </script>
 </body>
 </html>
