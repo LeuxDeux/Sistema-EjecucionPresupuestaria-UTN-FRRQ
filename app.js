@@ -35,7 +35,7 @@ app.use(session({
 //     next();
 // });
 // Configuración de almacenamiento para Multer
-const storage = multer.diskStorage({
+const storage = multer.diskStorage({ // Función de almacenamiento en sistemas de archivos del servidor
     destination: function (req, file, cb) {
         cb(null, 'uploads'); // Directorio donde se almacenarán los archivos
     },
@@ -44,7 +44,7 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ storage: storage }); // Configurar Multer con la configuración de almacenamiento
+const upload = multer({ storage: storage }); // Configurar Multer con la configuración de almacenamiento, se puede modificar para agregar filtro, tamaño y a que servicio se debe guardar
 app.listen(3000, ()=>{
     console.log("Server is running on port http://localhost:3000");
 });
@@ -56,13 +56,15 @@ app.listen(3000, ()=>{
 // app.use('/', require('./routes/router'));
 
 app.get('/', (req, res)=>{
-    if(req.session.loggedin){
+    if(req.session.loggedin){ // Si está logeado
         res.render('index', {
             login: true,
-            nombre: req.session.nombre,
-            secretaria: req.session.secretaria,
-            id_usuario: req.session.id_usuario
+            nombre: req.session.nombre, // Nombre Usuario
+            secretaria: req.session.secretaria, // ID Secretaria
+            id_usuario: req.session.id_usuario // ID Usuario
         });
+        console.log('APP.GET "/" Sesión Correcta - Usuario: ' + req.session.nombre + ' Secretaria ID: ' + req.session.secretaria);
+        console.log('Redireccionando hacia index.ejs')
     }else{
         res.render('index', {
             login: false,
@@ -71,27 +73,12 @@ app.get('/', (req, res)=>{
         });
     }
 });
-app.get('/login', (req, res) => {
+app.get('/login', (req, res) => { // RUTA LOGIN
     res.render('login');
 });
-app.get('/analiticas', (req, res) => {
-    connection.query('SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id', (error, results) => {  
-        if (error) {
-            throw error;
-        } else {
-            // Renderiza la plantilla 'analiticas.ejs' y pasa los resultados de la consulta
-            res.render('analiticas', {
-                login: true,
-                nombre: req.session.nombre,
-                id_usuario: req.session.id_usuario,
-                secretaria: req.session.secretaria,
-                facturas: results // Resultados de la consulta de facturas
-            });
-        }
-    });
-});
 
-app.get('/registro', (req, res)=>{
+
+app.get('/registro', (req, res)=>{ // RUTA REGISTRO
     connection.query('SELECT * FROM secretarias', (error, results)=>{
         if(error){
             throw error;
@@ -100,9 +87,9 @@ app.get('/registro', (req, res)=>{
         }
     });
 });
-app.post('/register', async (req, res) => {
-    const usuario = req.body.usuario;
-    const nombres = req.body.nombres;
+app.post('/register', async (req, res) => { // METODO REGISTRO
+    const usuario = req.body.usuario; // Obtener los datos del formulario
+    const nombres = req.body.nombres; 
     const secretaria = req.body.secretaria;
     const contraseña = req.body.contraseña;
     const email = req.body.email;
@@ -132,17 +119,23 @@ app.post('/register', async (req, res) => {
                         timer: 1500,
                         ruta: ''
                     });
+                    console.log('Valor de secretaria:', secretaria);
+                    console.log('APP.POST "/register". Se ha registrado el usuario: ' + nombres + ' en la secretaria: ' + resultsSecretarias.find(sec => sec.id === parseInt(secretaria)).nombre); // Muestra el nombre de usuario y la secretaria en la que se registro
+                    console.log('Redireccionando hacia index.ejs basandose en ruta: "vacio" y en sweetAlert en registro.ejs')
                 }
             });
         }
     });
 });
-app.post('/auth', async (req, res)=>{
-    const usuario = req.body.usuario;
+app.post('/auth', async (req, res)=>{ // METODO AUTENTIFICACIÓN
+    const usuario = req.body.usuario; // Valores del form
     const contraseña = req.body.contraseña;
     let contraseñaHash = await bcryptjs.hash(contraseña, 8);
-    if(usuario && contraseña){
-        connection.query('SELECT * FROM usuarios WHERE usuario = ?', [usuario], async (error, results)=>{
+    if(usuario && contraseña){ // Método .compare del hashing para comparar la contraseña con la base de datos
+        connection.query('SELECT usuarios.*, secretarias.nombre AS nombre_secretaria FROM usuarios INNER JOIN secretarias ON usuarios.secretaria_id = secretarias.id WHERE usuario = ?', [usuario], async (error, results)=>{
+            //Selecciona todas las columnas de la tabla usuarios y la columna 'nombre' de la tabla secretarias, asignandole 'nombre_secretaria' a la columna 'nombre' de la tabla secretarias' dejando como resultado 'nombre_secretaria'
+            //Usa INNER JOIN para una unión entre la tabla 'usuarios' y 'secretarias' "usuarios.secretarias_id = secretarias.id"
+            //En resumen busca seleccionar todas las columnas de la tabla 'usuarios' junto con el nombre de la secretaria correspondiente de la tabla 'secretarias' donde el usuario coincida con el valor proporcionado
             if(results.length == 0 || !(await bcryptjs.compare(contraseña, results[0].password))) { // si la longitud del select es 0 o si no coincide la contraseña
                 res.render('login', {
                     alert: true,
@@ -154,12 +147,14 @@ app.post('/auth', async (req, res)=>{
                     ruta: 'login'
                 });
             }else{
+                // Se establecen las variables de sesión para almacenar la info sobre que usuario inicio sesión, su id de secreteria y se cuenta
                 req.session.loggedin = true; //estado de log
                 req.session.nombre = results[0].nombres;
                 req.session.secretaria = results[0].secretaria_id;
                 req.session.id_usuario = results[0].id;
-                console.log('id_secretaria: ', req.session.secretaria);
-                console.log('id_usuario: ', req.session.id_usuario);
+                req.session.nombreSecretaria = results[0].nombre_secretaria;
+                console.log('Autentificación correcta del usuario: ' + req.session.nombre + ' con id de secretaria: ' + req.session.secretaria + ' con id de usuario: ' + req.session.id_usuario + ' en secretaria: ' + req.session.nombreSecretaria);
+                //Método if-else sujeto a cambios de si es admin o no ATENCION!!
                 if(req.session.secretaria == '1'){
                     res.render('login', {
                         alert: true,
@@ -167,6 +162,7 @@ app.post('/auth', async (req, res)=>{
                         nombre: req.session.nombre,
                         secretaria: req.session.secretaria,
                         id_usuario: req.session.id_usuario,
+                        nombreSecretaria: req.session.nombreSecretaria,
                         alertTitle: "Conexión Exitosa",
                         alertMessage: "¡Login Correcto!",
                         alertIcon: 'success',
@@ -182,6 +178,7 @@ app.post('/auth', async (req, res)=>{
                         nombre: req.session.nombre,
                         secretaria: req.session.secretaria,
                         id_usuario: req.session.id_usuario,
+                        nombreSecretaria: req.session.nombreSecretaria,
                         alertTitle: "Conexion Exitosa",
                         alertMessage: "¡Login Correcto!",
                         alertIcon: 'success',
@@ -330,6 +327,22 @@ app.post('/cargar-factura', upload.single('pdf'), (req, res) => {
     } else { // Si no se ha subido ningún archivo
         res.status(400).send({ error: 'No se pudo subir el archivo' }); // Enviar un error al cliente
     }
+});
+app.get('/analiticas', (req, res) => {
+    connection.query('SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id', (error, results) => {  
+        if (error) {
+            throw error;
+        } else {
+            // Renderiza la plantilla 'analiticas.ejs' y pasa los resultados de la consulta
+            res.render('analiticas', {
+                login: true,
+                nombre: req.session.nombre,
+                id_usuario: req.session.id_usuario,
+                secretaria: req.session.secretaria,
+                facturas: results // Resultados de la consulta de facturas
+            });
+        }
+    });
 });
 //BORRAR 
 // app.get('/descargar-archivo/:id', (req, res) => {
