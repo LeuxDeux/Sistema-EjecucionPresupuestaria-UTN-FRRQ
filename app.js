@@ -81,3 +81,6 @@ app.get('/descargar-archivo/:id', crud.descargarArchivo);
 
 //ANALITICAS
 app.get('/analiticas', crud.analiticas);
+
+app.get('/aceptar-factura/:id', crud.aceptarFactura);
+app.get('/rechazar-factura/:id', crud.rechazarFactura);

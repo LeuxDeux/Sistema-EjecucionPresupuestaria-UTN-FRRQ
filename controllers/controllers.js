@@ -2,7 +2,7 @@ const connection = require('../database/db');
 const fs = require('fs'); // Importar FileSystem para operaciones de archivos
 const path = require('path'); // Importar Path para manejar rutas de archivos
 const bcryptjs = require('bcryptjs'); 
-
+const queryAnaliticas = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE f.estado = "en proceso"';
 /* 
 //////////////////////
 CONTROLLERS USUARIOS
@@ -239,7 +239,7 @@ CONTROLLERS FACTURAS
 exports.facturas = (req, res) => {
     if (req.session.loggedin) {
         // Consulta SQL para seleccionar las facturas asociadas al usuario logueado
-        connection.query('SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario FROM facturas f JOIN usuarios u ON f.usuario_id = u.id WHERE u.secretaria_id = ?', [req.session.secretaria], (error, resultsFacturas) => {  
+        connection.query(queryAnaliticas, [req.session.secretaria], (error, resultsFacturas) => {  
             if (error) {
                 throw error;
             } else {
@@ -343,7 +343,7 @@ CONTROLLERS ANALITICAS
 */
 
 exports.analiticas = (req, res) => {
-    connection.query('SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id', (error, results) => {  
+    connection.query(queryAnaliticas, (error, results) => {  
         if (error) {
             throw error;
         } else {
@@ -354,6 +354,54 @@ exports.analiticas = (req, res) => {
                 id_usuario: req.session.id_usuario,
                 secretaria: req.session.secretaria,
                 facturas: results // Resultados de la consulta de facturas
+            });
+        }
+    });
+}
+exports.aceptarFactura = (req, res)=>{
+    const idFactura = req.params.id;
+    const estado = 'aceptado';
+    connection.query('UPDATE facturas SET estado = ? WHERE id = ?', [estado, idFactura], (error, results1)=>{
+        if(error){
+            throw error;
+        }else{
+            connection.query(queryAnaliticas,
+            (error, results2) => {
+                if (error) {
+                    throw error;
+                } else {
+                    res.render('analiticas', {
+                        login: true,
+                        nombre: req.session.nombre,
+                        id_usuario: req.session.id_usuario,
+                        secretaria: req.session.secretaria,
+                        facturas: results2 // Resultados de la consulta de facturas
+                    });
+                }
+            });
+        }
+    });
+}
+exports.rechazarFactura = (req, res)=>{
+    const idFactura = req.params.id;
+    const estado = 'denegado';
+    connection.query('UPDATE facturas SET estado = ? WHERE id = ?', [estado, idFactura], (error, results1)=>{
+        if(error){
+            throw error;
+        }else{
+            connection.query(queryAnaliticas,
+            (error, results2) => {
+                if (error) {
+                    throw error;
+                } else {
+                    res.render('analiticas', {
+                        login: true,
+                        nombre: req.session.nombre,
+                        id_usuario: req.session.id_usuario,
+                        secretaria: req.session.secretaria,
+                        facturas: results2 // Resultados de la consulta de facturas
+                    });
+                }
             });
         }
     });

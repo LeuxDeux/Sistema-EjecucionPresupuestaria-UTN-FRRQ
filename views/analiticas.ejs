@@ -66,8 +66,8 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" class="btn btn-success">Aceptar</button>
-          <button type="button" class="btn btn-danger">Rechazar</button>
+          <a href="/aceptar-factura/" class="btn btn-success" id="btnAceptar">Aceptar</a>
+          <a href="/rechazar-factura/" class="btn btn-danger" id="btnRechazar">Rechazar</a>
         </div>
       </div>
     </div>
@@ -111,9 +111,14 @@
         // Obtener el ID de la factura asociada al botón "Acción" clickeado
         var facturaNombreFactura = $(this).data('nombre');
         var facturaMonto = $(this).data('monto');
+        var facturaId = $(this).data('id');
         // Actualizar el texto del modal con información sobre la factura seleccionada
         $('#modalAccion .modal-body p').text('¿Qué acción desea realizar sobre la factura: ' + facturaNombreFactura + ' por un monto de $' + facturaMonto);
+        $('#modalAccion #btnAceptar').attr('href', '/aceptar-factura/' + facturaId);
+        $('#modalAccion #btnRechazar').attr('href', '/rechazar-factura/' + facturaId);
+        console.log(facturaId);
     });
 </script>
+
 </body>
 </html>
