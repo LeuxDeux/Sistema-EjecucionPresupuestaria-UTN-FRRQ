@@ -3,7 +3,6 @@ const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
 const mysql = require('mysql2');
 const multer = require('multer'); // Importar Multer para manejar la carga de archivos
-const path = require('path'); // Importar Path para manejar rutas de archivos
 const fs = require('fs'); // Importar FileSystem para operaciones de archivos
 const app = express();
 //motor plantillas
@@ -18,7 +17,6 @@ app.use(express.json()); //permite recibir json en las rutas
 dotenv.config({path: './env/.env'});
 
 const connection = require('./database/db');
-const bcryptjs = require('bcryptjs'); 
 const session = require('express-session');     //manejo de sesiones
 app.use(session({
     secret:'secret',       //clave secreta para cifrar las cookies
@@ -48,331 +46,38 @@ const upload = multer({ storage: storage }); // Configurar Multer con la configu
 app.listen(3000, ()=>{
     console.log("Server is running on port http://localhost:3000");
 });
-// app.get('/', (req, res)=>{
-//     res.render('index');
-// });
 
-//llamar router.js
-// app.use('/', require('./routes/router'));
+///////
+//RUTAS
+const routes = require('./routes/routes');
 
-app.get('/', (req, res)=>{
-    if(req.session.loggedin){ // Si está logeado
-        res.render('index', {
-            login: true,
-            nombre: req.session.nombre, // Nombre Usuario
-            secretaria: req.session.secretaria, // ID Secretaria
-            id_usuario: req.session.id_usuario // ID Usuario
-        });
-        console.log('APP.GET "/" Sesión Correcta - Usuario: ' + req.session.nombre + ' Secretaria ID: ' + req.session.secretaria);
-        console.log('Redireccionando hacia index.ejs')
-    }else{
-        res.render('index', {
-            login: false,
-            nombre: 'Debe iniciar sesión',
-            secretaria: '',
-        });
-    }
-});
-app.get('/login', (req, res) => { // RUTA LOGIN
-    res.render('login');
-});
+//ROOT
+app.get('/', routes.root);
 
+//LOGIN
+app.get('/login', routes.login);
 
-app.get('/registro', (req, res)=>{ // RUTA REGISTRO
-    connection.query('SELECT * FROM secretarias', (error, results)=>{
-        if(error){
-            throw error;
-        }else{
-            res.render('registro', {results:results});
-        }
-    });
-});
-app.post('/register', async (req, res) => { // METODO REGISTRO
-    const usuario = req.body.usuario; // Obtener los datos del formulario
-    const nombres = req.body.nombres; 
-    const secretaria = req.body.secretaria;
-    const contraseña = req.body.contraseña;
-    const email = req.body.email;
-    let contraseñaHash = await bcryptjs.hash(contraseña, 8);
-    connection.query('INSERT INTO usuarios SET ?', {
-        nombres: nombres,
-        email: email,
-        password: contraseñaHash,
-        secretaria_id: secretaria,
-        usuario: usuario
-    }, async (error, results) => {
-        if (error) {
-            throw error;
-        } else {
-            // Renderizar la plantilla 'registro.ejs' pasando 'results' junto con las variables relacionadas con el mensaje de alerta
-            connection.query('SELECT * FROM secretarias', (error, resultsSecretarias) => {
-                if (error) {
-                    throw error;
-                } else {
-                    res.render('registro', {
-                        results: resultsSecretarias, // Pasar 'resultsSecretarias' que contiene las secretarías
-                        alert: true,
-                        alertTitle: "Registro",
-                        alertMessage: "¡Registro Exitoso!",
-                        alertIcon: 'success',
-                        showConfirmButton: false,
-                        timer: 1500,
-                        ruta: ''
-                    });
-                    console.log('Valor de secretaria:', secretaria);
-                    console.log('APP.POST "/register". Se ha registrado el usuario: ' + nombres + ' en la secretaria: ' + resultsSecretarias.find(sec => sec.id === parseInt(secretaria)).nombre); // Muestra el nombre de usuario y la secretaria en la que se registro
-                    console.log('Redireccionando hacia index.ejs basandose en ruta: "vacio" y en sweetAlert en registro.ejs')
-                }
-            });
-        }
-    });
-});
-app.post('/auth', async (req, res)=>{ // METODO AUTENTIFICACIÓN
-    const usuario = req.body.usuario; // Valores del form
-    const contraseña = req.body.contraseña;
-    let contraseñaHash = await bcryptjs.hash(contraseña, 8);
-    if(usuario && contraseña){ // Método .compare del hashing para comparar la contraseña con la base de datos
-        connection.query('SELECT usuarios.*, secretarias.nombre AS nombre_secretaria FROM usuarios INNER JOIN secretarias ON usuarios.secretaria_id = secretarias.id WHERE usuario = ?', [usuario], async (error, results)=>{
-            //Selecciona todas las columnas de la tabla usuarios y la columna 'nombre' de la tabla secretarias, asignandole 'nombre_secretaria' a la columna 'nombre' de la tabla secretarias' dejando como resultado 'nombre_secretaria'
-            //Usa INNER JOIN para una unión entre la tabla 'usuarios' y 'secretarias' "usuarios.secretarias_id = secretarias.id"
-            //En resumen busca seleccionar todas las columnas de la tabla 'usuarios' junto con el nombre de la secretaria correspondiente de la tabla 'secretarias' donde el usuario coincida con el valor proporcionado
-            if(results.length == 0 || !(await bcryptjs.compare(contraseña, results[0].password))) { // si la longitud del select es 0 o si no coincide la contraseña
-                res.render('login', {
-                    alert: true,
-                    alertTitle: "Error",
-                    alertMessage: "¡Usuario y/o contraseña incorrectas!",
-                    alertIcon: 'error',
-                    showConfirmButton: true,
-                    timer: false,
-                    ruta: 'login'
-                });
-            }else{
-                // Se establecen las variables de sesión para almacenar la info sobre que usuario inicio sesión, su id de secreteria y se cuenta
-                req.session.loggedin = true; //estado de log
-                req.session.nombre = results[0].nombres;
-                req.session.secretaria = results[0].secretaria_id;
-                req.session.id_usuario = results[0].id;
-                req.session.nombreSecretaria = results[0].nombre_secretaria;
-                console.log('Autentificación correcta del usuario: ' + req.session.nombre + ' con id de secretaria: ' + req.session.secretaria + ' con id de usuario: ' + req.session.id_usuario + ' en secretaria: ' + req.session.nombreSecretaria);
-                //Método if-else sujeto a cambios de si es admin o no ATENCION!!
-                if(req.session.secretaria == '1'){
-                    res.render('login', {
-                        alert: true,
-                        login: true,
-                        nombre: req.session.nombre,
-                        secretaria: req.session.secretaria,
-                        id_usuario: req.session.id_usuario,
-                        nombreSecretaria: req.session.nombreSecretaria,
-                        alertTitle: "Conexión Exitosa",
-                        alertMessage: "¡Login Correcto!",
-                        alertIcon: 'success',
-                        showConfirmButton: false,
-                        timer: 1500,
-                        ruta: '',
-                    });
-                }else{
-                    console.log(req.session.secretaria);
-                    res.render('login', {
-                        alert: true,
-                        login: true,
-                        nombre: req.session.nombre,
-                        secretaria: req.session.secretaria,
-                        id_usuario: req.session.id_usuario,
-                        nombreSecretaria: req.session.nombreSecretaria,
-                        alertTitle: "Conexion Exitosa",
-                        alertMessage: "¡Login Correcto!",
-                        alertIcon: 'success',
-                        showConfirmButton: false,
-                        timer: 1500,
-                        ruta: ''
-                        });
-                }
-            }
-        });
-    }else{
-        res.render('login', {
-            alert: true,
-            alertTitle: "Advertencia",
-            alertMessage: "Por favor ingrese un usuario y contraseña",
-            alertIcon: 'warning',
-            showConfirmButton: true,
-            timer: 1500,
-            ruta: 'login'
-        });
-    }
-});
-app.get('/logout', (req, res)=>{
-    req.session.destroy(()=>{
-        res.redirect('/')
-    })
-})
-app.get('/categorias', (req, res) => {
-    if (req.session.loggedin) {
-        // Consulta SQL para seleccionar los nombres de las categorías con secretaria_id igual al req.session.secretaria
-        connection.query('SELECT id, nombre FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, results) => {
-            if (error) {
-                throw error;
-            } else {
-                // Renderiza la plantilla 'categorias.ejs' y pasa los resultados de la consulta
-                res.render('categorias', {
-                    login: true,
-                    nombre: req.session.nombre,
-                    secretaria: req.session.secretaria,
-                    id_usuario: req.session.id_usuario,
-                    categorias: results // Aquí pasa los resultados de la consulta
-                });
-            }
-        });
-    } else {
-        res.render('index', {
-            login: false,
-            nombre: 'Debe iniciar sesión',
-            secretaria: ''
-        });
-    }
-});
-// app.get('/facturas', (req, res) => {
-//     if (req.session.loggedin) {
-//         // Consulta SQL para seleccionar las facturas asociadas al usuario logueado
-//         //connection.query('SELECT f.* FROM facturas f JOIN usuarios u ON f.usuario_id = u.id WHERE u.secretaria_id = ?', [req.session.secretaria], (error, results) => {
-//         connection.query('SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada FROM facturas f JOIN usuarios u ON f.usuario_id = u.id WHERE u.secretaria_id = ?', [req.session.secretaria], (error, results) => {  
-//             if (error) {
-//                 throw error;
-//             } else {
-//                 // Renderiza la plantilla 'facturas.ejs' y pasa los resultados de la consulta
-//                 res.render('facturas', {
-//                     login: true,
-//                     nombre: req.session.nombre,
-//                     id_usuario: req.session.id_usuario,
-//                     secretaria: req.session.secretaria,
-//                     facturas: results // Aquí pasa los resultados de la consulta
-//                 });
-//             }
-//         });
-//     } else {
-//         res.render('index', {
-//             login: false,
-//             nombre: 'Debe iniciar sesión',
-//             secretaria: ''
-//         });
-//     }
-// });
-app.get('/facturas', (req, res) => {
-    if (req.session.loggedin) {
-        // Consulta SQL para seleccionar las facturas asociadas al usuario logueado
-        connection.query('SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario FROM facturas f JOIN usuarios u ON f.usuario_id = u.id WHERE u.secretaria_id = ?', [req.session.secretaria], (error, resultsFacturas) => {  
-            if (error) {
-                throw error;
-            } else {
-                // Consulta SQL para seleccionar las categorías asociadas a la secretaría del usuario logueado
-                connection.query('SELECT id, nombre FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, resultsCategorias) => {
-                    if (error) {
-                        throw error;
-                    } else {
-                        // Renderiza la plantilla 'facturas.ejs' y pasa los resultados de ambas consultas
-                        res.render('facturas', {
-                            login: true,
-                            nombre: req.session.nombre,
-                            id_usuario: req.session.id_usuario,
-                            secretaria: req.session.secretaria,
-                            facturas: resultsFacturas, // Resultados de la consulta de facturas
-                            categorias: resultsCategorias // Resultados de la consulta de categorías
-                        });
-                    }
-                });
-            }
-        });
-    } else {
-        res.render('index', {
-            login: false,
-            nombre: 'Debe iniciar sesión',
-            secretaria: ''
-        });
-    }
-});
-// Manejar la solicitud POST para cargar una factura
-app.post('/cargar-factura', upload.single('pdf'), (req, res) => {
-    const uploadedFile = req.file; // Obtener el archivo subido
-    const nombreFactura = uploadedFile.originalname; // Usar el nombre original del archivo como nombre de factura
-    const categoriaId = req.body.categoria; // Obtener el ID de la categoría seleccionada del cuerpo de la solicitud
-    const monto = req.body.monto; // Obtener el monto del cuerpo de la solicitud
-    const estado = 'en proceso'; // Valor predeterminado para el estado de la factura
-    const usuarioId = req.body.idUsuario; // Obtener el ID de usuario del cuerpo de la solicitud
+//REGISTRO
+app.get('/registro', routes.registro);
 
-    if (uploadedFile) { // Verificar si se ha subido un archivo
-        const newPath = path.join('uploads', uploadedFile.originalname); // Construir la ruta completa del nuevo archivo
-
-        // Renombrar el archivo en el sistema de archivos
-        fs.rename(uploadedFile.path, newPath, (err) => {
-            if (err) { // Manejar errores si ocurren al renombrar el archivo
-                console.error('Error al renombrar el archivo:', err);
-                res.status(500).send({ error: 'Error interno del servidor' });
-            } else { // Si el archivo se ha renombrado correctamente
-                const fechaActual = new Date();
-                const fechaLocal = new Date(fechaActual.getTime() - (fechaActual.getTimezoneOffset() * 60000));
-                const fechaFormateada = fechaLocal.toISOString().slice(0, 19).replace('T', ' ');
-                const sql = 'INSERT INTO facturas (fecha_carga, nombre_factura, categoria_id, monto, estado, usuario_id, archivo_factura) VALUES (?, ?, ?, ?, ?, ?, ?)';
-                // Insertar los datos de la factura en la base de datos
-                connection.query(sql, [fechaFormateada, nombreFactura, categoriaId, monto, estado, usuarioId, newPath], (err, result) => {
-                    if (err) { // Manejar errores si ocurren al insertar datos en la base de datos
-                        console.error('Error al insertar datos en la base de datos:', err);
-                        res.status(500).send({ error: 'Error interno del servidor' });
-                    } else { // Si los datos se insertaron correctamente en la base de datos
-                        console.log('Datos insertados correctamente en la base de datos');
-                        res.redirect('facturas'); // Redirigir a la página de inicio después de cargar la factura
-                    }
-                });
-            }
-        });
-    } else { // Si no se ha subido ningún archivo
-        res.status(400).send({ error: 'No se pudo subir el archivo' }); // Enviar un error al cliente
-    }
-});
-app.get('/analiticas', (req, res) => {
-    connection.query('SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id', (error, results) => {  
-        if (error) {
-            throw error;
-        } else {
-            // Renderiza la plantilla 'analiticas.ejs' y pasa los resultados de la consulta
-            res.render('analiticas', {
-                login: true,
-                nombre: req.session.nombre,
-                id_usuario: req.session.id_usuario,
-                secretaria: req.session.secretaria,
-                facturas: results // Resultados de la consulta de facturas
-            });
-        }
-    });
-});
-//BORRAR 
-// app.get('/descargar-archivo/:id', (req, res) => {
-//     const fileId = req.params.id; // Obtener el ID del archivo de la solicitud
-
-//     // Consultar la base de datos para obtener la información del archivo y su nombre
-//     const sql = 'SELECT nombre_factura, archivo_factura FROM facturas WHERE id = ?';
-//     connection.query(sql, [fileId], (err, result) => {
-//         if (err) { // Manejar errores si ocurren al realizar la consulta en la base de datos
-//             console.error('Error al obtener el archivo de la base de datos:', err);
-//             res.status(500).send({ error: 'Error interno del servidor' });
-//         } else {
-//             if (result.length > 0) { // Si se encontró el archivo en la base de datos
-//                 const nombreFactura = result[0].nombre_factura; // Obtener el nombre de la factura
-//                 const rutaArchivo = result[0].archivo_factura; // Obtener la ruta del archivo
-//                 // Configurar los encabezados de la respuesta para indicar que es un archivo PDF
-//                 res.setHeader('Content-Type', 'application/pdf');
-//                 // Utilizar el nombre de la factura como nombre de archivo para la descarga
-//                 res.setHeader('Content-Disposition', `attachment; filename="${nombreFactura}.pdf"`);
-//                 // enviar el contenido del archivo como respuesta
-//                 fs.createReadStream(rutaArchivo).pipe(res);
-//             } else { // Si no se encontró el archivo con el ID proporcionado
-//                 res.status(404).send({ error: 'Archivo no encontrado' }); // Enviar un error
-//             }
-//         }
-//     });
-// });
+/////////////
+//CONTROLLERS
 const crud = require('./controllers/controllers');
+
+//USUARIO
+app.post('/register', crud.registrarUsuario);
+app.post('/auth', crud.autentificacion);
+app.get('/logout', crud.logout);
+
+//CATEGORÍAS
 app.post('/crear-categorias', crud.crearCategorias);
 app.post('/editar-categorias', crud.editarCategoria);
-app.get('/descargar-archivo/:id', crud.descargarArchivo);
-//
+app.get('/categorias', crud.categorias);
 
+//FACTURAS
+app.get('/facturas', crud.facturas);
+app.post('/cargar-factura', upload.single('pdf'), crud.cargarFactura);
+app.get('/descargar-archivo/:id', crud.descargarArchivo);
+
+//ANALITICAS
+app.get('/analiticas', crud.analiticas);
