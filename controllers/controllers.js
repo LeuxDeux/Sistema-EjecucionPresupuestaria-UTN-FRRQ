@@ -249,6 +249,8 @@ exports.facturas = (req, res) => {
                     if (error) {
                         throw error;
                     } else {
+                        // Filtrar estados únicos de las facturas
+                        const estadosUnicos = [...new Set(resultsFacturas.map(factura => factura.estado))];
                         // Renderiza la plantilla 'facturas.ejs' y pasa los resultados de ambas consultas
                         res.render('facturas', {
                             login: true,
@@ -256,9 +258,10 @@ exports.facturas = (req, res) => {
                             id_usuario: req.session.id_usuario,
                             secretaria: req.session.secretaria,
                             facturas: resultsFacturas, // Resultados de la consulta de facturas
-                            categorias: resultsCategorias // Resultados de la consulta de categorías
+                            categorias: resultsCategorias, // Resultados de la consulta de categorías
+                            estados: estadosUnicos
                         });
-                        //console.log(resultsCategorias);
+                        console.log(resultsFacturas);
                     }
                 });
             }

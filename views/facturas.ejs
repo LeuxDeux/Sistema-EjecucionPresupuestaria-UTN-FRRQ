@@ -19,6 +19,16 @@
     <% if(login) { %>
         <p>Hola: <%= nombre %> id secretaria: <%= secretaria %> id usuario :<%= id_usuario %></p>
     <% } %>
+    <div class="mb-3">
+        <label for="selectEstado" class="form-label">Estado de la Factura</label>
+        <select name="selectEstado" id="selectEstado" class="form-select">
+            <option value="">Todos</option>
+            <!-- Iterar sobre los estados de factura disponibles -->
+            <% estados.forEach((estado) => { %>
+                <option value="<%= estado %>"><%= estado %></option>
+            <% }); %>
+        </select>
+    </div>
     <table class="table table-bordered table-striped text-center mt-4">
         <thead>
             <tr class="bg-primary text-white">
@@ -134,6 +144,20 @@
         // Asignar la fecha formateada al campo de entrada de texto
         fechaInput.value = fechaFormateada;
         $('#modalCargarFactura').modal('show');
+        });
+    });
+    $(document).ready(function() {
+        // Función para filtrar las filas de la tabla según el estado seleccionado
+        $('#selectEstado').change(function() {
+            var estadoSeleccionado = $(this).val(); // Obtener el valor del estado seleccionado
+            $('tbody tr').each(function() {
+                // Mostrar solo las filas cuyo estado coincida con el estado seleccionado, o todas si se selecciona "Todos"
+                if (estadoSeleccionado === '' || $(this).find('td:eq(5)').text() === estadoSeleccionado) {
+                    $(this).show(); // Mostrar la fila si coincide
+                } else {
+                    $(this).hide(); // Ocultar la fila si no coincide
+                }
+            });
         });
     });
 </script>
