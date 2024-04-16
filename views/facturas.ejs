@@ -148,11 +148,11 @@
     });
     $(document).ready(function() {
         // Función para filtrar las filas de la tabla según el estado seleccionado
-        $('#selectEstado').change(function() {
+        $('#selectEstado').change(function() { // Listener
             var estadoSeleccionado = $(this).val(); // Obtener el valor del estado seleccionado
-            $('tbody tr').each(function() {
+            $('tbody tr').each(function() { // Selecciona cada elemento <tr> del tbody y each itera sobre cada elemento y ejecuta la funcion
                 // Mostrar solo las filas cuyo estado coincida con el estado seleccionado, o todas si se selecciona "Todos"
-                if (estadoSeleccionado === '' || $(this).find('td:eq(5)').text() === estadoSeleccionado) {
+                if (estadoSeleccionado === '' || $(this).find('td:eq(5)').text() === estadoSeleccionado) { // Si se selecciona 'Todos' o si se selecciona el valor correspondiente al sexto <td> o sea factura.estado, asigna con === estricto el texto del sexto <td>
                     $(this).show(); // Mostrar la fila si coincide
                 } else {
                     $(this).hide(); // Ocultar la fila si no coincide
