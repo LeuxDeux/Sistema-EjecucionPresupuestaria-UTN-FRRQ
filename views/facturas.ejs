@@ -29,6 +29,7 @@
                 <th scope="col">Monto</th>
                 <th scope="col">Estado</th>
                 <th scope="col">Personal</th>
+                <th scope="col">Categoría</th>
                 <th scope="col" style="display: none;">Archivo de la Factura</th>
                 <th scope="col">ACCIONES</th>
             </tr>
@@ -45,6 +46,7 @@
                     <td><%= factura.monto %></td>
                     <td><%= factura.estado %></td>
                     <td><%= factura.nombre_usuario %></td>
+                    <td><%= factura.nombre_categoria %></td>
                     <td style="display: none;"><%= factura.archivo_factura %></td>
                     <td>
                         <a href="#" class="btn btn-outline-info" id="btn-borrar-factura" data-id="<%= factura.id %>">Borrar</a>
