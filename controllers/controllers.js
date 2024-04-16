@@ -348,20 +348,28 @@ CONTROLLERS ANALITICAS
 */
 
 exports.analiticas = (req, res) => {
-    connection.query(queryAnaliticas, (error, results) => {  
-        if (error) {
-            throw error;
-        } else {
-            // Renderiza la plantilla 'analiticas.ejs' y pasa los resultados de la consulta
-            res.render('analiticas', {
-                login: true,
-                nombre: req.session.nombre,
-                id_usuario: req.session.id_usuario,
-                secretaria: req.session.secretaria,
-                facturas: results // Resultados de la consulta de facturas
-            });
-        }
-    });
+    if (req.session.loggedin) {
+        connection.query(queryAnaliticas, (error, results) => {  
+            if (error) {
+                throw error;
+            } else {
+                // Renderiza la plantilla 'analiticas.ejs' y pasa los resultados de la consulta
+                res.render('analiticas', {
+                    login: true,
+                    nombre: req.session.nombre,
+                    id_usuario: req.session.id_usuario,
+                    secretaria: req.session.secretaria,
+                    facturas: results // Resultados de la consulta de facturas
+                });
+            }
+        });
+    } else {
+        res.render('index', {
+            login: false,
+            nombre: 'Debe iniciar sesión',
+            secretaria: ''
+        });
+    }
 }
 exports.aceptarFactura = (req, res)=>{
     const idFactura = req.params.id;
