@@ -419,3 +419,13 @@ exports.rechazarFactura = (req, res)=>{
         }
     });
 }
+
+///////////////////INGRESO
+exports.ingresoGanancia = (req, res)=>{
+    res.render('ingresos', {
+        login: true,
+        nombre: req.session.nombre,
+        id_usuario: req.session.id_usuario,
+        secretaria: req.session.secretaria,
+    });
+}
