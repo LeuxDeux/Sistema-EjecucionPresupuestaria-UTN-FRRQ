@@ -261,7 +261,7 @@ exports.facturas = (req, res) => {
                             categorias: resultsCategorias, // Resultados de la consulta de categorías
                             estados: estadosUnicos
                         });
-                        console.log(resultsFacturas);
+                        //console.log(resultsFacturas);
                     }
                 });
             }
@@ -422,10 +422,30 @@ exports.rechazarFactura = (req, res)=>{
 
 ///////////////////INGRESO
 exports.ingresoGanancia = (req, res)=>{
-    res.render('ingresos', {
-        login: true,
-        nombre: req.session.nombre,
-        id_usuario: req.session.id_usuario,
-        secretaria: req.session.secretaria,
-    });
+    if (req.session.loggedin) {
+        connection.query('SELECT ingresos.id_ingreso, ingresos.fecha_ingreso, ingresos.nombre_ingreso, categorias.nombre AS nombre_categoria, ingresos.monto, usuarios.nombres AS nombre_usuario FROM ingresos JOIN categorias ON ingresos.categoria_id = categorias.id JOIN usuarios ON ingresos.usuario_id = usuarios.id WHERE ingresos.secretaria_id = ?', [req.session.secretaria], (error, resultsIngresos) => {
+            if (error) {
+                throw error;
+            }else{
+                connection.query('SELECT id, nombre FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, resultsCategorias) => {
+                    if (error) {
+                        throw error;
+                    } else {
+                        res.render('ingresos', {
+                        login: true,
+                        nombre: req.session.nombre,
+                        id_usuario: req.session.id_usuario,
+                        secretaria: req.session.secretaria,
+                        ingresos: resultsIngresos,
+                        categorias: resultsCategorias
+                        });
+                        console.log(`Nombre: ${req.session.nombre}, ID Usuario: ${req.session.id_usuario}, Secretaria: ${req.session.secretaria}, Resultados de ingresos:`, resultsIngresos);
+                    }
+                });
+            }
+        });
+    }
 }
+
+
+        
