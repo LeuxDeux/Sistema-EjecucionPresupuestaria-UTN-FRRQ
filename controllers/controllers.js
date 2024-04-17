@@ -446,6 +446,33 @@ exports.ingresoGanancia = (req, res)=>{
         });
     }
 }
+exports.cargarIngreso = (req, res) => {
+    if (req.session.loggedin) {
+        const { nombreIngreso, categoria, monto } = req.body;
+        
+        // Obtener la fecha y hora actual formateada
+        const fechaActual = new Date();
+        const fechaLocal = new Date(fechaActual.getTime() - (fechaActual.getTimezoneOffset() * 60000));
+        const fechaFormateada = fechaLocal.toISOString().slice(0, 19).replace('T', ' ');
 
+        // Insertar el ingreso en la base de datos
+        connection.query('INSERT INTO ingresos (nombre_ingreso, categoria_id, monto, usuario_id, fecha_ingreso, secretaria_id) VALUES (?, ?, ?, ?, ?, ?)', 
+            [nombreIngreso, categoria, monto, req.session.id_usuario, fechaFormateada, req.session.secretaria], 
+            (error, results) => {
+                if (error) {
+                    throw error;
+                } else {
+                    this.ingresoGanancia(req, res);
+                }
+            }
+        );
+    } else {
+        res.render('index', {
+            login: false,
+            nombre: 'Debe iniciar sesión',
+            secretaria: ''
+        });
+    }
+};
 
         
