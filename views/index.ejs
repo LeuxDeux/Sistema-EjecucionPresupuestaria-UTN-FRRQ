@@ -15,13 +15,15 @@
         <a href="/logout" class="a-logout">Cerrar Sesión</a>
         <a href="/categorias" class="a-logout">Categorías</a>
         <a href="/facturas" class="a-logout">Facturas</a>
+        <a href="/ingresos" class="a-logout">Ingresos</a>
         <a href="/analiticas" class="a-logout">Analíticas</a>
         <% }else{ %>
             <h1>El usuario conectado es: <strong><%= nombre %></strong></h1>
             <p style="display: none;"><%= secretaria %></p>
             <a href="/logout" class="a-logout">Cerrar Sesión</a>
             <a href="/categorias" class="a-logout">Categorías</a>
-            <a href="/facturas" class="a-logout">Facturas</a>
+            <a href="/facturas" class="a-logout">Ingresos</a>
+            <a href="/ingresos" class="a-logout">Facturas</a>
        <% } %>
     <%} else { %>
         <h1><strong><%= nombre %></strong></h1>
