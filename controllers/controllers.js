@@ -450,7 +450,8 @@ exports.rechazarFactura = (req, res)=>{
 ///////////////////INGRESO
 exports.ingresoGanancia = (req, res)=>{
     if (req.session.loggedin) {
-        connection.query('SELECT ingresos.id_ingreso, ingresos.fecha_ingreso, ingresos.nombre_ingreso, categorias.nombre AS nombre_categoria, ingresos.monto, usuarios.nombres AS nombre_usuario FROM ingresos JOIN categorias ON ingresos.categoria_id = categorias.id JOIN usuarios ON ingresos.usuario_id = usuarios.id WHERE ingresos.secretaria_id = ?', [req.session.secretaria], (error, resultsIngresos) => {
+        //Modificación de la Query para que me formatee la fecha de ingreso
+        connection.query('SELECT ingresos.id_ingreso, ingresos.fecha_ingreso, DATE_FORMAT(ingresos.fecha_ingreso, "%d/%m/%Y") AS fecha_ingreso_formateada, ingresos.nombre_ingreso, categorias.nombre AS nombre_categoria, ingresos.monto, usuarios.nombres AS nombre_usuario FROM ingresos JOIN categorias ON ingresos.categoria_id = categorias.id JOIN usuarios ON ingresos.usuario_id = usuarios.id WHERE ingresos.secretaria_id = ?', [req.session.secretaria], (error, resultsIngresos) => {
             if (error) {
                 throw error;
             }else{
