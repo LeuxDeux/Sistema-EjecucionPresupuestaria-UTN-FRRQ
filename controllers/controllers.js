@@ -517,6 +517,7 @@ exports.tablaGrafica = (req,res)=>{
                 //     resultados: results
                 //     });
                 //     console.log(`Nombre: ${req.session.nombre}, ID Usuario: ${req.session.id_usuario}, Secretaria: ${req.session.secretaria}, Objeto:`, results);
+                console.log(results);
             }
         });
     }
