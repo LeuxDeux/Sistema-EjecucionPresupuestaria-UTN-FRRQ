@@ -32,7 +32,7 @@
                 <td style="display: none;"><%= categoria.id %></td>
                 <td>
                     <a href="#" class="btn btn-outline-info editar-categoria" data-id="<%= categoria.id %>">Editar</a>
-                    <a href="/delete/" class="btn btn-outline-info" data-id="<%= categoria.id %>">Borrar</a>
+                    <a href="#" class="btn btn-outline-info borrar-categoria" data-id="<%= categoria.id %>">Borrar</a>
                     <a href="#" class="btn btn-outline-info btnCargarFactura" data-id="<%= categoria.id %>">Seleccionar</a>
                 </td>
             </tr>
@@ -80,6 +80,24 @@
                         <input type="text" class="form-control" id="nombreCategoria" name="nuevoNombre" required>
                     </div>
                     <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal de Borrar -->
+<div class="modal fade" id="modalBorrarCategoria" tabindex="-1" aria-labelledby="modalBorrarCategoriaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalBorrarCategoriaLabel">Borrar Categoría</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formBorrarCategoria" action="/borrar-categorias" method="post">
+                    <!-- Campo oculto para almacenar el ID de la categoría -->
+                    <input type="hidden" name="id" id="inputBorrarCategoriaId" value="">
+                    <button type="submit" class="btn btn-primary">SI</button>
                 </form>
             </div>
         </div>
@@ -147,6 +165,17 @@
         $('#inputCategoriaId').val(categoriaId);
         //Mostrar el modal de edición
         $('#modalEditarCategoria').modal('show');
+    });
+    });
+    $(document).ready(function() {
+    $('.borrar-categoria').click(function(event) {
+        event.preventDefault(); // Evitar que el enlace recargue la página
+        //Obtener el ID de la categoría desde el atributo data
+        var categoriaId = $(this).data('id');
+        //Asignar el ID de la categoría al campo oculto en el formulario de edición
+        $('#inputBorrarCategoriaId').val(categoriaId);
+        //Mostrar el modal de borrar
+        $('#modalBorrarCategoria').modal('show');
     });
     });
     $(document).ready(function() {

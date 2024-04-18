@@ -229,6 +229,33 @@ exports.categorias = (req, res) => {
 };
 
 //BORRAR CATEGORÍA *PENDIENTE
+exports.borrarCategoria = (req, res) => {
+    const categoriaId = req.body.id; // Obtenemos el ID de la categoría desde el cuerpo de la solicitud
+    // Realizamos la actualización en la base de datos
+    connection.query('DELETE FROM categorias WHERE id = ?', [categoriaId], (error, results) => {
+        if (error) {
+            throw error;
+        } else {
+            console.log('Categoría borrada con éxito');
+            // Después de actualizar la categoría, consultamos nuevamente las categorías de la base de datos
+            connection.query('SELECT * FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, categorias) => {
+                if (error) {
+                    throw error;
+                } else {
+                    // Renderizamos la vista 'categorias.ejs' nuevamente con las categorías actualizadas
+                    res.render('categorias', {
+                        login: true,
+                        nombre: req.session.nombre,
+                        secretaria: req.session.secretaria,
+                        categorias: categorias,
+                        id_usuario: req.session.id_usuario
+                    });
+                }
+            });
+        }
+    });
+};
+
 
 /* 
 //////////////////////

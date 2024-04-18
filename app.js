@@ -73,6 +73,7 @@ app.get('/logout', crud.logout);
 app.post('/crear-categorias', crud.crearCategorias);
 app.post('/editar-categorias', crud.editarCategoria);
 app.get('/categorias', crud.categorias);
+app.post('/borrar-categorias', crud.borrarCategoria);
 
 //FACTURAS
 app.get('/facturas', crud.facturas);
