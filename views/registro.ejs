@@ -9,59 +9,51 @@
     <link rel="stylesheet" href="resources/css/styles.css">
 </head>
 <body>
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12 shadow-lg p-3 mb-5">
-                    <div class="card border-primary">
-                        <div class="card-header bg-primary text-white">Registrarse</div>
-                        <div class="card-body text-primary">
-                            <form action="/register" method="post">
-                                <div class="mb-3">
-                                    <label for="name" class="form-label">Nombre Completo</label>
-                                    <input type="text" id="nombres" name="nombres" class="form-control">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="user" class="form-label">Usuario</label>
-                                    <input type="text" id="usuario" name="usuario" class="form-control">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="pass" class="form-label">Contraseña</label>
-                                    <input type="password" id="contraseña" name="contraseña" class="form-control">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="pass" class="form-label">Email</label>
-                                    <input type="text" id="email" name="email" class="form-control">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="">Secretaria</label>
-                                        <select name="secretaria" id="secretaria" class="select-css">
-                                            <% results.forEach((secretaria) => { %>
-                                                <option value="<%= secretaria.id %>"><%= secretaria.nombre %></option>
-                                            <% }); %>
-                                        </select>
-                                </div>
-                                
-                                <div class="card-footer bg-transparent border-primary">
-                                    <a href="/" type="button" class="btn btn-secondary">Cancelar</a>
-                                    <button type="submit" class="btn btn-primary">Registrar</button>
-                                </div>
-                            </form>
-                        </div>
-                        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                            <% if(typeof alert != "undefined"){%>
-                                <script>
-                                    Swal.fire({
-                                        title: '<%= alertTitle%>',
-                                        text: '<%= alertMessage %>',
-                                        icon: '<%= alertIcon %>',
-                                        showConfirmButton: <%= showConfirmButton %>,
-                                        timer: <%= timer %>
-                                    }).then(()=>{
-                                        window.location='/<%= ruta %>'
-                                    })
-                                </script>
-
-                            <% } %>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 shadow-lg p-3 mb-5">
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">Registrarse</div>
+                    <div class="card-body text-primary">
+                        <form id="registroForm" action="/register" method="post">
+                            <div class="mb-3">
+                                <label for="nombres" class="form-label">Nombre Completo</label>
+                                <input type="text" id="nombres" name="nombres" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="usuario" class="form-label">Usuario</label>
+                                <input type="text" id="usuario" name="usuario" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="contraseña" class="form-label">Contraseña</label>
+                                <input type="password" id="contraseña" name="contraseña" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="repetir_contraseña" class="form-label">Repetir Contraseña</label>
+                                <input type="password" id="repetir_contraseña" name="repetir_contraseña" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" id="email" name="email" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="repetir_email" class="form-label">Repetir Email</label>
+                                <input type="email" id="repetir_email" name="repetir_email" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="secretaria" class="form-label">Secretaria</label>
+                                <select name="secretaria" id="secretaria" class="form-control">
+                                    <option value="" selected disabled>Selecciona una secretaria</option>
+                                    <% results.forEach((secretaria) => { %>
+                                        <option value="<%= secretaria.id %>"><%= secretaria.nombre %></option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                            <div class="card-footer bg-transparent border-primary">
+                                <a href="/" type="button" class="btn btn-secondary">Cancelar</a>
+                                <button type="submit" class="btn btn-primary">Registrar</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -69,5 +61,24 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script>
+        const form = document.getElementById('registroForm');
+        form.addEventListener('submit', function(event) {
+            const contraseña = document.getElementById('contraseña').value;
+            const repetirContraseña = document.getElementById('repetir_contraseña').value;
+            const email = document.getElementById('email').value;
+            const repetirEmail = document.getElementById('repetir_email').value;
+
+            if (contraseña !== repetirContraseña || email !== repetirEmail) {
+                event.preventDefault();
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Las contraseñas o los correos no coinciden',
+                    icon: 'error',
+                    showConfirmButton: true
+                });
+            }
+        });
+    </script>
 </body>
 </html>
