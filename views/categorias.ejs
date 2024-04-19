@@ -85,7 +85,7 @@
         </div>
     </div>
 </div>
-<!-- Modal de Borrar -->
+<!-- Modal de Borrar Categorias-->
 <div class="modal fade" id="modalBorrarCategoria" tabindex="-1" aria-labelledby="modalBorrarCategoriaLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -97,6 +97,9 @@
                 <form id="formBorrarCategoria" action="/borrar-categorias" method="post">
                     <!-- Campo oculto para almacenar el ID de la categoría -->
                     <input type="hidden" name="id" id="inputBorrarCategoriaId" value="">
+                    <div class="mb-3">
+                        <label for="borrarCategoriaWarning" class="form-label">Si se elimina la categoría, todas las facturas asociadas serán eliminadas también.</label>
+                    </div>
                     <button type="submit" class="btn btn-primary">SI</button>
                 </form>
             </div>

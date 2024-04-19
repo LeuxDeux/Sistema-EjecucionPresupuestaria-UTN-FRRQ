@@ -228,7 +228,7 @@ exports.categorias = (req, res) => {
     }
 };
 
-//BORRAR CATEGORÍA *PENDIENTE
+//BORRAR CATEGORÍA 
 exports.borrarCategoria = (req, res) => {
     const categoriaId = req.body.id; // Obtenemos el ID de la categoría desde el cuerpo de la solicitud
     // Realizamos la actualización en la base de datos
@@ -237,7 +237,7 @@ exports.borrarCategoria = (req, res) => {
             throw error;
         } else {
             console.log('Categoría borrada con éxito');
-            // Después de actualizar la categoría, consultamos nuevamente las categorías de la base de datos
+            // Después de borrar la categoría, consultamos nuevamente las categorías de la base de datos
             connection.query('SELECT * FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, categorias) => {
                 if (error) {
                     throw error;
@@ -364,6 +364,51 @@ exports.descargarArchivo = (req, res) => {
             } else { // Si no se encontró el archivo con el ID proporcionado
                 res.status(404).send({ error: 'Archivo no encontrado' }); // Enviar un error
             }
+        }
+    });
+};
+
+//BORRAR FACTURA 
+exports.borrarFactura = (req, res) => {
+    const facturaId = req.body.id; // Obtenemos el ID de la factura desde el cuerpo de la solicitud
+    // Realizamos la actualización en la base de datos
+    connection.query('DELETE FROM facturas WHERE id = ?', [facturaId], (error, results) => {
+        if (error) {
+            throw error;
+        } else {
+            console.log('Factura borrada con éxito');
+            // Después de borrar la factura, consultamos nuevamente las facturas de la base de datos
+            connection.query('SELECT * FROM facturas WHERE usuario_id = ?', [req.session.secretaria], (error, facturas) => {
+                if (error) {
+                    throw error;
+                } else {
+                    connection.query(queryAnaliticasNW, [req.session.secretaria], (error, resultsFacturas) => {  
+                        if (error) {
+                            throw error;
+                        } else {
+                            // Consulta SQL para seleccionar las categorías asociadas a la secretaría del usuario logueado
+                            connection.query('SELECT id, nombre FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, resultsCategorias) => {
+                                if (error) {
+                                    throw error;
+                                } else {
+                                    // Filtrar estados únicos de las facturas
+                                    const estadosUnicos = [...new Set(resultsFacturas.map(factura => factura.estado))];
+                                    // Renderiza la plantilla 'facturas.ejs' y pasa los resultados de ambas consultas
+                                    res.render('facturas', {
+                                        login: true,
+                                        nombre: req.session.nombre,
+                                        id_usuario: req.session.id_usuario,
+                                        secretaria: req.session.secretaria,
+                                        facturas: resultsFacturas, // Resultados de la consulta de facturas
+                                        categorias: resultsCategorias, // Resultados de la consulta de categorías
+                                        estados: estadosUnicos
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
         }
     });
 };

@@ -79,6 +79,7 @@ app.post('/borrar-categorias', crud.borrarCategoria);
 app.get('/facturas', crud.facturas);
 app.post('/cargar-factura', upload.single('pdf'), crud.cargarFactura);
 app.get('/descargar-archivo/:id', crud.descargarArchivo);
+app.post('/borrar-facturas', crud.borrarFactura);
 
 //ANALITICAS
 app.get('/analiticas', crud.analiticas);
