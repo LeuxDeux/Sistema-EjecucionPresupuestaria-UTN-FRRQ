@@ -2,6 +2,7 @@ const connection = require('../database/db');
 const fs = require('fs'); // Importar FileSystem para operaciones de archivos
 const path = require('path'); // Importar Path para manejar rutas de archivos
 const bcryptjs = require('bcryptjs'); 
+const { render } = require('ejs');
 const queryAnaliticas = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE f.estado = "en proceso"';
 const queryAnaliticasNW = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id';
 /* 
@@ -143,62 +144,70 @@ CONTROLLERS CATEGORÍAS
 
 //CREAR CATEGORÍA
 exports.crearCategorias = (req, res) => {
-    const nombre = req.body.nombre;
-    const secretaria_id = req.body.secretaria_id;
-    const categoria = { nombre: nombre, secretaria_id: secretaria_id };
+    if(req.session.loggedin){
+        const nombre = req.body.nombre;
+        const secretaria_id = req.body.secretaria_id;
+        const categoria = { nombre: nombre, secretaria_id: secretaria_id };
 
-    connection.query('INSERT INTO categorias SET ?', categoria, (error, results) => {
-        if (error) {
-            throw error;
-        } else {
-            console.log('Categoría creada con éxito: ', nombre);
-            
-            // Después de agregar la categoría, consulta nuevamente las categorías de la base de datos
-            connection.query('SELECT * FROM categorias WHERE secretaria_id = ?', [secretaria_id], (error, categorias) => {
-                if (error) {
-                    throw error;
-                } else {
-                    // Renderizar la vista categorias.ejs nuevamente con las nuevas categorías
-                    res.render('categorias', {
-                        login: true,
-                        nombre: req.session.nombre,
-                        secretaria: req.session.secretaria,
-                        categorias: categorias,
-                        id_usuario: req.session.id_usuario
-                    });
-                }
-            });
-        }
-    });
+        connection.query('INSERT INTO categorias SET ?', categoria, (error, results) => {
+            if (error) {
+                throw error;
+            } else {
+                console.log('Categoría creada con éxito: ', nombre);
+                
+                // Después de agregar la categoría, consulta nuevamente las categorías de la base de datos
+                connection.query('SELECT * FROM categorias WHERE secretaria_id = ?', [secretaria_id], (error, categorias) => {
+                    if (error) {
+                        throw error;
+                    } else {
+                        // Renderizar la vista categorias.ejs nuevamente con las nuevas categorías
+                        res.render('categorias', {
+                            login: true,
+                            nombre: req.session.nombre,
+                            secretaria: req.session.secretaria,
+                            categorias: categorias,
+                            id_usuario: req.session.id_usuario
+                        });
+                    }
+                });
+            }
+        });
+    }else{
+        res.render('login');
+    }
 };
 
 //EDITAR CATEGORÍA
 exports.editarCategoria = (req, res) => {
-    const categoriaId = req.body.id; // Obtenemos el ID de la categoría desde el cuerpo de la solicitud
-    const nuevoNombre = req.body.nuevoNombre; // Obtenemos el nuevo nombre de la categoría desde el cuerpo de la solicitud
-    // Realizamos la actualización en la base de datos
-    connection.query('UPDATE categorias SET nombre = ? WHERE id = ?', [nuevoNombre, categoriaId], (error, results) => {
-        if (error) {
-            throw error;
-        } else {
-            console.log('Categoría actualizada con éxito');
-            // Después de actualizar la categoría, consultamos nuevamente las categorías de la base de datos
-            connection.query('SELECT * FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, categorias) => {
-                if (error) {
-                    throw error;
-                } else {
-                    // Renderizamos la vista 'categorias.ejs' nuevamente con las categorías actualizadas
-                    res.render('categorias', {
-                        login: true,
-                        nombre: req.session.nombre,
-                        secretaria: req.session.secretaria,
-                        categorias: categorias,
-                        id_usuario: req.session.id_usuario
-                    });
-                }
-            });
-        }
-    });
+    if(req.session.loggedin){
+        const categoriaId = req.body.id; // Obtenemos el ID de la categoría desde el cuerpo de la solicitud
+        const nuevoNombre = req.body.nuevoNombre; // Obtenemos el nuevo nombre de la categoría desde el cuerpo de la solicitud
+        // Realizamos la actualización en la base de datos
+        connection.query('UPDATE categorias SET nombre = ? WHERE id = ?', [nuevoNombre, categoriaId], (error, results) => {
+            if (error) {
+                throw error;
+            } else {
+                console.log('Categoría actualizada con éxito');
+                // Después de actualizar la categoría, consultamos nuevamente las categorías de la base de datos
+                connection.query('SELECT * FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, categorias) => {
+                    if (error) {
+                        throw error;
+                    } else {
+                        // Renderizamos la vista 'categorias.ejs' nuevamente con las categorías actualizadas
+                        res.render('categorias', {
+                            login: true,
+                            nombre: req.session.nombre,
+                            secretaria: req.session.secretaria,
+                            categorias: categorias,
+                            id_usuario: req.session.id_usuario
+                        });
+                    }
+                });
+            }
+        });
+    }else{
+        res.render('login');
+    }
 };
 
 //VER CATEGORÍAS
@@ -220,40 +229,45 @@ exports.categorias = (req, res) => {
             }
         });
     } else {
-        res.render('index', {
-            login: false,
-            nombre: 'Debe iniciar sesión',
-            secretaria: ''
-        });
+        res.render('login');
+        // res.render('index', {
+        //     login: false,
+        //     nombre: 'Debe iniciar sesión',
+        //     secretaria: ''
+        // });
     }
 };
 
 //BORRAR CATEGORÍA 
 exports.borrarCategoria = (req, res) => {
-    const categoriaId = req.body.id; // Obtenemos el ID de la categoría desde el cuerpo de la solicitud
-    // Realizamos la actualización en la base de datos
-    connection.query('DELETE FROM categorias WHERE id = ?', [categoriaId], (error, results) => {
-        if (error) {
-            throw error;
-        } else {
-            console.log('Categoría borrada con éxito');
-            // Después de borrar la categoría, consultamos nuevamente las categorías de la base de datos
-            connection.query('SELECT * FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, categorias) => {
-                if (error) {
-                    throw error;
-                } else {
-                    // Renderizamos la vista 'categorias.ejs' nuevamente con las categorías actualizadas
-                    res.render('categorias', {
-                        login: true,
-                        nombre: req.session.nombre,
-                        secretaria: req.session.secretaria,
-                        categorias: categorias,
-                        id_usuario: req.session.id_usuario
-                    });
-                }
-            });
-        }
-    });
+    if(req.session.loggedin){
+        const categoriaId = req.body.id; // Obtenemos el ID de la categoría desde el cuerpo de la solicitud
+        // Realizamos la actualización en la base de datos
+        connection.query('DELETE FROM categorias WHERE id = ?', [categoriaId], (error, results) => {
+            if (error) {
+                throw error;
+            } else {
+                console.log('Categoría borrada con éxito');
+                // Después de borrar la categoría, consultamos nuevamente las categorías de la base de datos
+                connection.query('SELECT * FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, categorias) => {
+                    if (error) {
+                        throw error;
+                    } else {
+                        // Renderizamos la vista 'categorias.ejs' nuevamente con las categorías actualizadas
+                        res.render('categorias', {
+                            login: true,
+                            nombre: req.session.nombre,
+                            secretaria: req.session.secretaria,
+                            categorias: categorias,
+                            id_usuario: req.session.id_usuario
+                        });
+                    }
+                });
+            }
+        });
+    }else{
+        res.render('login');
+    }
 };
 
 
@@ -294,123 +308,136 @@ exports.facturas = (req, res) => {
             }
         });
     } else {
-        res.render('index', {
-            login: false,
-            nombre: 'Debe iniciar sesión',
-            secretaria: ''
-        });
+        res.render('login');
+        // res.render('index', {
+        //     login: false,
+        //     nombre: 'Debe iniciar sesión',
+        //     secretaria: ''
+        // });
     }
 };
 
 //CARGAR FACTURAS
 exports.cargarFactura = (req, res) => {
-    const uploadedFile = req.file; // Obtener el archivo subido
-    const nombreFactura = uploadedFile.originalname; // Usar el nombre original del archivo como nombre de factura
-    const categoriaId = req.body.categoria; // Obtener el ID de la categoría seleccionada del cuerpo de la solicitud
-    const monto = req.body.monto; // Obtener el monto del cuerpo de la solicitud
-    const estado = 'en proceso'; // Valor predeterminado para el estado de la factura
-    const usuarioId = req.body.idUsuario; // Obtener el ID de usuario del cuerpo de la solicitud
+    if(req.session.loggedin){
+        const uploadedFile = req.file; // Obtener el archivo subido
+        const nombreFactura = uploadedFile.originalname; // Usar el nombre original del archivo como nombre de factura
+        const categoriaId = req.body.categoria; // Obtener el ID de la categoría seleccionada del cuerpo de la solicitud
+        const monto = req.body.monto; // Obtener el monto del cuerpo de la solicitud
+        const estado = 'en proceso'; // Valor predeterminado para el estado de la factura
+        const usuarioId = req.body.idUsuario; // Obtener el ID de usuario del cuerpo de la solicitud
 
-    if (uploadedFile) { // Verificar si se ha subido un archivo
-        const newPath = path.join('uploads', uploadedFile.originalname); // Construir la ruta completa del nuevo archivo
+        if (uploadedFile) { // Verificar si se ha subido un archivo
+            const newPath = path.join('uploads', uploadedFile.originalname); // Construir la ruta completa del nuevo archivo
 
-        // Renombrar el archivo en el sistema de archivos
-        fs.rename(uploadedFile.path, newPath, (err) => {
-            if (err) { // Manejar errores si ocurren al renombrar el archivo
-                console.error('Error al renombrar el archivo:', err);
-                res.status(500).send({ error: 'Error interno del servidor' });
-            } else { // Si el archivo se ha renombrado correctamente
-                const fechaActual = new Date();
-                const fechaLocal = new Date(fechaActual.getTime() - (fechaActual.getTimezoneOffset() * 60000));
-                const fechaFormateada = fechaLocal.toISOString().slice(0, 19).replace('T', ' ');
-                const sql = 'INSERT INTO facturas (fecha_carga, nombre_factura, categoria_id, monto, estado, usuario_id, archivo_factura) VALUES (?, ?, ?, ?, ?, ?, ?)';
-                // Insertar los datos de la factura en la base de datos
-                connection.query(sql, [fechaFormateada, nombreFactura, categoriaId, monto, estado, usuarioId, newPath], (err, result) => {
-                    if (err) { // Manejar errores si ocurren al insertar datos en la base de datos
-                        console.error('Error al insertar datos en la base de datos:', err);
-                        res.status(500).send({ error: 'Error interno del servidor' });
-                    } else { // Si los datos se insertaron correctamente en la base de datos
-                        console.log('Datos insertados correctamente en la base de datos');
-                        res.redirect('facturas'); // Redirigir a la página de inicio después de cargar la factura
-                    }
-                });
-            }
-        });
-    } else { // Si no se ha subido ningún archivo
-        res.status(400).send({ error: 'No se pudo subir el archivo' }); // Enviar un error al cliente
+            // Renombrar el archivo en el sistema de archivos
+            fs.rename(uploadedFile.path, newPath, (err) => {
+                if (err) { // Manejar errores si ocurren al renombrar el archivo
+                    console.error('Error al renombrar el archivo:', err);
+                    res.status(500).send({ error: 'Error interno del servidor' });
+                } else { // Si el archivo se ha renombrado correctamente
+                    const fechaActual = new Date();
+                    const fechaLocal = new Date(fechaActual.getTime() - (fechaActual.getTimezoneOffset() * 60000));
+                    const fechaFormateada = fechaLocal.toISOString().slice(0, 19).replace('T', ' ');
+                    const sql = 'INSERT INTO facturas (fecha_carga, nombre_factura, categoria_id, monto, estado, usuario_id, archivo_factura) VALUES (?, ?, ?, ?, ?, ?, ?)';
+                    // Insertar los datos de la factura en la base de datos
+                    connection.query(sql, [fechaFormateada, nombreFactura, categoriaId, monto, estado, usuarioId, newPath], (err, result) => {
+                        if (err) { // Manejar errores si ocurren al insertar datos en la base de datos
+                            console.error('Error al insertar datos en la base de datos:', err);
+                            res.status(500).send({ error: 'Error interno del servidor' });
+                        } else { // Si los datos se insertaron correctamente en la base de datos
+                            console.log('Datos insertados correctamente en la base de datos');
+                            res.redirect('facturas'); // Redirigir a la página de inicio después de cargar la factura
+                        }
+                    });
+                }
+            });
+        } else { // Si no se ha subido ningún archivo
+            res.status(400).send({ error: 'No se pudo subir el archivo' }); // Enviar un error al cliente
+        }
+    }else{
+        res.render('login');
     }
 };
 
 //DESCARGAR PDF FACTURA
 exports.descargarArchivo = (req, res) => {
-    const fileId = req.params.id; // Obtener el ID del archivo de la solicitud
+    if(req.session.loggedin){
+        const fileId = req.params.id; // Obtener el ID del archivo de la solicitud
 
-    // Consultar la base de datos para obtener la información del archivo y su nombre
-    const sql = 'SELECT nombre_factura, archivo_factura FROM facturas WHERE id = ?';
-    connection.query(sql, [fileId], (err, result) => {
-        if (err) { // Manejar errores si ocurren al realizar la consulta en la base de datos
-            console.error('Error al obtener el archivo de la base de datos:', err);
-            res.status(500).send({ error: 'Error interno del servidor' });
-        } else {
-            if (result.length > 0) { // Si se encontró el archivo en la base de datos
-                const nombreFactura = result[0].nombre_factura; // Obtener el nombre de la factura
-                const rutaArchivo = result[0].archivo_factura; // Obtener la ruta del archivo
-                // Configurar los encabezados de la respuesta para indicar que es un archivo PDF
-                res.setHeader('Content-Type', 'application/pdf');
-                // Utilizar el nombre de la factura como nombre de archivo para la descarga
-                res.setHeader('Content-Disposition', `attachment; filename="${nombreFactura}.pdf"`);
-                // enviar el contenido del archivo como respuesta
-                fs.createReadStream(rutaArchivo).pipe(res);
-            } else { // Si no se encontró el archivo con el ID proporcionado
-                res.status(404).send({ error: 'Archivo no encontrado' }); // Enviar un error
+        // Consultar la base de datos para obtener la información del archivo y su nombre
+        const sql = 'SELECT nombre_factura, archivo_factura FROM facturas WHERE id = ?';
+        connection.query(sql, [fileId], (err, result) => {
+            if (err) { // Manejar errores si ocurren al realizar la consulta en la base de datos
+                console.error('Error al obtener el archivo de la base de datos:', err);
+                res.status(500).send({ error: 'Error interno del servidor' });
+            } else {
+                if (result.length > 0) { // Si se encontró el archivo en la base de datos
+                    const nombreFactura = result[0].nombre_factura; // Obtener el nombre de la factura
+                    const rutaArchivo = result[0].archivo_factura; // Obtener la ruta del archivo
+                    // Configurar los encabezados de la respuesta para indicar que es un archivo PDF
+                    res.setHeader('Content-Type', 'application/pdf');
+                    // Utilizar el nombre de la factura como nombre de archivo para la descarga
+                    res.setHeader('Content-Disposition', `attachment; filename="${nombreFactura}.pdf"`);
+                    // enviar el contenido del archivo como respuesta
+                    fs.createReadStream(rutaArchivo).pipe(res);
+                } else { // Si no se encontró el archivo con el ID proporcionado
+                    res.status(404).send({ error: 'Archivo no encontrado' }); // Enviar un error
+                }
             }
-        }
-    });
+        });
+    }else{
+        res.render('login');
+    }
 };
 
 //BORRAR FACTURA 
 exports.borrarFactura = (req, res) => {
-    const facturaId = req.body.id; // Obtenemos el ID de la factura desde el cuerpo de la solicitud
-    // Realizamos la actualización en la base de datos
-    connection.query('DELETE FROM facturas WHERE id = ?', [facturaId], (error, results) => {
-        if (error) {
-            throw error;
-        } else {
-            console.log('Factura borrada con éxito');
-            // Después de borrar la factura, consultamos nuevamente las facturas de la base de datos
-            connection.query('SELECT * FROM facturas WHERE usuario_id = ?', [req.session.secretaria], (error, facturas) => {
-                if (error) {
-                    throw error;
-                } else {
-                    connection.query(queryAnaliticasNW, [req.session.secretaria], (error, resultsFacturas) => {  
-                        if (error) {
-                            throw error;
-                        } else {
-                            // Consulta SQL para seleccionar las categorías asociadas a la secretaría del usuario logueado
-                            connection.query('SELECT id, nombre FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, resultsCategorias) => {
-                                if (error) {
-                                    throw error;
-                                } else {
-                                    // Filtrar estados únicos de las facturas
-                                    const estadosUnicos = [...new Set(resultsFacturas.map(factura => factura.estado))];
-                                    // Renderiza la plantilla 'facturas.ejs' y pasa los resultados de ambas consultas
-                                    res.render('facturas', {
-                                        login: true,
-                                        nombre: req.session.nombre,
-                                        id_usuario: req.session.id_usuario,
-                                        secretaria: req.session.secretaria,
-                                        facturas: resultsFacturas, // Resultados de la consulta de facturas
-                                        categorias: resultsCategorias, // Resultados de la consulta de categorías
-                                        estados: estadosUnicos
-                                    });
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-        }
-    });
+    if(req.session.loggedin){
+        const facturaId = req.body.id; // Obtenemos el ID de la factura desde el cuerpo de la solicitud
+        // Realizamos la actualización en la base de datos
+        connection.query('DELETE FROM facturas WHERE id = ?', [facturaId], (error, results) => {
+            if (error) {
+                throw error;
+            } else {
+                console.log('Factura borrada con éxito');
+                // Después de borrar la factura, consultamos nuevamente las facturas de la base de datos
+                connection.query('SELECT * FROM facturas WHERE usuario_id = ?', [req.session.secretaria], (error, facturas) => {
+                    if (error) {
+                        throw error;
+                    } else {
+                        connection.query(queryAnaliticasNW, [req.session.secretaria], (error, resultsFacturas) => {  
+                            if (error) {
+                                throw error;
+                            } else {
+                                // Consulta SQL para seleccionar las categorías asociadas a la secretaría del usuario logueado
+                                connection.query('SELECT id, nombre FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, resultsCategorias) => {
+                                    if (error) {
+                                        throw error;
+                                    } else {
+                                        // Filtrar estados únicos de las facturas
+                                        const estadosUnicos = [...new Set(resultsFacturas.map(factura => factura.estado))];
+                                        // Renderiza la plantilla 'facturas.ejs' y pasa los resultados de ambas consultas
+                                        res.render('facturas', {
+                                            login: true,
+                                            nombre: req.session.nombre,
+                                            id_usuario: req.session.id_usuario,
+                                            secretaria: req.session.secretaria,
+                                            facturas: resultsFacturas, // Resultados de la consulta de facturas
+                                            categorias: resultsCategorias, // Resultados de la consulta de categorías
+                                            estados: estadosUnicos
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }else{
+        res.render('login');
+    }
 };
 
 /* 
@@ -436,60 +463,69 @@ exports.analiticas = (req, res) => {
             }
         });
     } else {
-        res.render('index', {
-            login: false,
-            nombre: 'Debe iniciar sesión',
-            secretaria: ''
-        });
+        res.render('login');
+        // res.render('index', {
+        //     login: false,
+        //     nombre: 'Debe iniciar sesión',
+        //     secretaria: ''
+        // });
     }
 }
 exports.aceptarFactura = (req, res)=>{
-    const idFactura = req.params.id;
-    const estado = 'aceptado';
-    connection.query('UPDATE facturas SET estado = ? WHERE id = ?', [estado, idFactura], (error, results1)=>{
-        if(error){
-            throw error;
-        }else{
-            connection.query(queryAnaliticas,
-            (error, results2) => {
-                if (error) {
-                    throw error;
-                } else {
-                    res.render('analiticas', {
-                        login: true,
-                        nombre: req.session.nombre,
-                        id_usuario: req.session.id_usuario,
-                        secretaria: req.session.secretaria,
-                        facturas: results2 // Resultados de la consulta de facturas
-                    });
-                }
-            });
-        }
-    });
+    if(req.session.loggedin){
+        const idFactura = req.params.id;
+        const estado = 'aceptado';
+        connection.query('UPDATE facturas SET estado = ? WHERE id = ?', [estado, idFactura], (error, results1)=>{
+            if(error){
+                throw error;
+            }else{
+                connection.query(queryAnaliticas,
+                (error, results2) => {
+                    if (error) {
+                        throw error;
+                    } else {
+                        res.render('analiticas', {
+                            login: true,
+                            nombre: req.session.nombre,
+                            id_usuario: req.session.id_usuario,
+                            secretaria: req.session.secretaria,
+                            facturas: results2 // Resultados de la consulta de facturas
+                        });
+                    }
+                });
+            }
+        });
+    }else{
+        res.render('login');
+    }
 }
 exports.rechazarFactura = (req, res)=>{
-    const idFactura = req.params.id;
-    const estado = 'denegado';
-    connection.query('UPDATE facturas SET estado = ? WHERE id = ?', [estado, idFactura], (error, results1)=>{
-        if(error){
-            throw error;
-        }else{
-            connection.query(queryAnaliticas,
-            (error, results2) => {
-                if (error) {
-                    throw error;
-                } else {
-                    res.render('analiticas', {
-                        login: true,
-                        nombre: req.session.nombre,
-                        id_usuario: req.session.id_usuario,
-                        secretaria: req.session.secretaria,
-                        facturas: results2 // Resultados de la consulta de facturas
-                    });
-                }
-            });
-        }
-    });
+    if(req.session.loggedin){
+        const idFactura = req.params.id;
+        const estado = 'denegado';
+        connection.query('UPDATE facturas SET estado = ? WHERE id = ?', [estado, idFactura], (error, results1)=>{
+            if(error){
+                throw error;
+            }else{
+                connection.query(queryAnaliticas,
+                (error, results2) => {
+                    if (error) {
+                        throw error;
+                    } else {
+                        res.render('analiticas', {
+                            login: true,
+                            nombre: req.session.nombre,
+                            id_usuario: req.session.id_usuario,
+                            secretaria: req.session.secretaria,
+                            facturas: results2 // Resultados de la consulta de facturas
+                        });
+                    }
+                });
+            }
+        });
+    }else{
+        res.render('login');
+    }
 }
 
 ///////////////////INGRESO
@@ -517,6 +553,13 @@ exports.ingresoGanancia = (req, res)=>{
                 });
             }
         });
+    }else{
+        res.render('login');
+        // res.render('index', {
+        //     login: false,
+        //     nombre: 'Debe iniciar sesión',
+        //     secretaria: ''
+        // });
     }
 }
 exports.cargarIngreso = (req, res) => {
@@ -540,11 +583,12 @@ exports.cargarIngreso = (req, res) => {
             }
         );
     } else {
-        res.render('index', {
-            login: false,
-            nombre: 'Debe iniciar sesión',
-            secretaria: ''
-        });
+        res.render('login');
+        // res.render('index', {
+        //     login: false,
+        //     nombre: 'Debe iniciar sesión',
+        //     secretaria: ''
+        // });
     }
 };
 exports.tablaGrafica = (req,res)=>{
@@ -565,5 +609,7 @@ exports.tablaGrafica = (req,res)=>{
                 console.log(results);
             }
         });
+    }else{
+        res.render('login');
     }
 }

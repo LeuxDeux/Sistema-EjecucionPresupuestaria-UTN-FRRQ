@@ -54,6 +54,7 @@ const routes = require('./routes/routes');
 //ROOT
 app.get('/', routes.root);
 
+
 //LOGIN
 app.get('/login', routes.login);
 
