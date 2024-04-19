@@ -12,30 +12,118 @@ CONTROLLERS USUARIOS
 */
 
 //CREAR USUARIO
- exports.registrarUsuario = async (req, res) => { // METODO REGISTRO
-    const usuario = req.body.usuario; // Obtener los datos del formulario
+//BETA
+//  exports.registrarUsuario = async (req, res) => { // METODO REGISTRO
+//     const usuario = req.body.usuario; // Obtener los datos del formulario
+//     const nombres = req.body.nombres; 
+//     const secretaria = req.body.secretaria;
+//     const contraseña = req.body.contraseña;
+//     const email = req.body.email;
+//     let contraseñaHash = await bcryptjs.hash(contraseña, 8);
+//     connection.query('INSERT INTO usuarios SET ?', {
+//         nombres: nombres,
+//         email: email,
+//         password: contraseñaHash,
+//         secretaria_id: secretaria,
+//         usuario: usuario
+//     }, async (error, results) => {
+//         if (error) {
+//             throw error;
+//         } else {
+//             // Renderizar la plantilla 'registro.ejs' pasando 'results' junto con las variables relacionadas con el mensaje de alerta
+//             connection.query('SELECT * FROM secretarias', (error, resultsSecretarias) => {
+//                 if (error) {
+//                     throw error;
+//                 } else {
+//                     res.render('registro', {
+//                         results: resultsSecretarias, // Pasar 'resultsSecretarias' que contiene las secretarías
+//                         alert: true,
+//                         alertTitle: "Registro",
+//                         alertMessage: "¡Registro Exitoso!",
+//                         alertIcon: 'success',
+//                         showConfirmButton: false,
+//                         timer: 1500,
+//                         ruta: ''
+//                     });
+//                     console.log('Valor de secretaria:', secretaria);
+//                     console.log('APP.POST "/register". Se ha registrado el usuario: ' + nombres + ' en la secretaria: ' + resultsSecretarias.find(sec => sec.id === parseInt(secretaria)).nombre); // Muestra el nombre de usuario y la secretaria en la que se registro
+//                     console.log('Redireccionando hacia index.ejs basandose en ruta: "vacio" y en sweetAlert en registro.ejs')
+//                 }
+//             });
+//         }
+//     });
+// };
+//CON MANEJO TRYCATCH
+exports.registrarUsuario = (req, res) => {
+    const usuario = req.body.usuario;
     const nombres = req.body.nombres; 
     const secretaria = req.body.secretaria;
     const contraseña = req.body.contraseña;
     const email = req.body.email;
-    let contraseñaHash = await bcryptjs.hash(contraseña, 8);
-    connection.query('INSERT INTO usuarios SET ?', {
-        nombres: nombres,
-        email: email,
-        password: contraseñaHash,
-        secretaria_id: secretaria,
-        usuario: usuario
-    }, async (error, results) => {
-        if (error) {
-            throw error;
-        } else {
-            // Renderizar la plantilla 'registro.ejs' pasando 'results' junto con las variables relacionadas con el mensaje de alerta
-            connection.query('SELECT * FROM secretarias', (error, resultsSecretarias) => {
-                if (error) {
-                    throw error;
-                } else {
+    // Hash de la contraseña
+    bcryptjs.hash(contraseña, 8, (hashError, contraseñaHash) => {
+        if (hashError) {
+            console.error('Error al generar hash de contraseña:', hashError);
+            res.status(500).send(`
+                    <h2>Error interno del servidor, ha ocurrido un error al encriptar la clave: ` + hashError`</h2>
+                    <p>Ocurrió un error al procesar tu solicitud. Por favor, intenta nuevamente.</p>
+                    <a href="/">Volver a la página principal</a>
+                    `);
+            return;
+        }
+        // Verificar si el usuario ya existe
+        connection.query('SELECT COUNT(*) AS count FROM usuarios WHERE usuario = ?', [usuario], (selectError, countResult) => {
+            if (selectError) {
+                console.error('Error al verificar usuario existente:', selectError);
+                res.status(500).send(`
+                    <h2>Error interno del servidor, ha ocurrido un error al verificar el usuario</h2>
+                    <p>Ocurrió un error al procesar tu solicitud. Por favor, intenta nuevamente.</p>
+                    <a href="/">Volver a la página principal</a>
+                    `);
+                return;
+            }
+            // Si el usuario ya existe, enviar una respuesta al cliente
+            if (countResult[0].count > 0) {
+                res.status(400).send(`
+                    <h2>Error</h2>
+                    <p>El usuario '${usuario}' ya existe. Por favor, elige otro nombre de usuario.</p>
+                    <a href="/registro">Volver a la página de registro</a>
+                `);
+                return;
+            }
+            // Insertar usuario en la base de datos
+            connection.query('INSERT INTO usuarios SET ?', {
+                nombres: nombres,
+                email: email,
+                password: contraseñaHash,
+                secretaria_id: secretaria,
+                usuario: usuario
+            }, (insertError, results) => {
+                if (insertError) {
+                    console.error('Error al insertar usuario:', insertError);
+                    res.status(500).send(`
+                        <h2>Error interno del servidor, ha ocurrido un error al crear la cuenta: ` + insertError`</h2>
+                        <p>Ocurrió un error al procesar tu solicitud. Por favor, intenta nuevamente.</p>
+                        <a href="/">Volver a la página principal</a>
+                        `);
+                    return;
+                }
+                // Obtener la lista de secretarías
+                connection.query('SELECT * FROM secretarias', (selectError, resultsSecretarias) => {
+                    if (selectError) {
+                        console.error('Error al obtener secretarías:', selectError);
+                        res.status(500).send(`
+                        <h2>Error interno del servidor, ha ocurrido un error al mostrar las secretarías: ` + selectError`</h2>
+                        <p>Ocurrió un error al procesar tu solicitud. Por favor, intenta nuevamente.</p>
+                        <a href="/">Volver a la página principal</a>
+                        `);
+                        return;
+                    }
+                    // Encontrar el nombre de la secretaría
+                    const nombreSecretaria = resultsSecretarias.find(sec => sec.id === parseInt(secretaria)).nombre;
+                    // Renderizar la plantilla 'registro.ejs'
                     res.render('registro', {
-                        results: resultsSecretarias, // Pasar 'resultsSecretarias' que contiene las secretarías
+                        results: resultsSecretarias,
                         alert: true,
                         alertTitle: "Registro",
                         alertMessage: "¡Registro Exitoso!",
@@ -44,15 +132,13 @@ CONTROLLERS USUARIOS
                         timer: 1500,
                         ruta: ''
                     });
-                    console.log('Valor de secretaria:', secretaria);
-                    console.log('APP.POST "/register". Se ha registrado el usuario: ' + nombres + ' en la secretaria: ' + resultsSecretarias.find(sec => sec.id === parseInt(secretaria)).nombre); // Muestra el nombre de usuario y la secretaria en la que se registro
-                    console.log('Redireccionando hacia index.ejs basandose en ruta: "vacio" y en sweetAlert en registro.ejs')
-                }
+                    console.log(`APP.POST "/register". Se ha registrado el usuario: ${nombres} en la secretaria: ${nombreSecretaria}`);
+                    console.log('Redireccionando hacia index.ejs basándose en ruta: "vacio" y en sweetAlert en registro.ejs');
+                });
             });
-        }
+        });
     });
 };
-
 //AUTENTIFICACIÓN DE USUARIO
 exports.autentificacion = async (req, res) =>{ // METODO AUTENTIFICACIÓN
     const usuario = req.body.usuario; // Valores del form
