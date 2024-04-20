@@ -10,7 +10,6 @@ const queryAnaliticasNW = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS
 CONTROLLERS USUARIOS
 //////////////////////
 */
-
 //CREAR USUARIO
 //BETA
 //  exports.registrarUsuario = async (req, res) => { // METODO REGISTRO
@@ -172,6 +171,7 @@ exports.autentificacion = async (req, res) =>{ // METODO AUTENTIFICACIÓN
                     res.render('login', {
                         alert: true,
                         login: true,
+                        admin: true,
                         nombre: req.session.nombre,
                         secretaria: req.session.secretaria,
                         id_usuario: req.session.id_usuario,
@@ -188,6 +188,7 @@ exports.autentificacion = async (req, res) =>{ // METODO AUTENTIFICACIÓN
                     res.render('login', {
                         alert: true,
                         login: true,
+                        admin: false,
                         nombre: req.session.nombre,
                         secretaria: req.session.secretaria,
                         id_usuario: req.session.id_usuario,
@@ -230,35 +231,66 @@ CONTROLLERS CATEGORÍAS
 
 //CREAR CATEGORÍA
 exports.crearCategorias = (req, res) => {
-    if(req.session.loggedin){
-        const nombre = req.body.nombre;
-        const secretaria_id = req.body.secretaria_id;
-        const categoria = { nombre: nombre, secretaria_id: secretaria_id };
+    if (req.session.loggedin) {
+        try {
+            const nombre = req.body.nombre;
+            const secretaria_id = req.body.secretaria_id;
+            const categoria = { nombre: nombre, secretaria_id: secretaria_id };
 
-        connection.query('INSERT INTO categorias SET ?', categoria, (error, results) => {
-            if (error) {
-                throw error;
-            } else {
-                console.log('Categoría creada con éxito: ', nombre);
-                
-                // Después de agregar la categoría, consulta nuevamente las categorías de la base de datos
-                connection.query('SELECT * FROM categorias WHERE secretaria_id = ?', [secretaria_id], (error, categorias) => {
-                    if (error) {
-                        throw error;
+            connection.query('INSERT INTO categorias SET ?', categoria, (error, results) => {
+                if (error) {
+                    // Si hay un error al insertar en la base de datos
+                    console.error('Error en la inserción de categoría:', error);
+                    if (error.code === 'ER_DUP_ENTRY') {
+                        // Si es un error de duplicación, enviar una respuesta 400 Bad Request
+                        return res.status(400).send(`
+                            <h2>Error de duplicación</h2>
+                            <p>Ya existe una categoría con el mismo nombre para la secretaría especificada.</p>
+                            <a href="/">Volver a la página principal</a>
+                        `);
                     } else {
-                        // Renderizar la vista categorias.ejs nuevamente con las nuevas categorías
-                        res.render('categorias', {
-                            login: true,
-                            nombre: req.session.nombre,
-                            secretaria: req.session.secretaria,
-                            categorias: categorias,
-                            id_usuario: req.session.id_usuario
-                        });
+                        // Si es otro tipo de error, enviar una respuesta 500 Internal Server Error
+                        return res.status(500).send(`
+                            <h2>Error interno del servidor</h2> 
+                            <p>Ocurrió un error al procesar tu solicitud. Por favor, intenta nuevamente.</p>
+                            <a href="/">Volver a la página principal</a>
+                        `);
                     }
-                });
-            }
-        });
-    }else{
+                } else {
+                    console.log('Categoría creada con éxito: ', nombre);
+                    // Después de agregar la categoría, consulta nuevamente las categorías de la base de datos
+                    connection.query('SELECT * FROM categorias WHERE secretaria_id = ?', [secretaria_id], (error, categorias) => {
+                        if (error) {
+                            console.error('Error en la consulta de categorías:', error);
+                            return res.status(500).send(`
+                                <h2>Error interno del servidor</h2> ` + error `
+                                <p>Ocurrió un error al procesar tu solicitud. Por favor, intenta nuevamente.</p>
+                                <a href="/">Volver a la página principal</a>
+                            `);
+                        } else {
+                            // Renderizar la vista categorias.ejs nuevamente con las nuevas categorías
+                            res.render('categorias', {
+                                login: true,
+                                nombre: req.session.nombre,
+                                secretaria: req.session.secretaria,
+                                categorias: categorias,
+                                id_usuario: req.session.id_usuario
+                            });
+                        }
+                    });
+                }
+            });
+        } catch (error) {
+            // Si hay un error en el código síncrono, enviar una respuesta 500 Internal Server Error
+            console.error('Error en la creación de categoría:', error);
+            return res.status(500).send(`
+                <h2>Error interno del servidor</h2>
+                <p>Ocurrió un error al procesar tu solicitud. Por favor, intenta nuevamente.</p>
+                <a href="/">Volver a la página principal</a>
+            `);
+        }
+    } else {
+        // Si el usuario no está autenticado, redirigir al formulario de inicio de sesión
         res.render('login');
     }
 };
