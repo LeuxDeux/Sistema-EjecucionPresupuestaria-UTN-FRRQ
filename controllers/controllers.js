@@ -258,26 +258,27 @@ exports.crearCategorias = (req, res) => {
                     }
                 } else {
                     console.log('Categoría creada con éxito: ', nombre);
-                    // Después de agregar la categoría, consulta nuevamente las categorías de la base de datos
-                    connection.query('SELECT * FROM categorias WHERE secretaria_id = ?', [secretaria_id], (error, categorias) => {
-                        if (error) {
-                            console.error('Error en la consulta de categorías:', error);
-                            return res.status(500).send(`
-                                <h2>Error interno del servidor</h2> ` + error `
-                                <p>Ocurrió un error al procesar tu solicitud. Por favor, intenta nuevamente.</p>
-                                <a href="/">Volver a la página principal</a>
-                            `);
-                        } else {
-                            // Renderizar la vista categorias.ejs nuevamente con las nuevas categorías
-                            res.render('categorias', {
-                                login: true,
-                                nombre: req.session.nombre,
-                                secretaria: req.session.secretaria,
-                                categorias: categorias,
-                                id_usuario: req.session.id_usuario
-                            });
-                        }
-                    });
+                    this.categorias(req, res);
+                    // // Después de agregar la categoría, consulta nuevamente las categorías de la base de datos
+                    // connection.query('SELECT * FROM categorias WHERE secretaria_id = ?', [secretaria_id], (error, categorias) => {
+                    //     if (error) {
+                    //         console.error('Error en la consulta de categorías:', error);
+                    //         return res.status(500).send(`
+                    //             <h2>Error interno del servidor</h2> ` + error `
+                    //             <p>Ocurrió un error al procesar tu solicitud. Por favor, intenta nuevamente.</p>
+                    //             <a href="/">Volver a la página principal</a>
+                    //         `);
+                    //     } else {
+                    //         // Renderizar la vista categorias.ejs nuevamente con las nuevas categorías
+                    //         res.render('categorias', {
+                    //             login: true,
+                    //             nombre: req.session.nombre,
+                    //             secretaria: req.session.secretaria,
+                    //             categorias: categorias,
+                    //             id_usuario: req.session.id_usuario
+                    //         });
+                    //     }
+                    // });
                 }
             });
         } catch (error) {
@@ -297,33 +298,55 @@ exports.crearCategorias = (req, res) => {
 
 //EDITAR CATEGORÍA
 exports.editarCategoria = (req, res) => {
-    if(req.session.loggedin){
-        const categoriaId = req.body.id; // Obtenemos el ID de la categoría desde el cuerpo de la solicitud
-        const nuevoNombre = req.body.nuevoNombre; // Obtenemos el nuevo nombre de la categoría desde el cuerpo de la solicitud
-        // Realizamos la actualización en la base de datos
-        connection.query('UPDATE categorias SET nombre = ? WHERE id = ?', [nuevoNombre, categoriaId], (error, results) => {
-            if (error) {
-                throw error;
-            } else {
-                console.log('Categoría actualizada con éxito');
-                // Después de actualizar la categoría, consultamos nuevamente las categorías de la base de datos
-                connection.query('SELECT * FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, categorias) => {
-                    if (error) {
-                        throw error;
-                    } else {
-                        // Renderizamos la vista 'categorias.ejs' nuevamente con las categorías actualizadas
-                        res.render('categorias', {
-                            login: true,
-                            nombre: req.session.nombre,
-                            secretaria: req.session.secretaria,
-                            categorias: categorias,
-                            id_usuario: req.session.id_usuario
-                        });
-                    }
-                });
-            }
-        });
-    }else{
+    if (req.session.loggedin) {
+        try {
+            const categoriaId = req.body.id; // Obtenemos el ID de la categoría desde el cuerpo de la solicitud
+            const nuevoNombre = req.body.nuevoNombre; // Obtenemos el nuevo nombre de la categoría desde el cuerpo de la solicitud
+            // Realizamos la actualización en la base de datos
+            connection.query('UPDATE categorias SET nombre = ? WHERE id = ?', [nuevoNombre, categoriaId], (error, results) => {
+                if (error) {
+                    console.error('Error al editar la categoría:', error);
+                    return res.status(500).send(`
+                        <h2>Error al editar la categoría</h2>
+                        <p>Ocurrió un error al editar la categoría. Por favor, intenta nuevamente.</p>
+                        <a href="/">Volver a la página principal</a>
+                    `);
+                } else {
+                    this.categorias(req, res);
+                    // console.log('Categoría actualizada con éxito');
+                    // // Después de actualizar la categoría, consultamos nuevamente las categorías de la base de datos
+                    // connection.query('SELECT * FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, categorias) => {
+                    //     if (error) {
+                    //         console.error('Error al consultar las categorías:', error);
+                    //         return res.status(500).send(`
+                    //             <h2>Error interno del servidor al obtener las categorías actualizadas</h2>
+                    //             <p>Ocurrió un error al obtener las categorías actualizadas. Por favor, intenta nuevamente.</p>
+                    //             <a href="/">Volver a la página principal</a>
+                    //         `);
+                    //     } else {
+                    //         // Renderizamos la vista 'categorias.ejs' nuevamente con las categorías actualizadas
+                    //         res.render('categorias', {
+                    //             login: true,
+                    //             nombre: req.session.nombre,
+                    //             secretaria: req.session.secretaria,
+                    //             categorias: categorias,
+                    //             id_usuario: req.session.id_usuario
+                    //         });
+                    //     }
+                    // });
+                }
+            });
+        } catch (error) {
+            // Si hay un error en el código síncrono, enviar una respuesta 500 Internal Server Error
+            console.error('Error en la actualización de la categoría:', error);
+            return res.status(500).send(`
+                <h2>Error interno del servidor</h2>
+                <p>Ocurrió un error al procesar tu solicitud. Por favor, intenta nuevamente.</p>
+                <a href="/">Volver a la página principal</a>
+            `);
+        }
+    } else {
+        // Si el usuario no está autenticado, redirigir al formulario de inicio de sesión
         res.render('login');
     }
 };
@@ -334,7 +357,12 @@ exports.categorias = (req, res) => {
         // Consulta SQL para seleccionar los nombres de las categorías con secretaria_id igual al req.session.secretaria
         connection.query('SELECT id, nombre FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, results) => {
             if (error) {
-                throw error;
+                console.error('Error al obtener las categorías:', error);
+                res.status(500).send(`
+                    <h2>Error al obtener las categorías</h2>
+                    <p>Ocurrió un error al obtener las categorías. Por favor, intenta nuevamente.</p>
+                    <a href="/">Volver a la página principal</a>
+                `);
             } else {
                 // Renderiza la plantilla 'categorias.ejs' y pasa los resultados de la consulta
                 res.render('categorias', {
@@ -348,11 +376,6 @@ exports.categorias = (req, res) => {
         });
     } else {
         res.render('login');
-        // res.render('index', {
-        //     login: false,
-        //     nombre: 'Debe iniciar sesión',
-        //     secretaria: ''
-        // });
     }
 };
 
