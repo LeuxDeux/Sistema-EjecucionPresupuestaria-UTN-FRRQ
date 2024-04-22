@@ -93,3 +93,6 @@ app.post('/registrar-ingreso', crud.cargarIngreso);
 
 //COMIENZO ESTADISTICAS/GRAFICO/TABLA
 app.get('/tabla_grafica', crud.tablaGrafica);
+
+//FACTURAS ACTIVAS
+app.get('/facturas-activas', crud.facturasActivas);

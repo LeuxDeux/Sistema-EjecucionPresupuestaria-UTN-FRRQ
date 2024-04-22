@@ -4,6 +4,7 @@ const path = require('path'); // Importar Path para manejar rutas de archivos
 const bcryptjs = require('bcryptjs'); 
 const { render } = require('ejs');
 const queryAnaliticas = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE f.estado = "en proceso"';
+const facturasAceptadas = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE f.estado = "aceptado" ORDER BY f.fecha_carga DESC';
 const queryAnaliticasNW = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id';
 /* 
 //////////////////////
@@ -674,7 +675,7 @@ exports.rechazarFactura = (req, res)=>{
 exports.ingresoGanancia = (req, res)=>{
     if (req.session.loggedin) {
         //Modificación de la Query para que me formatee la fecha de ingreso
-        connection.query('SELECT ingresos.id_ingreso, ingresos.fecha_ingreso, DATE_FORMAT(ingresos.fecha_ingreso, "%d/%m/%Y") AS fecha_ingreso_formateada, ingresos.nombre_ingreso, categorias.nombre AS nombre_categoria, ingresos.monto, usuarios.nombres AS nombre_usuario FROM ingresos JOIN categorias ON ingresos.categoria_id = categorias.id JOIN usuarios ON ingresos.usuario_id = usuarios.id WHERE ingresos.secretaria_id = ?', [req.session.secretaria], (error, resultsIngresos) => {
+        connection.query('SELECT ingresos.id_ingreso, ingresos.fecha_ingreso, DATE_FORMAT(ingresos.fecha_ingreso, "%d/%m/%Y") AS fecha_ingreso_formateada, ingresos.nombre_ingreso, categorias.nombre AS nombre_categoria, ingresos.monto, usuarios.nombres AS nombre_usuario FROM ingresos JOIN categorias ON ingresos.categoria_id = categorias.id JOIN usuarios ON ingresos.usuario_id = usuarios.id WHERE ingresos.secretaria_id = ? ORDER BY ingresos.fecha_ingreso DESC', [req.session.secretaria], (error, resultsIngresos) => {
             if (error) {
                 throw error;
             }else{
@@ -748,6 +749,27 @@ exports.tablaGrafica = (req,res)=>{
                 //     resultados: results
                 //     });
                 //     console.log(`Nombre: ${req.session.nombre}, ID Usuario: ${req.session.id_usuario}, Secretaria: ${req.session.secretaria}, Objeto:`, results);
+                console.log(results);
+            }
+        });
+    }else{
+        res.render('login');
+    }
+}
+exports.facturasActivas = (req, res)=>{
+    if(req.session.loggedin){
+        connection.query(facturasAceptadas, (error, results)=>{
+            if(error){
+                throw error;
+            }else{
+                // res.send(results);
+                res.render('facturas-activas', {
+                    login: true,
+                    nombre: req.session.nombre,
+                    id_usuario: req.session.id_usuario,
+                    secretaria: req.session.secretaria,
+                    resultados: results
+                });
                 console.log(results);
             }
         });
