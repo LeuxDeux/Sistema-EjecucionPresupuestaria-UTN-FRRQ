@@ -13,6 +13,10 @@
 <body>
 <h1>Crear, editar, borrar y seleccionar categorias para carga de facturas</h1>
 <div class="container">
+    <div class="mb-3">
+        <label for="filtroCategoria" class="form-label">Filtrar Categorías</label>
+        <input type="text" class="form-control" id="filtroCategoria" placeholder="Buscar categoría...">
+    </div>
     <a href="/" id="volver" class="btn btn-outline-primary mt-4"><i class="bx bxs-chevron-left bx-md"></i></a>
     <a href="#" id="btnCrearCategoria" class="btn btn-outline-primary mt-4" data-secretaria="<%= secretaria %>"><i class="bx bxs-plus-circle bx-md"></i></a>
     <% if(login) { %>
@@ -210,6 +214,15 @@
         $('#modalCrearCategoria').on('shown.bs.modal', function () {
             // Enfocar el input
             $('#nombreCategoria').focus();
+        });
+    });
+    $(document).ready(function() {
+        // Función para filtrar categorías
+        $('#filtroCategoria').on('input', function() {
+            var valor = $(this).val().toLowerCase(); // Obtener el valor del filtro y convertirlo a minúsculas
+            $('tbody tr').filter(function() { // Filtrar las filas de la tabla
+                $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1); // Mostrar u ocultar las filas según el valor del filtro
+            });
         });
     });
 </script>
