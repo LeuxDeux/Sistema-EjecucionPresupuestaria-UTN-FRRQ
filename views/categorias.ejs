@@ -31,9 +31,9 @@
                 <td><%= categoria.nombre %></td>
                 <td style="display: none;"><%= categoria.id %></td>
                 <td>
-                    <a href="#" class="btn btn-outline-info editar-categoria" data-id="<%= categoria.id %>">Editar</a>
-                    <a href="#" class="btn btn-outline-info borrar-categoria" data-id="<%= categoria.id %>">Borrar</a>
-                    <a href="#" class="btn btn-outline-info btnCargarFactura" data-id="<%= categoria.id %>">Seleccionar</a>
+                    <a href="#" class="btn btn-outline-info editar-categoria" data-id="<%= categoria.id %>" data-name=" <%= categoria.nombre %>">Editar</a>
+                    <a href="#" class="btn btn-outline-info borrar-categoria" data-id="<%= categoria.id %>" data-name=" <%= categoria.nombre %>">Borrar</a>
+                    <a href="#" class="btn btn-outline-info btnCargarFactura" data-id="<%= categoria.id %>" data-name=" <%= categoria.nombre %>">Seleccionar</a>
                 </td>
             </tr>
             <% }); %>
@@ -77,7 +77,7 @@
                     <input type="hidden" name="id" id="inputCategoriaId" value="">
                     <div class="mb-3">
                         <label for="nombreCategoria" class="form-label">Nuevo Nombre de la Categoría</label>
-                        <input type="text" class="form-control" id="nombreCategoria" name="nuevoNombre" required>
+                        <input type="text" class="form-control campoNuevoNombre" id="nombreCategoriaEdit" name="nuevoNombre" required>
                     </div>
                     <button type="submit" class="btn btn-primary">Guardar Cambios</button>
                 </form>
@@ -158,71 +158,54 @@
             $('#inputSecretaria').val(secretaria);
             $('#modalCrearCategoria').modal('show');
         });
-    });
-    $(document).ready(function() {
-    $('.editar-categoria').click(function(event) {
-        event.preventDefault(); // Evitar que el enlace recargue la página
-        //Obtener el ID de la categoría desde el atributo data
-        var categoriaId = $(this).data('id');
-        //Asignar el ID de la categoría al campo oculto en el formulario de edición
-        $('#inputCategoriaId').val(categoriaId);
-        //Mostrar el modal de edición
-        $('#modalEditarCategoria').modal('show');
-    });
-    });
-    $(document).ready(function() {
-    $('.borrar-categoria').click(function(event) {
-        event.preventDefault(); // Evitar que el enlace recargue la página
-        //Obtener el ID de la categoría desde el atributo data
-        var categoriaId = $(this).data('id');
-        //Asignar el ID de la categoría al campo oculto en el formulario de edición
-        $('#inputBorrarCategoriaId').val(categoriaId);
-        //Mostrar el modal de borrar
-        $('#modalBorrarCategoria').modal('show');
-    });
-    });
-    $(document).ready(function() {
-        $('.btnCargarFactura').click(function() {
-        // Obtener el ID de la categoría asociada al botón "Seleccionar" clickeado
-        var categoriaId = $(this).data('id');
-        // Preseleccionar la categoría en el formulario de carga de facturas
-        $('#categoria').val(categoriaId);
-        var fechaInput = document.getElementById('fechaActual');
-        // Obtener la fecha actual como un objeto de fecha
-        var fechaActual = new Date();
-        // Formatear la fecha actual como una cadena en el formato deseado 
-        var fechaFormateada = fechaActual.getFullYear() + '-' +
-                              ('0' + (fechaActual.getMonth() + 1)).slice(-2) + '-' +
-                              ('0' + fechaActual.getDate()).slice(-2) + ' ' +
-                              ('0' + fechaActual.getHours()).slice(-2) + ':' +
-                              ('0' + fechaActual.getMinutes()).slice(-2) + ':' +
-                              ('0' + fechaActual.getSeconds()).slice(-2);
 
-        // Asignar la fecha formateada al campo de entrada de texto
-        fechaInput.value = fechaFormateada;
-        $('#modalCargarFactura').modal('show');
+        $('.editar-categoria').click(function(event) {
+            event.preventDefault(); // Evitar que el enlace recargue la página
+            //Obtener el ID de la categoría desde el atributo data
+            var categoriaId = $(this).data('id');
+            var categoriaName = $(this).data('name');
+            console.log(categoriaName);
+            //Asignar el ID de la categoría al campo oculto en el formulario de edición
+            $('#inputCategoriaId').val(categoriaId);
+            //Mostrar el modal de edición
+            $('#modalEditarCategoria').modal('show');
+            $('#nombreCategoriaEdit').val(categoriaName);
+
         });
-    });
-    //script fecha: recontra sacado de chatgpt
-    //trae la fecha al momento de cargarse el dom
-    /*
-    // obtener el elemento de entrada de texto de la fecha actual por su ID
-    var fechaInput = document.getElementById('fechaActual');
-    // obtener la fecha actual como un objeto de fecha
-    var fechaActual = new Date();
-    // Formatear la fecha actual como una cadena en el formato deseado 
-    var fechaFormateada = fechaActual.getFullYear() + '-' +
-                          ('0' + (fechaActual.getMonth() + 1)).slice(-2) + '-' +
-                          ('0' + fechaActual.getDate()).slice(-2) + ' ' +
-                          ('0' + fechaActual.getHours()).slice(-2) + ':' +
-                          ('0' + fechaActual.getMinutes()).slice(-2) + ':' +
-                          ('0' + fechaActual.getSeconds()).slice(-2);
+        $('#modalEditarCategoria').on('shown.bs.modal', function () {
+            $('#nombreCategoriaEdit').focus().select();
+        });
+        $('.borrar-categoria').click(function(event) {
+            event.preventDefault(); // Evitar que el enlace recargue la página
+            //Obtener el ID de la categoría desde el atributo data
+            var categoriaId = $(this).data('id');
+            //Asignar el ID de la categoría al campo oculto en el formulario de edición
+            $('#inputBorrarCategoriaId').val(categoriaId);
+            //Mostrar el modal de borrar
+            $('#modalBorrarCategoria').modal('show');
+        });
 
-    // Asignar la fecha formateada al campo de entrada de texto
-    fechaInput.value = fechaFormateada;
-    */ 
-   // Esperar a que el documento esté completamente cargado
-   $(document).ready(function() {
+        $('.btnCargarFactura').click(function() {
+            // Obtener el ID de la categoría asociada al botón "Seleccionar" clickeado
+            var categoriaId = $(this).data('id');
+            // Preseleccionar la categoría en el formulario de carga de facturas
+            $('#categoria').val(categoriaId);
+            var fechaInput = document.getElementById('fechaActual');
+            // Obtener la fecha actual como un objeto de fecha
+            var fechaActual = new Date();
+            // Formatear la fecha actual como una cadena en el formato deseado 
+            var fechaFormateada = fechaActual.getFullYear() + '-' +
+                                ('0' + (fechaActual.getMonth() + 1)).slice(-2) + '-' +
+                                ('0' + fechaActual.getDate()).slice(-2) + ' ' +
+                                ('0' + fechaActual.getHours()).slice(-2) + ':' +
+                                ('0' + fechaActual.getMinutes()).slice(-2) + ':' +
+                                ('0' + fechaActual.getSeconds()).slice(-2);
+
+            // Asignar la fecha formateada al campo de entrada de texto
+            fechaInput.value = fechaFormateada;
+            $('#modalCargarFactura').modal('show');
+        });
+
         // Mostrar el modalCrearCategoria
         $('#modalCrearCategoria').on('shown.bs.modal', function () {
             // Enfocar el input
