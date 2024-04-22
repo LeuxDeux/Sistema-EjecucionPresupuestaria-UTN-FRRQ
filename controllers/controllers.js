@@ -389,21 +389,22 @@ exports.borrarCategoria = (req, res) => {
                 throw error;
             } else {
                 console.log('Categoría borrada con éxito');
+                this.categorias(req, res);
                 // Después de borrar la categoría, consultamos nuevamente las categorías de la base de datos
-                connection.query('SELECT * FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, categorias) => {
-                    if (error) {
-                        throw error;
-                    } else {
-                        // Renderizamos la vista 'categorias.ejs' nuevamente con las categorías actualizadas
-                        res.render('categorias', {
-                            login: true,
-                            nombre: req.session.nombre,
-                            secretaria: req.session.secretaria,
-                            categorias: categorias,
-                            id_usuario: req.session.id_usuario
-                        });
-                    }
-                });
+                // connection.query('SELECT * FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, categorias) => {
+                //     if (error) {
+                //         throw error;
+                //     } else {
+                //         // Renderizamos la vista 'categorias.ejs' nuevamente con las categorías actualizadas
+                //         res.render('categorias', {
+                //             login: true,
+                //             nombre: req.session.nombre,
+                //             secretaria: req.session.secretaria,
+                //             categorias: categorias,
+                //             id_usuario: req.session.id_usuario
+                //         });
+                //     }
+                // });
             }
         });
     }else{
