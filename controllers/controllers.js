@@ -770,7 +770,23 @@ exports.facturasActivas = (req, res)=>{
                     secretaria: req.session.secretaria,
                     resultados: results
                 });
+                //console.log(results);
+            }
+        });
+    }else{
+        res.render('login');
+    }
+}
+exports.facturasActivasBL = (req, res)=>{
+    if(req.session.loggedin){
+        const idFactura = req.body.id;
+        const visibilidad = 'no visible';
+        connection.query('UPDATE facturas SET visibilidad = ? WHERE id = ?', [visibilidad, idFactura], (error, results)=>{
+            if(error){
+                throw error;
+            }else{
                 console.log(results);
+                this.facturasActivas(req, res);
             }
         });
     }else{
