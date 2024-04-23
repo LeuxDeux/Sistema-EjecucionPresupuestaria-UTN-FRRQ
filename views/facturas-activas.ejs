@@ -39,6 +39,7 @@
                 <th scope="col">Monto</th>
                 <th scope="col">Personal</th>
                 <th scope="col">Categoría</th>
+                <th scope="col">Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -51,10 +52,34 @@
                     <td><%= factura.monto %></td>
                     <td><%= factura.nombre_usuario %></td>
                     <td><%= factura.nombre_categoria %></td>
+                    <td>
+                        <a href="#" class="btn btn-outline-info baja-factura" data-id="<%= factura.id %>">Dar de baja</a>
+                    </td>
                 </tr>
             <% }); %>
         </tbody>
     </table>
+</div>
+<!-- Modal de Borrar Facturas-->
+<div class="modal fade" id="modalBLFactura" tabindex="-1" aria-labelledby="modalBLFacturaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalBLFacturaLabel">Baja Lógica Factura</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formBLFactura" action="/bl-factura" method="post">
+                    <!-- Campo oculto para almacenar el ID de la factura -->
+                    <input type="hidden" name="id" id="inputBLFacturaId" value=""><div class="mb-3">
+                        <label for="BLFacturaWarning" class="form-label">Al confirmar se hará la bája lógica de esta factura.</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Confirmar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
@@ -69,6 +94,18 @@
         window.location.href = '/descargar-archivo/' + facturaId;
     });
 });
+    $(document).ready(function() {
+        $('.baja-factura').click(function(event) {
+            event.stopPropagation();
+            event.preventDefault(); // Evitar que el enlace recargue la página
+            //Obtener el ID de la factura desde el atributo data
+            var facturaId = $(this).data('id');
+            //Asignar el ID de la factura al campo oculto en el formulario de edición
+            $('#inputBLFacturaId').val(facturaId);
+            //Mostrar el modal de borrar
+            $('#modalBLFactura').modal('show');
+        });
+        });
     // $(document).ready(function() {
     //     var fechaInput = document.getElementById('fechaActual');
     //     // Obtener la fecha actual como un objeto de fecha
