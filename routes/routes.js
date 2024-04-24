@@ -7,7 +7,8 @@ exports.root = (req, res) =>{
             login: true,
             nombre: req.session.nombre, // Nombre Usuario
             secretaria: req.session.secretaria, // ID Secretaria
-            id_usuario: req.session.id_usuario // ID Usuario
+            id_usuario: req.session.id_usuario, // ID Usuario
+            nombreSecretaria: req.session.nombreSecretaria
         });
         console.log('APP.GET "/" Sesión Correcta - Usuario: ' + req.session.nombre + ' Secretaria ID: ' + req.session.secretaria);
         console.log('Redireccionando hacia index.ejs')

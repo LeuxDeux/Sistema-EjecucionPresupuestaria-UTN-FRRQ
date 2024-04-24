@@ -371,6 +371,7 @@ exports.categorias = (req, res) => {
                     nombre: req.session.nombre,
                     secretaria: req.session.secretaria,
                     id_usuario: req.session.id_usuario,
+                    nombreSecretaria: req.session.nombreSecretaria,
                     categorias: results // Aquí pasa los resultados de la consulta
                 });
             }
@@ -441,6 +442,7 @@ exports.facturas = (req, res) => {
                             nombre: req.session.nombre,
                             id_usuario: req.session.id_usuario,
                             secretaria: req.session.secretaria,
+                            nombreSecretaria: req.session.nombreSecretaria,
                             facturas: resultsFacturas, // Resultados de la consulta de facturas
                             categorias: resultsCategorias, // Resultados de la consulta de categorías
                             estados: estadosUnicos
@@ -601,6 +603,7 @@ exports.analiticas = (req, res) => {
                     nombre: req.session.nombre,
                     id_usuario: req.session.id_usuario,
                     secretaria: req.session.secretaria,
+                    nombreSecretaria: req.session.nombreSecretaria,
                     facturas: results // Resultados de la consulta de facturas
                 });
             }
@@ -689,6 +692,7 @@ exports.ingresoGanancia = (req, res)=>{
                         id_usuario: req.session.id_usuario,
                         secretaria: req.session.secretaria,
                         ingresos: resultsIngresos,
+                        nombreSecretaria: req.session.nombreSecretaria,
                         categorias: resultsCategorias
                         });
                         console.log(`Nombre: ${req.session.nombre}, ID Usuario: ${req.session.id_usuario}, Secretaria: ${req.session.secretaria}, Resultados de ingresos:`, resultsIngresos);
@@ -768,6 +772,7 @@ exports.facturasActivas = (req, res)=>{
                     nombre: req.session.nombre,
                     id_usuario: req.session.id_usuario,
                     secretaria: req.session.secretaria,
+                    nombreSecretaria: req.session.nombreSecretaria,
                     resultados: results
                 });
                 //console.log(results);

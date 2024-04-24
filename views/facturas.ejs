@@ -17,8 +17,9 @@
     <a href="#" class="btn btn-outline-primary mt-4 btnCargarFactura"><i class="bx bxs-plus-circle bx-md"></i></a>
     <!-- Sección para mostrar información -->
     <% if(login) { %>
-        <p>Hola: <%= nombre %> id secretaria: <%= secretaria %> id usuario :<%= id_usuario %></p>
-    <% } %>
+        <p><%= nombre %></p>
+        <p><%= nombreSecretaria %></p>
+        <% } %>
     <div class="mb-3">
         <label for="selectEstado" class="form-label">Estado de la Factura</label>
         <select name="selectEstado" id="selectEstado" class="form-select">
