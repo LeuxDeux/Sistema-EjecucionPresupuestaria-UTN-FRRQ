@@ -523,7 +523,8 @@ exports.descargarArchivo = (req, res) => {
                     // Configurar los encabezados de la respuesta para indicar que es un archivo PDF
                     res.setHeader('Content-Type', 'application/pdf');
                     // Utilizar el nombre de la factura como nombre de archivo para la descarga
-                    res.setHeader('Content-Disposition', `attachment; filename="${nombreFactura}.pdf"`);
+                    // res.setHeader('Content-Disposition', `attachment; filename="${nombreFactura}.pdf"`);
+                    res.setHeader('Content-Disposition', `attachment; filename="${nombreFactura}"`);
                     // enviar el contenido del archivo como respuesta
                     fs.createReadStream(rutaArchivo).pipe(res);
                 } else { // Si no se encontró el archivo con el ID proporcionado

@@ -39,7 +39,7 @@
                 <tr>
                     <td style="display: none;"><%= factura.id %></td>
                     <td><%= factura.fecha_formateada %></td>
-                    <td><%= factura.nombre_factura %></td>
+                    <td><a href="/descargar-archivo/<%= factura.id %>"><%= factura.nombre_factura %></a></td>
                     <td><%= factura.nombre_categoria %></td>
                     <td><%= factura.monto %></td>
                     <td><%= factura.estado %></td>
@@ -114,7 +114,7 @@
         var facturaMonto = $(this).data('monto');
         var facturaId = $(this).data('id');
         // Actualizar el texto del modal con información sobre la factura seleccionada
-        $('#modalAccion .modal-body p').text('¿Qué acción desea realizar sobre la factura: ' + facturaNombreFactura + ' por un monto de $' + facturaMonto);
+        $('#modalAccion .modal-body p').html('¿Qué acción desea realizar sobre la factura: <a href="/descargar-archivo/' + facturaId + '">' + facturaNombreFactura + '</a> por un monto de $' + facturaMonto);
         $('#modalAccion #btnAceptar').attr('href', '/aceptar-factura/' + facturaId);
         $('#modalAccion #btnRechazar').attr('href', '/rechazar-factura/' + facturaId);
         console.log(facturaId);

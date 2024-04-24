@@ -11,7 +11,7 @@
     <title>FACTURAS ACEPTADAS</title>
 </head>
 <body>
-    <style>
+    <!-- <style>
         tbody .fila-factura:active {
         background-color: black !important;
         }
@@ -23,7 +23,7 @@
         .fila-seleccionada {
         background-color: violet; /* Color de fondo deseado para la fila seleccionada */
         }
-    </style>
+    </style> -->
 <h1>FACTURAS ACEPTADAS</h1>
 <div class="container">
     <a href="/" class="btn btn-outline-primary mt-4" id="volver"><i class="bx bxs-chevron-left bx-md"></i></a>
@@ -49,7 +49,7 @@
                 <tr class="fila-factura" data-id="<%= factura.id %>">
                     <td style="display: none;"><%= factura.id %></td>
                     <td><%= factura.fecha_formateada %></td>
-                    <td><%= factura.nombre_factura %></td>
+                    <td><a href="/descargar-archivo/<%= factura.id %>"><%= factura.nombre_factura %></a></td>
                     <td><%= factura.monto %></td>
                     <td><%= factura.nombre_usuario %></td>
                     <td><%= factura.nombre_categoria %></td>
@@ -85,16 +85,16 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 <script>
-    $(document).ready(function() {
-    // Agregar controlador de eventos de clic a cada fila de la tabla
-    $('.fila-factura').click(function() {
-        // Obtener el ID de la factura correspondiente a la fila seleccionada
-        var facturaId = $(this).data('id');
+//     $(document).ready(function() {
+//     // Agregar controlador de eventos de clic a cada fila de la tabla
+//     $('.fila-factura').click(function() {
+//         // Obtener el ID de la factura correspondiente a la fila seleccionada
+//         var facturaId = $(this).data('id');
         
-        // Realizar una solicitud GET al servidor para descargar el archivo
-        window.location.href = '/descargar-archivo/' + facturaId;
-    });
-});
+//         // Realizar una solicitud GET al servidor para descargar el archivo
+//         window.location.href = '/descargar-archivo/' + facturaId;
+//     });
+// });
     $(document).ready(function() {
         $('.baja-factura').click(function(event) {
             event.stopPropagation();

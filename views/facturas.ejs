@@ -52,7 +52,7 @@
                 <tr>
                     <td style="display: none;"><%= factura.id %></td>
                     <td><%= factura.fecha_formateada %></td>
-                    <td><%= factura.nombre_factura %></td>
+                    <td><a href="/descargar-archivo/<%= factura.id %>"><%= factura.nombre_factura %></a></td>
                     <td style="display: none;"><%= factura.categoria_id %></td>
                     <td><%= factura.monto %></td>
                     <td><%= factura.estado %></td>
