@@ -5,7 +5,7 @@ const bcryptjs = require('bcryptjs');
 const { render } = require('ejs');
 const queryAnaliticas = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE f.estado = "en proceso"';
 const facturasAceptadas = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE f.estado = "aceptado" AND f.visibilidad = "visible" ORDER BY f.fecha_carga DESC';
-const queryAnaliticasNW = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id';
+const facturasSelect = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE u.secretaria_id = ?';
 /* 
 //////////////////////
 CONTROLLERS USUARIOS
@@ -425,7 +425,7 @@ CONTROLLERS FACTURAS
 exports.facturas = (req, res) => {
     if (req.session.loggedin) {
         // Consulta SQL para seleccionar las facturas asociadas al usuario logueado
-        connection.query(queryAnaliticasNW, [req.session.secretaria], (error, resultsFacturas) => {  
+        connection.query(facturasSelect, [req.session.secretaria], (error, resultsFacturas) => {  
             if (error) {
                 throw error;
             } else {
@@ -552,7 +552,7 @@ exports.borrarFactura = (req, res) => {
                     if (error) {
                         throw error;
                     } else {
-                        connection.query(queryAnaliticasNW, [req.session.secretaria], (error, resultsFacturas) => {  
+                        connection.query(facturasSelect, [req.session.secretaria], (error, resultsFacturas) => {  
                             if (error) {
                                 throw error;
                             } else {
