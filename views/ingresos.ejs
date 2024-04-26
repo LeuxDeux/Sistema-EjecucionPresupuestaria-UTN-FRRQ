@@ -13,6 +13,10 @@
 <body>
 <h1>SUBIR INGRESOS, SE DEBE ELEGIR LA CATEGORÍA</h1>
 <div class="container">
+    <div class="mb-3">
+        <label for="filtroIngresos" class="form-label">Filtrar Facturas</label>
+        <input type="text" class="form-control" id="filtroIngresos" placeholder="Buscar ingresos...">
+    </div>
     <a href="/" class="btn btn-outline-primary mt-4" id="volver"><i class="bx bxs-chevron-left bx-md"></i></a>
     <a href="#" class="btn btn-outline-primary mt-4 btnCargarIngreso"><i class="bx bxs-plus-circle bx-md"></i></a>
     <!-- Sección para mostrar información -->
@@ -29,7 +33,6 @@
                 <th scope="col">Categoría</th>
                 <th scope="col">Monto</th>
                 <th scope="col">Usuario</th>
-                <th scope="col">Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -41,9 +44,6 @@
                     <td><%= ingreso.nombre_categoria %></td>
                     <td><%= ingreso.monto %></td>
                     <td><%= ingreso.nombre_usuario %></td>
-                    <td>
-                        <!-- Aquí puedes agregar los botones de acciones según sea necesario -->
-                    </td>
                 </tr>
             <% }); %>
         </tbody>
@@ -89,6 +89,15 @@
     $(document).ready(function() {
         $('.btnCargarIngreso').click(function() {
             $('#modalCargarIngreso').modal('show');
+        });
+    });
+    $(document).ready(function() {
+        // Función para filtrar categorías
+        $('#filtroIngresos').on('input', function() {
+            var valor = $(this).val().toLowerCase(); // Obtener el valor del filtro y convertirlo a minúsculas
+            $('tbody tr').filter(function() { // Filtrar las filas de la tabla
+                $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1); // Mostrar u ocultar las filas según el valor del filtro
+            });
         });
     });
 </script>

@@ -636,7 +636,8 @@ exports.aceptarFactura = (req, res)=>{
                             nombre: req.session.nombre,
                             id_usuario: req.session.id_usuario,
                             secretaria: req.session.secretaria,
-                            facturas: results2 // Resultados de la consulta de facturas
+                            facturas: results2, // Resultados de la consulta de facturas
+                            nombreSecretaria: req.session.nombreSecretaria
                         });
                     }
                 });

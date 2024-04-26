@@ -13,6 +13,10 @@
 <body>
 <h1>ACEPTAR o RECHAZAR FACTURAS(EGRESOS) REGISTRADOS</h1>
 <div class="container">
+    <div class="mb-3">
+        <label for="filtroAnaliticas" class="form-label">Filtrar Facturas</label>
+        <input type="text" class="form-control" id="filtroAnaliticas" placeholder="Buscar facturas en proceso...">
+    </div>
     <a href="/" class="btn btn-outline-primary mt-4" id="volver"><i class="bx bxs-chevron-left bx-md"></i></a>
     <!-- Sección para mostrar información -->
     <% if(login) { %>
@@ -118,6 +122,15 @@
         $('#modalAccion #btnAceptar').attr('href', '/aceptar-factura/' + facturaId);
         $('#modalAccion #btnRechazar').attr('href', '/rechazar-factura/' + facturaId);
         console.log(facturaId);
+    });
+    $(document).ready(function() {
+        // Función para filtrar categorías
+        $('#filtroAnaliticas').on('input', function() {
+            var valor = $(this).val().toLowerCase(); // Obtener el valor del filtro y convertirlo a minúsculas
+            $('tbody tr').filter(function() { // Filtrar las filas de la tabla
+                $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1); // Mostrar u ocultar las filas según el valor del filtro
+            });
+        });
     });
 </script>
 
