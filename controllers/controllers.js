@@ -571,7 +571,8 @@ exports.borrarFactura = (req, res) => {
                                             secretaria: req.session.secretaria,
                                             facturas: resultsFacturas, // Resultados de la consulta de facturas
                                             categorias: resultsCategorias, // Resultados de la consulta de categorías
-                                            estados: estadosUnicos
+                                            estados: estadosUnicos,
+                                            nombreSecretaria: req.session.nombreSecretaria
                                         });
                                     }
                                 });
@@ -665,7 +666,8 @@ exports.rechazarFactura = (req, res)=>{
                             nombre: req.session.nombre,
                             id_usuario: req.session.id_usuario,
                             secretaria: req.session.secretaria,
-                            facturas: results2 // Resultados de la consulta de facturas
+                            facturas: results2, // Resultados de la consulta de facturas
+                            nombreSecretaria: req.session.nombreSecretaria
                         });
                     }
                 });
