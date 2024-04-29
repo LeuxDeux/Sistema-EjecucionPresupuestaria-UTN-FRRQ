@@ -22,13 +22,22 @@
         var dataContainer = document.getElementById('dataContainer');
         var resultados = JSON.parse(dataContainer.getAttribute('data-resultados'));
         
+        //Reduce los datos de las secretarias en grupos por cada una de ganancia y perdida
+        var datosPorSecretaria = resultados.reduce((acc, item) => {
+            if (!acc[item.nombre_secretaria]) {
+                acc[item.nombre_secretaria] = { ganancia: 0, perdida: 0 };
+            }
+            acc[item.nombre_secretaria].ganancia += parseFloat(item.ganancia);
+            acc[item.nombre_secretaria].perdida += parseFloat(item.perdida);
+            return acc;
+        }, {});
 
-        // Extraer las fechas y los montos de ganancias y pérdidas
-        var secretarias = resultados.map(item => item.nombre_secretaria);
-        var ganancias = resultados.map(item => item.ganancia);
-        var perdidas = resultados.map(item => item.perdida);
+        // Obtener los nombres de las secretarias y los datos de ganancia y pérdida
+        var secretarias = Object.keys(datosPorSecretaria);
+        var ganancias = Object.values(datosPorSecretaria).map(data => data.ganancia);
+        var perdidas = Object.values(datosPorSecretaria).map(data => data.perdida);
 
-        console.log(resultados)
+        console.log(datosPorSecretaria)
 
         // Crear un contexto de gráfico
         var ctx1 = document.getElementById('myChart1').getContext('2d');
