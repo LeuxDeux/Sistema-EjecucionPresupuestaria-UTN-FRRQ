@@ -754,8 +754,9 @@ exports.tablaGrafica = (req,res)=>{
                    nombre: req.session.nombre,
                    id_usuario: req.session.id_usuario,
                    secretaria: req.session.secretaria,
-                    resultados: results
-                    });
+                   nombreSecretaria: req.session.nombreSecretaria,
+                   resultados: results
+                });
                   console.log(`Nombre: ${req.session.nombre}, ID Usuario: ${req.session.id_usuario}, Secretaria: ${req.session.secretaria}, Objeto:`, results);
             }
         });
