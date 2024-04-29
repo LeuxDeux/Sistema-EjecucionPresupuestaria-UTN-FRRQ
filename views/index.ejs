@@ -5,32 +5,126 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <link rel="stylesheet" href="resources/css/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
-    <h1>Bienvenido</h1>
     <% if (login) { %>
         <% if(secretaria == 1){ %>
-        <h1><strong><%= nombre %></strong></h1>
-        <h2><strong><%= nombreSecretaria %></strong></h2>
-        <p style="display: none;"><%= secretaria %></p>
-        <a href="/logout" class="a-logout">Cerrar Sesión</a>
-        <a href="/categorias" class="a-logout">Categorías</a>
-        <a href="/facturas" class="a-logout">Facturas</a>
-        <a href="/ingresos" class="a-logout">Ingresos</a>
-        <a href="/analiticas" class="a-logout">Aprobar/Rechazar Egresos</a>
-        <a href="/facturas-activas" class="a-logout">Facturas Activas</a>
+            <div class="flex flex-col min-h-screen">
+                <!-- Encabezados -->
+                <p style="display: none;"><%= secretaria %></p>
+                <div class="flex justify-center items-center py-4 shadow-md" style="background-image: linear-gradient(to right, #4F46E5, #FFFFFF);">
+                    <div class="text-center">
+                        <h1 class="text-lg font-bold mb-1 text-white">Bienvenido</h1>
+                        <h1 class="text-xl font-bold mb-1 text-white"><strong><%= nombre %></strong></h1>
+                        <h2 class="text-md font-bold mb-4 text-white"><strong><%= nombreSecretaria %></strong></h2>
+                    </div>
+                </div>
+                
+                <!-- Contenedor principal -->
+                <div class="flex min-h-screen">
+                    <!-- Botón para desplegar la sidebar en los celulares -->
+                    <button id="sidebarToggle" class="block md:hidden bg-blue-700 text-white py-2 px-4">
+                        <span class="material-icons">menu</span>
+                    </button>
+                    
+                    <!-- Sidebar -->
+                    <nav id="sidebar" class="bg-blue-700 w-64 flex-shrink-0 hidden md:block shadow-md" style="background-image: linear-gradient(to right, #4F46E5, #FFFFFF);">
+                        <ul class="py-4">
+                            <li>
+                                <li><a href="/categorias" class="block py-2 px-4 text-white hover:text-blue-800">Categorías</a></li>
+                                <a href="#" class="block py-2 px-4 text-white hover:text-blue-800 flex justify-between items-center" id="toggleFacturas">
+                                    <span>Facturas</span>
+                                    <span id="arrowIcon">></span>
+                                </a>
+                                <ul class="pl-4" id="submenuFacturas" style="display: none;">
+                                    <li><a href="/facturas" class="block py-2 px-4 text-white hover:text-blue-800">Facturas</a></li>
+                                    <li><a href="/facturas-activas" class="block py-2 px-4 text-white hover:text-blue-800">Facturas Activas</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="/ingresos" class="block py-2 px-4 text-white hover:text-blue-800">Ingresos</a></li>
+                            <li><a href="/analiticas" class="block py-2 px-4 text-white hover:text-blue-800">Aprobar/Rechazar Egresos</a></li>
+                            <li><a href="/logout" class="block py-2 px-4 text-white hover:text-blue-800">Cerrar Sesión</a></li>
+                        </ul>
+                    </nav>
+            
+                    <!-- Contenido principal -->
+                    <div class="flex-1">
+                        <!-- Acá se pone el contenido principal -->
+                    </div>
+                </div>
+            </div>
         <% }else{ %>
-            <h1>El usuario conectado es: <strong><%= nombre %></strong></h1>
-            <p style="display: none;"><%= secretaria %></p>
-            <a href="/logout" class="a-logout">Cerrar Sesión</a>
-            <a href="/categorias" class="a-logout">Categorías</a>
-            <a href="/ingresos" class="a-logout">Ingresos</a>
-            <a href="/facturas" class="a-logout">Facturas</a>
+            <div class="flex flex-col min-h-screen">
+                <!-- Encabezados -->
+                <p style="display: none;"><%= secretaria %></p>
+                <div class="flex justify-center items-center py-4 shadow-md" style="background-image: linear-gradient(to right, #4F46E5, #FFFFFF);">
+                    <div class="text-center">
+                        <h1 class="text-lg font-bold mb-1 text-white">Bienvenido</h1>
+                        <h1 class="text-xl font-bold mb-1 text-white"><strong><%= nombre %></strong></h1>
+                        <h2 class="text-md font-bold mb-4 text-white"><strong><%= nombreSecretaria %></strong></h2>
+                    </div>
+                </div>
+                
+                <!-- Contenedor principal -->
+                <div class="flex min-h-screen">
+                    <!-- Botón para desplegar la sidebar en los celulares -->
+                    <button id="sidebarToggle" class="block md:hidden bg-blue-700 text-white py-2 px-4" style="background-image: #4F46E5;">
+                        <span class="material-icons">menu</span>
+                    </button>
+                    
+                    <!-- Sidebar -->
+                    <nav id="sidebar" class="bg-blue-700 w-64 flex-shrink-0 hidden md:block shadow-md"" style="background-image: linear-gradient(to right, #4F46E5, #FFFFFF);">
+                        <ul class="py-4">
+                            <li><a href="/categorias" class="block py-2 px-4 text-white hover:text-blue-800">Categorías</a></li>
+                            <li><a href="/facturas" class="block py-2 px-4 text-white hover:text-blue-800">Facturas</a></li>
+                            <li><a href="/ingresos" class="block py-2 px-4 text-white hover:text-blue-800">Ingresos</a></li>
+                            <li><a href="/logout" class="block py-2 px-4 text-white hover:text-blue-800">Cerrar Sesión</a></li>
+                        </ul>
+                    </nav>
+            
+                    <!-- Contenido principal -->
+                    <div class="flex-1">
+                        <!-- Acá se pone el contenido principal -->
+                    </div>
+                </div>
+            </div>
        <% } %>
     <%} else { %>
-        <h1><strong><%= nombre %></strong></h1>
-        <a href="login" class="a-login">Ir a Inicio</a>
-    <% } %>  
+        <div class="flex justify-center items-center h-screen">
+            <div class="text-center">
+                <h1 class="text-3xl font-bold mb-4"><strong><%= nombre %></strong></h1>
+                <a href="login" class="block px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Ir a Inicio</a>
+            </div>
+        </div>
+    <% } %> 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        //Script para desplegar la barra en los celulares
+        $(document).ready(function(){
+            $('#sidebarToggle').click(function(){
+                $('#sidebar').toggleClass('hidden');
+            });
+        });
+
+        //Script para cambiar entre el submenú minimizado y desplegado junto con la flecha ">" "v"
+        document.addEventListener("DOMContentLoaded", function() {
+            const toggleFacturas = document.getElementById("toggleFacturas");
+            const submenuFacturas = document.getElementById("submenuFacturas");
+            const arrowIcon = document.getElementById("arrowIcon");
+
+            toggleFacturas.addEventListener("click", function() {
+                if (submenuFacturas.style.display === "none") {
+                    submenuFacturas.style.display = "block";
+                    arrowIcon.textContent = "v";
+                } else {
+                    submenuFacturas.style.display = "none";
+                    arrowIcon.textContent = ">";
+                }
+            });
+        });
+    </script>
 </body>
 </html>
 </html>

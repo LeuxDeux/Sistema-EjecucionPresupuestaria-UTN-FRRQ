@@ -748,16 +748,15 @@ exports.tablaGrafica = (req,res)=>{
             if (error) {
                 throw error;
             }else{
-                res.send(results);
-                // res.render('tabla_grafica', {
-                //     login: true,
-                //     nombre: req.session.nombre,
-                //     id_usuario: req.session.id_usuario,
-                //     secretaria: req.session.secretaria,
-                //     resultados: results
-                //     });
-                //     console.log(`Nombre: ${req.session.nombre}, ID Usuario: ${req.session.id_usuario}, Secretaria: ${req.session.secretaria}, Objeto:`, results);
-                console.log(results);
+                //res.send(results);
+                res.render('tabla_grafica', {
+                   login: true,
+                   nombre: req.session.nombre,
+                   id_usuario: req.session.id_usuario,
+                   secretaria: req.session.secretaria,
+                    resultados: results
+                    });
+                  console.log(`Nombre: ${req.session.nombre}, ID Usuario: ${req.session.id_usuario}, Secretaria: ${req.session.secretaria}, Objeto:`, results);
             }
         });
     }else{

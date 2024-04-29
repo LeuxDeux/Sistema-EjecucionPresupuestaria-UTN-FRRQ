@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabla Gráfica</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+     <!-- Div oculto para contener los datos -->
+     <div id="dataContainer" style="display: none;" data-resultados="<%= JSON.stringify(resultados) %>"></div>
+
+    <!-- Canvas para el gráfico -->
+    <div class="flex flex-col">
+        <canvas id="myChart1" class="w-345 h-345"></canvas>
+        <canvas id="myChart2" class="w-345 h-345"></canvas>
+    </div>
+
+    <!-- Script para definir los datos del gráfico -->
+    <script>
+        // Obtener los datos del div
+        var dataContainer = document.getElementById('dataContainer');
+        var resultados = JSON.parse(dataContainer.getAttribute('data-resultados'));
+        
+
+        // Extraer las fechas y los montos de ganancias y pérdidas
+        var secretarias = resultados.map(item => item.nombre_secretaria);
+        var ganancias = resultados.map(item => item.ganancia);
+        var perdidas = resultados.map(item => item.perdida);
+
+        console.log(resultados)
+
+        // Crear un contexto de gráfico
+        var ctx1 = document.getElementById('myChart1').getContext('2d');
+        var ctx2 = document.getElementById('myChart2').getContext('2d');
+
+        // Crear el gráfico
+        var myChart1 = new Chart(ctx1, {
+            type: 'bar', // Tipo de gráfico (puedes cambiarlo según tus necesidades)
+            data: {
+                labels: secretarias, // Secretarias en el eje x
+                datasets: [{
+                    label: 'Ganancias',
+                    data: ganancias, // Datos de ganancias en el eje y
+                    borderColor: 'green', // Color del borde
+                    backgroundColor: 'rgba(0, 255, 0, 0.2)', // Color de fondo
+                    borderWidth: 1 // Ancho del borde
+                }, {
+                    label: 'Pérdidas',
+                    data: perdidas, // Datos de pérdidas en el eje y
+                    borderColor: 'red', // Color del borde
+                    backgroundColor: 'rgba(255, 0, 0, 0.2)', // Color de fondo
+                    borderWidth: 1 // Ancho del borde
+                }]
+            },
+            options: {
+                // Configuración adicional del gráfico (puedes personalizar según tus necesidades)
+            }
+        });
+
+
+        var myChart2 = new Chart(ctx2, {
+            type: 'pie', // Tipo de gráfico (puedes cambiarlo según tus necesidades)
+            data: {
+                labels: secretarias, // Secretarias en el eje x
+                datasets: [{
+                    label: 'Ganancias',
+                    data: ganancias, // Datos de ganancias en el eje y
+                    borderColor: 'green', // Color del borde
+                    backgroundColor: 'rgba(0, 255, 0, 0.2)', // Color de fondo
+                    borderWidth: 1 // Ancho del borde
+                }, {
+                    label: 'Pérdidas',
+                    data: perdidas, // Datos de pérdidas en el eje y
+                    borderColor: 'red', // Color del borde
+                    backgroundColor: 'rgba(255, 0, 0, 0.2)', // Color de fondo
+                    borderWidth: 1 // Ancho del borde
+                }]
+            },
+            options: {
+                // Configuración adicional del gráfico (puedes personalizar según tus necesidades)
+            }
+        });
+        
+
+    </script>
+</body>
+</html>

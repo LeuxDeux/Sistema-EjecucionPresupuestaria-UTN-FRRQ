@@ -1,3 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#sidebarToggle {
+    font-size: 24px; /* Cambiar el tamaño del botón */
+}
 
 .select-css {
     display: block;
