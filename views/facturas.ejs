@@ -129,11 +129,14 @@
             <div class="modal-body">
                 <form id="formBorrarFactura" action="/borrar-facturas" method="post">
                     <!-- Campo oculto para almacenar el ID de la factura -->
-                    <input type="hidden" name="id" id="inputBorrarFacturaId" value=""><div class="mb-3">
-                        <label for="borrarFacturaWarning" class="form-label">Esta seguro que desea borrar la factura?</label>
-
+                    <input type="hidden" name="id" id="inputBorrarFacturaId" value="">
+                    <div class="mb-3">
+                        <label for="borrarFacturaWarning" class="form-label">¿Está seguro que desea borrar la factura?</label>
                     </div>
-                    <button type="submit" class="btn btn-primary">SI</button>
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary">SI</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    </div>
                 </form>
             </div>
         </div>

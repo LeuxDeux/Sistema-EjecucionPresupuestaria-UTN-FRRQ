@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Config del botón del menu desplegable en el celular*/
 #sidebarToggle {
     font-size: 24px; /* Cambiar el tamaño del botón */
 }
