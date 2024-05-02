@@ -7,6 +7,14 @@ const queryAnaliticas = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS f
 const facturasAceptadas = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE f.estado = "aceptado" AND f.visibilidad = "visible" ORDER BY f.fecha_carga DESC';
 const facturasSelect = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE u.secretaria_id = ?';
 const categoriasSelect = 'SELECT id, nombre FROM categorias WHERE secretaria_id = ?';
+// Función de utilidad para manejar respuestas HTTP
+function handleHttpResponse(res, statusCode, message) {
+    res.status(statusCode).send(`
+        <h2>Error ${statusCode}</h2>
+        <p>${message}</p>
+        <a href="/">Volver a la página principal</a>
+    `);
+}
 /* 
 //////////////////////
 CONTROLLERS USUARIOS
@@ -65,32 +73,17 @@ exports.registrarUsuario = (req, res) => {
     bcryptjs.hash(contraseña, 8, (hashError, contraseñaHash) => {
         if (hashError) {
             console.error('Error al generar hash de contraseña:', hashError);
-            res.status(500).send(`
-                    <h2>Error interno del servidor, ha ocurrido un error al encriptar la clave: ` + hashError`</h2>
-                    <p>Ocurrió un error al procesar tu solicitud. Por favor, intenta nuevamente.</p>
-                    <a href="/">Volver a la página principal</a>
-                    `);
-            return;
+            return handleHttpResponse(res, 500, 'Error interno del servidor, ha ocurrido un error al encriptar la clave');
         }
         // Verificar si el usuario ya existe
         connection.query('SELECT COUNT(*) AS count FROM usuarios WHERE usuario = ?', [usuario], (selectError, countResult) => {
             if (selectError) {
                 console.error('Error al verificar usuario existente:', selectError);
-                res.status(500).send(`
-                    <h2>Error interno del servidor, ha ocurrido un error al verificar el usuario</h2>
-                    <p>Ocurrió un error al procesar tu solicitud. Por favor, intenta nuevamente.</p>
-                    <a href="/">Volver a la página principal</a>
-                    `);
-                return;
+                return handleHttpResponse(res, 500, 'Error interno del servidor, ha ocurrido un error al verificar el usuario');
             }
             // Si el usuario ya existe, enviar una respuesta al cliente
             if (countResult[0].count > 0) {
-                res.status(400).send(`
-                    <h2>Error</h2>
-                    <p>El usuario '${usuario}' ya existe. Por favor, elige otro nombre de usuario.</p>
-                    <a href="/registro">Volver a la página de registro</a>
-                `);
-                return;
+                return handleHttpResponse(res, 400, `El usuario '${usuario}' ya existe. Por favor, elige otro nombre de usuario.`);
             }
             // Insertar usuario en la base de datos
             connection.query('INSERT INTO usuarios SET ?', {
@@ -102,27 +95,16 @@ exports.registrarUsuario = (req, res) => {
             }, (insertError, results) => {
                 if (insertError) {
                     console.error('Error al insertar usuario:', insertError);
-                    res.status(500).send(`
-                        <h2>Error interno del servidor, ha ocurrido un error al crear la cuenta: ` + insertError`</h2>
-                        <p>Ocurrió un error al procesar tu solicitud. Por favor, intenta nuevamente.</p>
-                        <a href="/">Volver a la página principal</a>
-                        `);
-                    return;
+                    return handleHttpResponse(res, 500,`Error interno del servidor, ha ocurrido un error al crear la cuenta: '${insertError}'`);
                 }
                 // Obtener la lista de secretarías
                 connection.query('SELECT * FROM secretarias', (selectError, resultsSecretarias) => {
                     if (selectError) {
                         console.error('Error al obtener secretarías:', selectError);
-                        res.status(500).send(`
-                        <h2>Error interno del servidor, ha ocurrido un error al mostrar las secretarías: ` + selectError`</h2>
-                        <p>Ocurrió un error al procesar tu solicitud. Por favor, intenta nuevamente.</p>
-                        <a href="/">Volver a la página principal</a>
-                        `);
-                        return;
+                        return handleHttpResponse(res, 500, `Error interno del servidor, ha ocurrido un error al mostrar las secretarias`)
                     }
                     // Encontrar el nombre de la secretaría
                     const nombreSecretaria = resultsSecretarias.find(sec => sec.id === parseInt(secretaria)).nombre;
-                    // Renderizar la plantilla 'registro.ejs'
                     res.render('registro', {
                         results: resultsSecretarias,
                         alert: true,
@@ -238,62 +220,26 @@ exports.crearCategorias = (req, res) => {
             const nombre = req.body.nombre;
             const secretaria_id = req.body.secretaria_id;
             const categoria = { nombre: nombre, secretaria_id: secretaria_id };
-
             connection.query('INSERT INTO categorias SET ?', categoria, (error, results) => {
                 if (error) {
                     // Si hay un error al insertar en la base de datos
                     console.error('Error en la inserción de categoría:', error);
                     if (error.code === 'ER_DUP_ENTRY') {
-                        // Si es un error de duplicación, enviar una respuesta 400 Bad Request
-                        return res.status(400).send(`
-                            <h2>Error de duplicación</h2>
-                            <p>Ya existe una categoría con el mismo nombre para la secretaría especificada.</p>
-                            <a href="/">Volver a la página principal</a>
-                        `);
+                        return handleHttpResponse(res, 400, 'Ya existe una categoría con el mismo nombre para la secretaria especificada');
                     } else {
-                        // Si es otro tipo de error, enviar una respuesta 500 Internal Server Error
-                        return res.status(500).send(`
-                            <h2>Error interno del servidor</h2> 
-                            <p>Ocurrió un error al procesar tu solicitud. Por favor, intenta nuevamente.</p>
-                            <a href="/">Volver a la página principal</a>
-                        `);
+                        return handleHttpResponse(res, 500, 'Ocurrió un error al procesar su solicitud, por favor intente nuevamente.')
                     }
                 } else {
                     console.log('Categoría creada con éxito: ', nombre);
                     this.categorias(req, res);
-                    // // Después de agregar la categoría, consulta nuevamente las categorías de la base de datos
-                    // connection.query('SELECT * FROM categorias WHERE secretaria_id = ?', [secretaria_id], (error, categorias) => {
-                    //     if (error) {
-                    //         console.error('Error en la consulta de categorías:', error);
-                    //         return res.status(500).send(`
-                    //             <h2>Error interno del servidor</h2> ` + error `
-                    //             <p>Ocurrió un error al procesar tu solicitud. Por favor, intenta nuevamente.</p>
-                    //             <a href="/">Volver a la página principal</a>
-                    //         `);
-                    //     } else {
-                    //         // Renderizar la vista categorias.ejs nuevamente con las nuevas categorías
-                    //         res.render('categorias', {
-                    //             login: true,
-                    //             nombre: req.session.nombre,
-                    //             secretaria: req.session.secretaria,
-                    //             categorias: categorias,
-                    //             id_usuario: req.session.id_usuario
-                    //         });
-                    //     }
-                    // });
                 }
             });
         } catch (error) {
             // Si hay un error en el código síncrono, enviar una respuesta 500 Internal Server Error
             console.error('Error en la creación de categoría:', error);
-            return res.status(500).send(`
-                <h2>Error interno del servidor</h2>
-                <p>Ocurrió un error al procesar tu solicitud. Por favor, intenta nuevamente.</p>
-                <a href="/">Volver a la página principal</a>
-            `);
+            return handleHttpResponse(res, 500, 'Ocurrió un error al procesar su solicitud, por favor intente nuevamente');
         }
     } else {
-        // Si el usuario no está autenticado, redirigir al formulario de inicio de sesión
         res.render('login');
     }
 };
@@ -308,47 +254,17 @@ exports.editarCategoria = (req, res) => {
             connection.query('UPDATE categorias SET nombre = ? WHERE id = ?', [nuevoNombre, categoriaId], (error, results) => {
                 if (error) {
                     console.error('Error al editar la categoría:', error);
-                    return res.status(500).send(`
-                        <h2>Error al editar la categoría</h2>
-                        <p>Ocurrió un error al editar la categoría. Por favor, intenta nuevamente.</p>
-                        <a href="/">Volver a la página principal</a>
-                    `);
+                    return handleHttpResponse(res, 500, 'Ocurrió un error al editar la categoría. Por favor, intente nuevamente');
                 } else {
                     this.categorias(req, res);
-                    // console.log('Categoría actualizada con éxito');
-                    // // Después de actualizar la categoría, consultamos nuevamente las categorías de la base de datos
-                    // connection.query('SELECT * FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, categorias) => {
-                    //     if (error) {
-                    //         console.error('Error al consultar las categorías:', error);
-                    //         return res.status(500).send(`
-                    //             <h2>Error interno del servidor al obtener las categorías actualizadas</h2>
-                    //             <p>Ocurrió un error al obtener las categorías actualizadas. Por favor, intenta nuevamente.</p>
-                    //             <a href="/">Volver a la página principal</a>
-                    //         `);
-                    //     } else {
-                    //         // Renderizamos la vista 'categorias.ejs' nuevamente con las categorías actualizadas
-                    //         res.render('categorias', {
-                    //             login: true,
-                    //             nombre: req.session.nombre,
-                    //             secretaria: req.session.secretaria,
-                    //             categorias: categorias,
-                    //             id_usuario: req.session.id_usuario
-                    //         });
-                    //     }
-                    // });
                 }
             });
         } catch (error) {
             // Si hay un error en el código síncrono, enviar una respuesta 500 Internal Server Error
             console.error('Error en la actualización de la categoría:', error);
-            return res.status(500).send(`
-                <h2>Error interno del servidor</h2>
-                <p>Ocurrió un error al procesar tu solicitud. Por favor, intenta nuevamente.</p>
-                <a href="/">Volver a la página principal</a>
-            `);
+            return handleHttpResponse(res, 500, 'Ocurrió un error al procesar tu solicitud. Por favor, intente nuevamente');
         }
     } else {
-        // Si el usuario no está autenticado, redirigir al formulario de inicio de sesión
         res.render('login');
     }
 };
@@ -360,13 +276,8 @@ exports.categorias = (req, res) => {
         connection.query(categoriasSelect, [req.session.secretaria], (error, results) => {
             if (error) {
                 console.error('Error al obtener las categorías:', error);
-                res.status(500).send(`
-                    <h2>Error al obtener las categorías</h2>
-                    <p>Ocurrió un error al obtener las categorías. Por favor, intenta nuevamente.</p>
-                    <a href="/">Volver a la página principal</a>
-                `);
+                return handleHttpResponse(res, 500, 'Ocurrió un error al obtener las categorías. Por favor, intente nuevamente o comuníquese con el soporte');
             } else {
-                // Renderiza la plantilla 'categorias.ejs' y pasa los resultados de la consulta
                 res.render('categorias', {
                     login: true,
                     nombre: req.session.nombre,
@@ -389,39 +300,22 @@ exports.borrarCategoria = (req, res) => {
         // Realizamos la actualización en la base de datos
         connection.query('DELETE FROM categorias WHERE id = ?', [categoriaId], (error, results) => {
             if (error) {
-                throw error;
+                console.error('Error al borrar categoría', error);
+                return handleHttpResponse(res, 500, 'Ocurrió un error al borrar la categoría, intente nuevamente o comuníquese con el soporte');
             } else {
                 console.log('Categoría borrada con éxito');
                 this.categorias(req, res);
-                // Después de borrar la categoría, consultamos nuevamente las categorías de la base de datos
-                // connection.query('SELECT * FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, categorias) => {
-                //     if (error) {
-                //         throw error;
-                //     } else {
-                //         // Renderizamos la vista 'categorias.ejs' nuevamente con las categorías actualizadas
-                //         res.render('categorias', {
-                //             login: true,
-                //             nombre: req.session.nombre,
-                //             secretaria: req.session.secretaria,
-                //             categorias: categorias,
-                //             id_usuario: req.session.id_usuario
-                //         });
-                //     }
-                // });
             }
         });
     }else{
         res.render('login');
     }
 };
-
-
 /* 
 //////////////////////
 CONTROLLERS FACTURAS
 //////////////////////
 */
-
 //VER FACTURAS
 exports.facturas = (req, res) => {
     if (req.session.loggedin) {
