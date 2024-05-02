@@ -6,6 +6,7 @@ const { render } = require('ejs');
 const queryAnaliticas = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE f.estado = "en proceso"';
 const facturasAceptadas = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE f.estado = "aceptado" AND f.visibilidad = "visible" ORDER BY f.fecha_carga DESC';
 const facturasSelect = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE u.secretaria_id = ?';
+const categoriasSelect = 'SELECT id, nombre FROM categorias WHERE secretaria_id = ?';
 /* 
 //////////////////////
 CONTROLLERS USUARIOS
@@ -356,7 +357,7 @@ exports.editarCategoria = (req, res) => {
 exports.categorias = (req, res) => {
     if (req.session.loggedin) {
         // Consulta SQL para seleccionar los nombres de las categorías con secretaria_id igual al req.session.secretaria
-        connection.query('SELECT id, nombre FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, results) => {
+        connection.query(categoriasSelect, [req.session.secretaria], (error, results) => {
             if (error) {
                 console.error('Error al obtener las categorías:', error);
                 res.status(500).send(`
@@ -430,7 +431,7 @@ exports.facturas = (req, res) => {
                 throw error;
             } else {
                 // Consulta SQL para seleccionar las categorías asociadas a la secretaría del usuario logueado
-                connection.query('SELECT id, nombre FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, resultsCategorias) => {
+                connection.query(categoriasSelect, [req.session.secretaria], (error, resultsCategorias) => {
                     if (error) {
                         throw error;
                     } else {
@@ -557,7 +558,7 @@ exports.borrarFactura = (req, res) => {
                                 throw error;
                             } else {
                                 // Consulta SQL para seleccionar las categorías asociadas a la secretaría del usuario logueado
-                                connection.query('SELECT id, nombre FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, resultsCategorias) => {
+                                connection.query(categoriasSelect, [req.session.secretaria], (error, resultsCategorias) => {
                                     if (error) {
                                         throw error;
                                     } else {
@@ -686,7 +687,7 @@ exports.ingresoGanancia = (req, res)=>{
             if (error) {
                 throw error;
             }else{
-                connection.query('SELECT id, nombre FROM categorias WHERE secretaria_id = ?', [req.session.secretaria], (error, resultsCategorias) => {
+                connection.query(categoriasSelect, [req.session.secretaria], (error, resultsCategorias) => {
                     if (error) {
                         throw error;
                     } else {
