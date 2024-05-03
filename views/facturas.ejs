@@ -10,6 +10,11 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
     <title>FACTURAS</title>
+    <style>
+        td {
+            height: 2.95rem;
+        }
+    </style>
 </head>
 <body>
 <h1>SUBIR, BORRAR y DESCARGAR FACTURAS</h1>
@@ -65,9 +70,13 @@
                     <td><%= factura.nombre_usuario %></td>
                     <td><%= factura.nombre_categoria %></td>
                     <td style="display: none;"><%= factura.archivo_factura %></td>
-                    <td>
-                        <a href="#" class="btn btn-outline-info borrar-factura" data-id="<%= factura.id %>">Borrar</a>
-                        <a href="/descargar-archivo/<%= factura.id %>" class="btn btn-outline-info" data-id="<%= factura.id %>">Descargar</a>
+                    <td style="display: flex; gap: 10px">
+                        <% if (factura.estado.trim().toLowerCase() === 'aceptado') { %>
+                            <a href="#" class="btn borrar-factura disabled btn-outline-info" data-id="<%= factura.id %>" style="height: 2.5rem;">Borrar</a>
+                        <% } else { %>
+                            <a href="#" class="btn btn-outline-info borrar-factura" data-id="<%= factura.id %>" style="height: 2.5rem;">Borrar</a>
+                        <% } %>
+                        <a href="/descargar-archivo/<%= factura.id %>" class="btn btn-outline-info" data-id="<%= factura.id %>" style="height: 2.5rem;">Descargar</a>
                     </td>
                 </tr>
             <% }); %>
@@ -134,8 +143,8 @@
                         <label for="borrarFacturaWarning" class="form-label">¿Está seguro que desea borrar la factura?</label>
                     </div>
                     <div class="d-flex justify-content-between">
-                        <button type="submit" class="btn btn-primary">SI</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary btn-danger">Borrar Factura</button>
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Cancelar</button>
                     </div>
                 </form>
             </div>
@@ -201,7 +210,6 @@
             });
         });
     });
-
 </script>
 </body>
 </html>
