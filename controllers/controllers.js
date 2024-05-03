@@ -320,14 +320,16 @@ CONTROLLERS FACTURAS
 exports.facturas = (req, res) => {
     if (req.session.loggedin) {
         // Consulta SQL para seleccionar las facturas asociadas al usuario logueado
-        connection.query(facturasSelect, [req.session.secretaria], (error, resultsFacturas) => {  
-            if (error) {
-                throw error;
+        connection.query(facturasSelect, [req.session.secretaria], (errorFacturas, resultsFacturas) => {  
+            if (errorFacturas) {
+                console.error('Error al obtener las facturas', errorFacturas);
+                return handleHttpResponse(res, 500, 'Error al obtener las facturas, por favor comuníquese con soporte');
             } else {
                 // Consulta SQL para seleccionar las categorías asociadas a la secretaría del usuario logueado
-                connection.query(categoriasSelect, [req.session.secretaria], (error, resultsCategorias) => {
-                    if (error) {
-                        throw error;
+                connection.query(categoriasSelect, [req.session.secretaria], (errorCategorias, resultsCategorias) => {
+                    if (errorCategorias) {
+                        console.error('Error al obtener categorías: ', errorCategorias);
+                        return handleHttpResponse(res, 500, 'Error al obtener las categorias. Por favor comuníquese con soporte');
                     } else {
                         // Filtrar estados únicos de las facturas
                         const estadosUnicos = [...new Set(resultsFacturas.map(factura => factura.estado))];
@@ -371,10 +373,10 @@ exports.cargarFactura = (req, res) => {
             const newPath = path.join('uploads', uploadedFile.originalname); // Construir la ruta completa del nuevo archivo
 
             // Renombrar el archivo en el sistema de archivos
-            fs.rename(uploadedFile.path, newPath, (err) => {
-                if (err) { // Manejar errores si ocurren al renombrar el archivo
-                    console.error('Error al renombrar el archivo:', err);
-                    res.status(500).send({ error: 'Error interno del servidor' });
+            fs.rename(uploadedFile.path, newPath, (error) => {
+                if (error) { // Manejar errores si ocurren al renombrar el archivo
+                    console.error('Error al renombrar el archivo:', error);
+                    return handleHttpResponse(res, 500, 'Error interno del servidor al renombrar el archivo. Por favor comuníquese con soporte.');
                 } else { // Si el archivo se ha renombrado correctamente
                     const fechaActual = new Date();
                     const fechaLocal = new Date(fechaActual.getTime() - (fechaActual.getTimezoneOffset() * 60000));
@@ -384,7 +386,7 @@ exports.cargarFactura = (req, res) => {
                     connection.query(sql, [fechaFormateada, nombreFactura, categoriaId, monto, estado, usuarioId, newPath], (err, result) => {
                         if (err) { // Manejar errores si ocurren al insertar datos en la base de datos
                             console.error('Error al insertar datos en la base de datos:', err);
-                            res.status(500).send({ error: 'Error interno del servidor' });
+                            return handleHttpResponse(res, 500, 'Error interno del servidor al insertar los datos en la base de datos.')
                         } else { // Si los datos se insertaron correctamente en la base de datos
                             console.log('Datos insertados correctamente en la base de datos');
                             res.redirect('facturas'); // Redirigir a la página de inicio después de cargar la factura
@@ -393,7 +395,7 @@ exports.cargarFactura = (req, res) => {
                 }
             });
         } else { // Si no se ha subido ningún archivo
-            res.status(400).send({ error: 'No se pudo subir el archivo' }); // Enviar un error al cliente
+            return handleHttpResponse(res, 400, 'No se ha podido subir ningún archivo');
         }
     }else{
         res.render('login');
@@ -410,7 +412,7 @@ exports.descargarArchivo = (req, res) => {
         connection.query(sql, [fileId], (err, result) => {
             if (err) { // Manejar errores si ocurren al realizar la consulta en la base de datos
                 console.error('Error al obtener el archivo de la base de datos:', err);
-                res.status(500).send({ error: 'Error interno del servidor' });
+                return handleHttpResponse(res, 500, 'Error interno del servidor al obtener el archivo de la base de datos. Por favor comuníquese con soporte.');
             } else {
                 if (result.length > 0) { // Si se encontró el archivo en la base de datos
                     const nombreFactura = result[0].nombre_factura; // Obtener el nombre de la factura
@@ -423,7 +425,7 @@ exports.descargarArchivo = (req, res) => {
                     // enviar el contenido del archivo como respuesta
                     fs.createReadStream(rutaArchivo).pipe(res);
                 } else { // Si no se encontró el archivo con el ID proporcionado
-                    res.status(404).send({ error: 'Archivo no encontrado' }); // Enviar un error
+                    return handleHttpResponse(res, 400, 'Archivo no encontrado.');
                 }
             }
         });
@@ -435,44 +437,29 @@ exports.descargarArchivo = (req, res) => {
 //BORRAR FACTURA 
 exports.borrarFactura = (req, res) => {
     if(req.session.loggedin){
-        const facturaId = req.body.id; // Obtenemos el ID de la factura desde el cuerpo de la solicitud
-        // Realizamos la actualización en la base de datos
+        const facturaId = req.body.id; 
         connection.query('DELETE FROM facturas WHERE id = ?', [facturaId], (error, results) => {
             if (error) {
-                throw error;
+                console.error('Error al borrar la factura: ', error);
+                return handleHttpResponse(res, 500, 'Error al borrar la factura. Por favor comuníquese con el soporte');
             } else {
                 console.log('Factura borrada con éxito');
                 // Después de borrar la factura, consultamos nuevamente las facturas de la base de datos
-                connection.query('SELECT * FROM facturas WHERE usuario_id = ?', [req.session.secretaria], (error, facturas) => {
-                    if (error) {
-                        throw error;
-                    } else {
-                        connection.query(facturasSelect, [req.session.secretaria], (error, resultsFacturas) => {  
-                            if (error) {
-                                throw error;
-                            } else {
-                                // Consulta SQL para seleccionar las categorías asociadas a la secretaría del usuario logueado
-                                connection.query(categoriasSelect, [req.session.secretaria], (error, resultsCategorias) => {
-                                    if (error) {
-                                        throw error;
-                                    } else {
-                                        // Filtrar estados únicos de las facturas
-                                        const estadosUnicos = [...new Set(resultsFacturas.map(factura => factura.estado))];
-                                        // Renderiza la plantilla 'facturas.ejs' y pasa los resultados de ambas consultas
-                                        res.render('facturas', {
-                                            login: true,
-                                            nombre: req.session.nombre,
-                                            id_usuario: req.session.id_usuario,
-                                            secretaria: req.session.secretaria,
-                                            facturas: resultsFacturas, // Resultados de la consulta de facturas
-                                            categorias: resultsCategorias, // Resultados de la consulta de categorías
-                                            estados: estadosUnicos,
-                                            nombreSecretaria: req.session.nombreSecretaria
-                                        });
-                                    }
-                                });
-                            }
-                        });
+                 connection.query(facturasSelect, [req.session.secretaria], (error, resultsFacturas) => {  
+                     if (error) {
+                         console.error('Error al consultar las facturas: ', error);
+                         return handleHttpResponse(res, 500, 'Error interno del servidor al consultar las facturas. Por favor comuníquese con el soporte');
+                     } else {
+                         // Consulta SQL para seleccionar las categorías asociadas a la secretaría del usuario logueado
+                         connection.query(categoriasSelect, [req.session.secretaria], (error, resultsCategorias) => {
+                             if (error) {
+                                 console.error('Error al consultar con las categorías: ', error);
+                                 return handleHttpResponse(res, 500, 'Error interno del servidor al consultar con las categorías. Por favor comuníquese con el soporte');
+                             } else {
+                                 // Renderiza la plantilla 'facturas.ejs' y pasa los resultados de ambas consultas
+                                 res.redirect('facturas');
+                             }
+                         });
                     }
                 });
             }
