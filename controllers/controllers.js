@@ -555,7 +555,7 @@ exports.ingresoGanancia = (req, res)=>{
                         nombreSecretaria: req.session.nombreSecretaria,
                         categorias: resultsCategorias
                         });
-                        console.log(`Nombre: ${req.session.nombre}, ID Usuario: ${req.session.id_usuario}, Secretaria: ${req.session.secretaria}, Resultados de ingresos:`, resultsIngresos);
+                        //console.log(`Nombre: ${req.session.nombre}, ID Usuario: ${req.session.id_usuario}, Secretaria: ${req.session.secretaria}, Resultados de ingresos:`, resultsIngresos);
                     }
                 });
             }
