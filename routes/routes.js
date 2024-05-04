@@ -10,8 +10,7 @@ exports.root = (req, res) =>{
             id_usuario: req.session.id_usuario, // ID Usuario
             nombreSecretaria: req.session.nombreSecretaria
         });
-        console.log('APP.GET "/" Sesión Correcta - Usuario: ' + req.session.nombre + ' Secretaria ID: ' + req.session.secretaria);
-        console.log('Redireccionando hacia index.ejs')
+        console.log('Sesión Correcta del Usuario: ' + req.session.nombre + ' de la secretaria ' + req.session.nombreSecretaria);
     }else{
         res.render('index', {
             login: false,
