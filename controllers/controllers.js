@@ -538,11 +538,13 @@ exports.ingresoGanancia = (req, res)=>{
         //Modificación de la Query para que me formatee la fecha de ingreso
         connection.query('SELECT ingresos.id_ingreso, ingresos.fecha_ingreso, DATE_FORMAT(ingresos.fecha_ingreso, "%d/%m/%Y") AS fecha_ingreso_formateada, ingresos.nombre_ingreso, categorias.nombre AS nombre_categoria, ingresos.monto, usuarios.nombres AS nombre_usuario FROM ingresos JOIN categorias ON ingresos.categoria_id = categorias.id JOIN usuarios ON ingresos.usuario_id = usuarios.id WHERE ingresos.secretaria_id = ? ORDER BY ingresos.fecha_ingreso DESC', [req.session.secretaria], (error, resultsIngresos) => {
             if (error) {
-                throw error;
+                console.error('Error al consultar con los ingresos: ', error);
+                return handleHttpResponse(res, 500, 'Error interno del servidor al consultar con la base de datos. Por favor comuníquese con el soporte');
             }else{
                 connection.query(categoriasSelect, [req.session.secretaria], (error, resultsCategorias) => {
                     if (error) {
-                        throw error;
+                        console.error('Error al consultar con las categorías en la base de datos: ', error);
+                        return handleHttpResponse(res, 500, 'Error interno del servidor al consultar con la base de datos. Por favor comuníquese con el soporte');
                     } else {
                         res.render('ingresos', {
                         login: true,
@@ -560,11 +562,6 @@ exports.ingresoGanancia = (req, res)=>{
         });
     }else{
         res.render('login');
-        // res.render('index', {
-        //     login: false,
-        //     nombre: 'Debe iniciar sesión',
-        //     secretaria: ''
-        // });
     }
 }
 exports.cargarIngreso = (req, res) => {
