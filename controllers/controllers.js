@@ -479,7 +479,8 @@ exports.analiticas = (req, res) => {
     if (req.session.loggedin) {
         connection.query(queryAnaliticas, (error, results) => {  
             if (error) {
-                throw error;
+                console.error('Ha ocurrido un error interno al consultar con la base de datos: ', error);
+                return handleHttpResponse(res, 500, 'Error interno del servidor al consultar con las facturas en proceso. Por favor comuníquese con el soporte');
             } else {
                 // Renderiza la plantilla 'analiticas.ejs' y pasa los resultados de la consulta
                 res.render('analiticas', {
@@ -494,11 +495,6 @@ exports.analiticas = (req, res) => {
         });
     } else {
         res.render('login');
-        // res.render('index', {
-        //     login: false,
-        //     nombre: 'Debe iniciar sesión',
-        //     secretaria: ''
-        // });
     }
 }
 exports.aceptarFactura = (req, res)=>{
@@ -507,23 +503,11 @@ exports.aceptarFactura = (req, res)=>{
         const estado = 'aceptado';
         connection.query('UPDATE facturas SET estado = ? WHERE id = ?', [estado, idFactura], (error, results1)=>{
             if(error){
-                throw error;
+                console.error('Ha ocurrido un error al aceptar la factura: ', error);
+                return handleHttpResponse(res, 500, 'Error interno al cambiar el estado de la factura. Por favor comuníquese con el soporte');
             }else{
-                connection.query(queryAnaliticas,
-                (error, results2) => {
-                    if (error) {
-                        throw error;
-                    } else {
-                        res.render('analiticas', {
-                            login: true,
-                            nombre: req.session.nombre,
-                            id_usuario: req.session.id_usuario,
-                            secretaria: req.session.secretaria,
-                            facturas: results2, // Resultados de la consulta de facturas
-                            nombreSecretaria: req.session.nombreSecretaria
-                        });
-                    }
-                });
+                console.log('Factura aceptada correctamente: ', results1);
+                this.analiticas(req, res);
             }
         });
     }else{
@@ -536,23 +520,11 @@ exports.rechazarFactura = (req, res)=>{
         const estado = 'denegado';
         connection.query('UPDATE facturas SET estado = ? WHERE id = ?', [estado, idFactura], (error, results1)=>{
             if(error){
-                throw error;
+                console.error('Ha ocurrido un error al rechazar la factura: ', error);
+                return handleHttpResponse(res, 500, 'Error interno al cambiar el estado de la factura. Por favor comuníquese con el soporte');
             }else{
-                connection.query(queryAnaliticas,
-                (error, results2) => {
-                    if (error) {
-                        throw error;
-                    } else {
-                        res.render('analiticas', {
-                            login: true,
-                            nombre: req.session.nombre,
-                            id_usuario: req.session.id_usuario,
-                            secretaria: req.session.secretaria,
-                            facturas: results2, // Resultados de la consulta de facturas
-                            nombreSecretaria: req.session.nombreSecretaria
-                        });
-                    }
-                });
+                console.log('Factura rechazada correctamente: ', results1);
+                this.analiticas(req, res);
             }
         });
     }else{
