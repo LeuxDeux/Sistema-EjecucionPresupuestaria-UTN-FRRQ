@@ -578,7 +578,8 @@ exports.cargarIngreso = (req, res) => {
             [nombreIngreso, categoria, monto, req.session.id_usuario, fechaFormateada, req.session.secretaria], 
             (error, results) => {
                 if (error) {
-                    throw error;
+                    console.error('Error al insertar el ingreso: ', error);
+                    return handleHttpResponse(res, 500, 'Error interno del servidor al cargar el ingreso. Por favor comuníquese con el soporte');
                 } else {
                     this.ingresoGanancia(req, res);
                 }
@@ -619,7 +620,8 @@ exports.facturasActivas = (req, res)=>{
     if(req.session.loggedin){
         connection.query(facturasAceptadas, (error, results)=>{
             if(error){
-                throw error;
+                console.error('Ha ocurrido un error al cargar las facturas activas (aceptadas): ', error);
+                return handleHttpResponse(res, 500, 'Error al cargar las facturas aceptadas desde la base de datos. Por favor comuníquese con el soporte');
             }else{
                 // res.send(results);
                 res.render('facturas-activas', {
@@ -643,7 +645,8 @@ exports.facturasActivasBL = (req, res)=>{
         const visibilidad = 'no visible';
         connection.query('UPDATE facturas SET visibilidad = ? WHERE id = ?', [visibilidad, idFactura], (error, results)=>{
             if(error){
-                throw error;
+                console.error('Ha ocurrido un error al dar de baja las facturas activas (aceptadas): ', error);
+                return handleHttpResponse(res, 500, 'Error al dar de baja las facturas aceptadas desde la base de datos. Por favor comuníquese con el soporte');
             }else{
                 console.log(results);
                 this.facturasActivas(req, res);
