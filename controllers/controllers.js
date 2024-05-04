@@ -149,7 +149,7 @@ exports.autentificacion = async (req, res) =>{ // METODO AUTENTIFICACIÓN
                 req.session.secretaria = results[0].secretaria_id;
                 req.session.id_usuario = results[0].id;
                 req.session.nombreSecretaria = results[0].nombre_secretaria;
-                //console.log('Autentificación correcta del usuario: ' + req.session.nombre + ' perteneciente a la secretaria: ' + req.session.nombreSecretaria);
+                console.log('Autentificación correcta del usuario: ' + req.session.nombre + ' perteneciente a la secretaria: ' + req.session.nombreSecretaria);
                 //Método if-else sujeto a cambios de si es admin o no ATENCION!!
                 if(req.session.secretaria == '1'){
                     res.render('login', {
