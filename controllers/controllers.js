@@ -3,6 +3,7 @@ const fs = require('fs'); // Importar FileSystem para operaciones de archivos
 const path = require('path'); // Importar Path para manejar rutas de archivos
 const bcryptjs = require('bcryptjs'); 
 const { render } = require('ejs');
+const Swal = require('sweetalert2');
 const queryAnaliticas = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE f.estado = "en proceso"';
 const facturasAceptadas = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE f.estado = "aceptado" AND f.visibilidad = "visible" ORDER BY f.fecha_carga DESC';
 const facturasSelect = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE u.secretaria_id = ?';
@@ -231,7 +232,8 @@ exports.crearCategorias = (req, res) => {
                     }
                 } else {
                     console.log('Categoría creada con éxito: ', nombre);
-                    this.categorias(req, res);
+                    //this.categorias(req, res);
+                    res.redirect('categorias?alertcreate=true')
                 }
             });
         } catch (error) {
@@ -389,7 +391,7 @@ exports.cargarFactura = (req, res) => {
                             return handleHttpResponse(res, 500, 'Error interno del servidor al insertar los datos en la base de datos.')
                         } else { // Si los datos se insertaron correctamente en la base de datos
                             console.log('Datos insertados correctamente en la base de datos');
-                            res.redirect('facturas'); // Redirigir a la página de inicio después de cargar la factura
+                            res.redirect('facturas?success=true'); // Redirigir a la página de inicio después de cargar la factura
                         }
                     });
                 }
