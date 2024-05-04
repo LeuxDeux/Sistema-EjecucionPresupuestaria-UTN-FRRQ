@@ -46,7 +46,6 @@
     </table>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
 <!-- Modal Crear Categoria-->
 <div class="modal fade" id="modalCrearCategoria" tabindex="-1" aria-labelledby="modalCrearCategoriaLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -156,6 +155,7 @@
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     $(document).ready(function() {
         $('#btnCrearCategoria').click(function() {
@@ -226,6 +226,18 @@
             });
         });
     });
+    window.onload = function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const success = urlParams.get('alertcreate');
+    if (success === 'true') {
+        Swal.fire({
+            icon: 'success',
+            title: 'Categoría creada correctamente',
+            showConfirmButton: false,
+            timer: 2000
+        });
+    }
+};
 </script>
 </body>
 </html>
