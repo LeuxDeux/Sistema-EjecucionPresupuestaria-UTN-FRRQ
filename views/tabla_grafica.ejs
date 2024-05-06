@@ -5,19 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tabla Gráfica</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
      <!-- Div oculto para contener los datos -->
      <div id="dataContainer" style="display: none;" data-resultados="<%= JSON.stringify(resultados) %>"></div>
 
-    <!-- Canvas para el gráfico -->
-    <div class="flex flex-col">
-        <canvas id="myChart1" class="w-345 h-345"></canvas>
-        <canvas id="myChart2" class="w-345 h-345"></canvas>
-    </div>
+     <!-- Grafico torta para todas las secretarías -->
+    <div id="containerSecretariasPie" style="width:100%; height:400px;"></div>
 
-    <!-- Script para definir los datos del gráfico -->
+    <!-- Grafico torta para la secretaría de mantenimiento -->
+    <div id="containerMantenimiento" style="width:100%; height:400px;"></div>
+
+    <!-- Gráfico barra que contrapone los fondos de todas las secretarías-->
+    <div id="containerSecretariasBar" style="width:100%; height:400px;"></div>
+
+    <!-- Contenedor de la tabla -->
+    <div class="container mt-5">
+        <h2 class="text-center">Tabla de Secretarías</h2>
+        <table class="table table-bordered table-striped text-center mt-4">
+            <thead>
+                <tr class="bg-primary text-white">
+                    <th scope="col">SECRETARÍA</th>
+                    <th scope="col">EGRESOS</th>
+                    <th scope="col">INGRESOS</th>
+                    <th scope="col">TOTAL</th>
+                </tr>
+            </thead>
+            <tbody id="tablaSecretariasBody">
+                <!-- Los datos de la tabla se generarán acá con el JS de abajo  línea 200 a 242-->
+            </tbody>
+        </table>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
     <script>
+
+
         // Obtener los datos del div
         var dataContainer = document.getElementById('dataContainer');
         var resultados = JSON.parse(dataContainer.getAttribute('data-resultados'));
@@ -37,61 +63,260 @@
         var ganancias = Object.values(datosPorSecretaria).map(data => data.ganancia);
         var perdidas = Object.values(datosPorSecretaria).map(data => data.perdida);
 
+
         console.log(datosPorSecretaria)
-
-        // Crear un contexto de gráfico
-        var ctx1 = document.getElementById('myChart1').getContext('2d');
-        var ctx2 = document.getElementById('myChart2').getContext('2d');
-
-        // Crear el gráfico
-        var myChart1 = new Chart(ctx1, {
-            type: 'bar', // Tipo de gráfico (puedes cambiarlo según tus necesidades)
-            data: {
-                labels: secretarias, // Secretarias en el eje x
-                datasets: [{
-                    label: 'Ganancias',
-                    data: ganancias, // Datos de ganancias en el eje y
-                    borderColor: 'green', // Color del borde
-                    backgroundColor: 'rgba(0, 255, 0, 0.2)', // Color de fondo
-                    borderWidth: 1 // Ancho del borde
-                }, {
-                    label: 'Pérdidas',
-                    data: perdidas, // Datos de pérdidas en el eje y
-                    borderColor: 'red', // Color del borde
-                    backgroundColor: 'rgba(255, 0, 0, 0.2)', // Color de fondo
-                    borderWidth: 1 // Ancho del borde
-                }]
-            },
-            options: {
-                // Configuración adicional del gráfico (puedes personalizar según tus necesidades)
-            }
-        });
-
-
-        var myChart2 = new Chart(ctx2, {
-            type: 'pie', // Tipo de gráfico (puedes cambiarlo según tus necesidades)
-            data: {
-                labels: secretarias, // Secretarias en el eje x
-                datasets: [{
-                    label: 'Ganancias',
-                    data: ganancias, // Datos de ganancias en el eje y
-                    borderColor: 'green', // Color del borde
-                    backgroundColor: 'rgba(0, 255, 0, 0.2)', // Color de fondo
-                    borderWidth: 1 // Ancho del borde
-                }, {
-                    label: 'Pérdidas',
-                    data: perdidas, // Datos de pérdidas en el eje y
-                    borderColor: 'red', // Color del borde
-                    backgroundColor: 'rgba(255, 0, 0, 0.2)', // Color de fondo
-                    borderWidth: 1 // Ancho del borde
-                }]
-            },
-            options: {
-                // Configuración adicional del gráfico (puedes personalizar según tus necesidades)
-            }
-        });
         
+        //Aray para almacenar los datos de ganancias y pérdidas por secretaría
+        var datosPorSecretaria = [];
 
+        // Recorrer cada secretaría y agregar sus datos al array
+        for (var i = 0; i < secretarias.length; i++) {
+            datosPorSecretaria.push({
+                name: secretarias[i],
+                y: ganancias[i] + perdidas[i], // Sumar ganancias y pérdidas para cada secretaría
+                ganancias: ganancias[i], // Agregar las ganancias como propiedad
+                perdidas: perdidas[i] // Agregar las pérdidas como propiedad
+            });
+        }
+
+        // Se crea el grafico con los datos de cada secretaria
+        Highcharts.chart('containerSecretariasPie', {
+            chart: {
+                type: 'pie' // Es el tipo de grafico
+            },
+            title: {
+                text: 'Ganancias y pérdidas por secretaría'
+            },
+            tooltip: {
+                pointFormat: '<b>{point.name}</b>: <br>Ganancias: {point.ganancias}, Pérdidas: {point.perdidas}' // Formato del tooltip para mostrar ganancias y pérdidas
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: <br>Ganancias: {point.ganancias}, Pérdidas: {point.perdidas}', // Formato de las etiquetas de datos para mostrar ganancias y pérdidas
+                        style: {
+                            color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                        }
+                    }
+                }
+            },
+            series: [{
+                name: 'Ganancias y pérdidas',
+                colorByPoint: true,
+                data: datosPorSecretaria // Utilizar los datos agrupados por secretaría
+            }],
+            responsive: {
+                rules: [{
+                    condition: {
+                        maxWidth: 500
+                    },
+                    chartOptions: {
+                        legend: {
+                            layout: 'horizontal',
+                            align: 'center',
+                            verticalAlign: 'bottom'
+                        }
+                    }
+                }]
+            }
+        });
+
+        ///Mantenimiento
+        // Función para obtener los datos de una secretaria
+        function obtenerDatosParaPieChart(secretaria, resultados) {
+            // Filtrar los datos para obtener solo los relacionados con la secretaría que se selecciona
+            const datosSecretaria = resultados.filter(item => item.nombre_secretaria === secretaria);
+
+            // Se almacena la categoría aca
+            const egresosPorCategoria = {};
+
+            // Se calcula los egresos de cada categoria
+            datosSecretaria.forEach(item => {
+                const categoria = item.nombre_categoria;
+                const egresos = parseFloat(item.perdida);
+
+                // Si la categoría ya existe en el objeto, agregamos los egresos, de lo contrario, los inicializamos con los valores actuales
+                if (egresosPorCategoria[categoria]) {
+                    egresosPorCategoria[categoria] += egresos;
+                } else {
+                    egresosPorCategoria[categoria] = egresos;
+                }
+            });
+
+            // Crear un arreglo de objetos con los datos necesarios para el gráfico de pastel
+            const dataParaPieChart = Object.keys(egresosPorCategoria).map(categoria => ({
+                name: categoria,
+                y: egresosPorCategoria[categoria]
+            }));
+
+            return dataParaPieChart;
+        }
+
+        // Obtenemos los datos de la secretaría "Mantenimiento"
+        const datosMantenimiento = obtenerDatosParaPieChart('Mantenimiento', resultados);
+
+        // Crear el gráfico para los gastos de la secretaría "Mantenimiento"
+        Highcharts.chart('containerMantenimiento', {
+            chart: {
+                type: 'pie'
+            },
+            title: {
+                text: 'Egresos por categoría para la secretaría de Mantenimiento'
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.y}'
+                    }
+                }
+            },
+            series: [{
+                name: 'Egreso',
+                colorByPoint: true,
+                data: datosMantenimiento
+            }],
+            responsive: {
+                rules: [{
+                    condition: {
+                        maxWidth: 500
+                    },
+                    chartOptions: {
+                        legend: {
+                            layout: 'horizontal',
+                            align: 'center',
+                            verticalAlign: 'bottom'
+                        }
+                    }
+                }]
+            }
+        });
+
+        //Tabla para secretarias
+        // Función para generar las filas de la tabla
+        function generarFilas(resultados) {
+            var tbody = $('#tablaSecretariasBody');
+
+            // Objeto para almacenar los egresos e ingresos por secretaría
+            var resumenPorSecretaria = {};
+
+            // Iterar sobre los resultados y sumar egresos e ingresos por secretaría
+            $.each(resultados, function(index, resultado) {
+                // Si la secretaría ya existe en el objeto, se agregan los egresos e ingresos
+                if (resumenPorSecretaria[resultado.nombre_secretaria]) {
+                    resumenPorSecretaria[resultado.nombre_secretaria].egresos += parseFloat(resultado.perdida);
+                    resumenPorSecretaria[resultado.nombre_secretaria].ingresos += parseFloat(resultado.ganancia);
+                } else { // Si no existe, se inicializan los valores
+                    resumenPorSecretaria[resultado.nombre_secretaria] = {
+                        egresos: parseFloat(resultado.perdida),
+                        ingresos: parseFloat(resultado.ganancia)
+                    };
+                }
+            });
+
+            // Limpiar el contenido existente de la tabla
+            tbody.empty();
+
+            // Iterar sobre el objeto resumenPorSecretaria y generar una fila por cada secretaría
+            $.each(resumenPorSecretaria, function(secretaria, resumen) {
+                // Calcular el total (ingresos - egresos)
+                var total = resumen.ingresos - resumen.egresos;
+
+                // Crear fila
+                var row = $('<tr>');
+
+                // Agregar celdas con los datos correspondientes
+                $('<td>').text(secretaria).appendTo(row);
+                $('<td>').text(resumen.egresos).appendTo(row);
+                $('<td>').text(resumen.ingresos).appendTo(row);
+                $('<td>').text(total).appendTo(row);
+
+                // Agregar la fila a la tabla
+                tbody.append(row);
+            });
+        }
+        // Esperar a que el DOM esté listo
+        $(document).ready(function() {
+            // Obtener los datos del div oculto
+            var resultados = JSON.parse($('#dataContainer').attr('data-resultados'));
+
+            // Llamar a la función para generar las filas
+            generarFilas(resultados);
+        });
+
+        
+        //Grafico de Barras de secretarias
+        // Función para calcular los egresos por secretaría
+        function calcularEgresosPorSecretaria(resultados) {
+            return resultados.reduce(function(acc, item) {
+                var secretaria = item.nombre_secretaria;
+                var egreso = parseFloat(item.perdida);
+                acc[secretaria] = (acc[secretaria] || 0) + egreso;
+                return acc;
+            }, {});
+        }
+
+        // Calcular los egresos por secretaría
+        var egresosPorSecretaria = calcularEgresosPorSecretaria(resultados);
+
+        // Variable para almacenar el fondo disponible por secretaría
+        var fondoSecretaria = {
+            'Mantenimiento': 1000000,
+            'Administrativa': 1300000,
+            'Extensión Universitaria': 150000 // Fondos de ejemplo
+        };
+
+        // Calculo de fondo restantes
+        var fondosRestantes = Object.keys(egresosPorSecretaria).map(function(secretaria) {
+            var fondo = fondoSecretaria[secretaria] || 0; // Si no hay fondo disponible para una secretaría, establecerlo en 0
+            var egreso = egresosPorSecretaria[secretaria] || 0; // Si no hay egresos para una secretaría, establecerlo en 0
+            return fondo - egreso;
+        });
+
+        // Crear el gráfico de barras
+        Highcharts.chart('containerSecretariasBar', {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: 'Egresos y fondo disponible por secretaría'
+            },
+            xAxis: {
+                categories: Object.keys(egresosPorSecretaria) // Usar las categorías (nombres de las secretarías)
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: 'Monto'
+            }
+        },
+        tooltip: {
+            shared: true,
+            headerFormat: '<b>{point.x}</b><br/>',
+            pointFormat: '{series.name}: ${point.y}<br/>'
+        },
+        plotOptions: {
+            column: {
+                stacking: 'normal'
+            }
+        },
+        series: [{
+                name: 'Fondo Disponible',
+                data: fondosRestantes, // Utilizar los fondos restantes calculados
+                color: 'green' 
+            }, {
+                name: 'Egresos',
+                data: Object.keys(egresosPorSecretaria).map(function(secretaria) {
+                    return egresosPorSecretaria[secretaria] || 0; // Usar los montos de egresos acumulados
+                }),
+                color: 'red'
+            }]
+        });
     </script>
 </body>
 </html>
