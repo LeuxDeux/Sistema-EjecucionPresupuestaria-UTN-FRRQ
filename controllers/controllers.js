@@ -459,7 +459,7 @@ exports.borrarFactura = (req, res) => {
                                  return handleHttpResponse(res, 500, 'Error interno del servidor al consultar con las categorías. Por favor comuníquese con el soporte');
                              } else {
                                  // Renderiza la plantilla 'facturas.ejs' y pasa los resultados de ambas consultas
-                                 res.redirect('facturas');
+                                 res.redirect('facturas?borrado=true');
                              }
                          });
                     }
