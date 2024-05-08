@@ -157,12 +157,9 @@
 <script>
     $(document).ready(function() {
     $('.borrar-factura').click(function(event) {
-        event.preventDefault(); // Evitar que el enlace recargue la página
-        //Obtener el ID de la factura desde el atributo data
+        event.preventDefault(); 
         var facturaId = $(this).data('id');
-        //Asignar el ID de la factura al campo oculto en el formulario de edición
         $('#inputBorrarFacturaId').val(facturaId);
-        //Mostrar el modal de borrar
         $('#modalBorrarFactura').modal('show');
     });
     });
@@ -211,18 +208,92 @@
             });
         });
     });
+    //BETA DE MENSAJES
+//     window.onload = function() {
+//     const urlParams = new URLSearchParams(window.location.search);
+//     const successCargado = urlParams.get('success');
+//     const successBorrado = urlParams.get('borrado');
+
+//     if (successCargado === 'true') {
+//         Swal.fire({
+//             icon: 'success',
+//             title: '¡Factura cargada correctamente!',
+//             showConfirmButton: false,
+//             timer: 2000
+//         });
+//     }
+
+//     if (successBorrado === 'true') {
+//         Swal.fire({
+//             icon: 'success',
+//             title: '¡Factura borrada correctamente!',
+//             showConfirmButton: false,
+//             timer: 2000
+//         });
+//     }
+// };
+    //código de prueba para los alerts + cookies
     window.onload = function() {
     const urlParams = new URLSearchParams(window.location.search);
-    const success = urlParams.get('success');
-    if (success === 'true') {
+
+    // Verificar si se ha cargado correctamente una factura
+    const successCargado = urlParams.get('success');
+    if (successCargado === 'true' && getCookie('alertaCargada') !== 'true') {
+        setCookie('alertaCargada', 'true', 1); // Establecer cookie para evitar que se muestre nuevamente
         Swal.fire({
             icon: 'success',
             title: '¡Factura cargada correctamente!',
             showConfirmButton: false,
             timer: 2000
         });
+    } else {
+        // Eliminar cookie para permitir que se muestre la alerta en la próxima carga de página
+        deleteCookie('alertaCargada');
+    }
+
+    // Verificar si se ha borrado correctamente una factura
+    const successBorrado = urlParams.get('borrado');
+    if (successBorrado === 'true' && getCookie('alertaBorrada') !== 'true') {
+        setCookie('alertaBorrada', 'true', 1); // Establecer cookie para evitar que se muestre nuevamente
+        Swal.fire({
+            icon: 'success',
+            title: '¡Factura borrada correctamente!',
+            showConfirmButton: false,
+            timer: 2000
+        });
+    } else {
+        // Eliminar cookie para permitir que se muestre la alerta en la próxima carga de página
+        deleteCookie('alertaBorrada');
     }
 };
+
+// Función para establecer una cookie
+function setCookie(name, value, days) {
+    var expires = '';
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = '; expires=' + date.toUTCString();
+    }
+    document.cookie = name + '=' + (value || '') + expires + '; path=/';
+}
+
+// Función para obtener el valor de una cookie
+function getCookie(name) {
+    var nameEQ = name + '=';
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+}
+
+// Función para eliminar una cookie
+function deleteCookie(name) {
+    document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
 </script>
 </body>
 </html>
