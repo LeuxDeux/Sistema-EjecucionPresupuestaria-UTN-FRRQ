@@ -659,3 +659,18 @@ exports.facturasActivasBL = (req, res)=>{
         res.render('login');
     }
 }
+exports.fondosDisponibles = (req, res)=>{
+    if(req.session.loggedin){
+        connection.query('SELECT nombre_fondo, monto, fecha_carga FROM fondos_disponibles', (error, results)=>{
+            if(error){
+                console.error('Ha ocurrido un error al cargar los fondos disponibles: ', error);
+                return handleHttpResponse(res, 500, 'Error interno al cargar los fondos disponibles');
+            }else{
+                console.log(results);
+                res.send(results);
+            }
+        });
+    }else{
+        res.render('login');
+    }
+}
