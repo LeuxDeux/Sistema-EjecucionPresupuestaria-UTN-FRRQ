@@ -661,13 +661,20 @@ exports.facturasActivasBL = (req, res)=>{
 }
 exports.fondosDisponibles = (req, res)=>{
     if(req.session.loggedin){
-        connection.query('SELECT nombre_fondo, monto, fecha_carga FROM fondos_disponibles', (error, results)=>{
+        connection.query('SELECT nombre_fondo, monto, fecha_carga, id_fondo FROM fondos_disponibles', (error, results)=>{
             if(error){
                 console.error('Ha ocurrido un error al cargar los fondos disponibles: ', error);
                 return handleHttpResponse(res, 500, 'Error interno al cargar los fondos disponibles');
             }else{
                 console.log(results);
-                res.send(results);
+                res.render('fondos-disponibles', {
+                    login: true,
+                    nombre: req.session.nombre,
+                    id_usuario: req.session.id_usuario,
+                    secretaria: req.session.secretaria,
+                    nombreSecretaria: req.session.nombreSecretaria,
+                    resultados: results
+                });
             }
         });
     }else{
