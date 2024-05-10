@@ -29,6 +29,12 @@
                 </tr>
             </thead>
             <tbody>
+                <tr style="background-color: #127cc1;">
+                    <td><strong>TOTAL</strong></td>
+                    <td style="display: none;"></td>
+                    <td id="totalMonto"></td>
+                    <td></td>
+                </tr>
                 <% resultados.forEach(function(fondos) { %>
                 <tr>
                     <td><%= fondos.nombre_fondo %></td>
@@ -72,6 +78,15 @@ $(document).ready(function() {
     $('#btnAgregarFondo').click(function() {
         $('#modalAgregarFondo').modal('show');
     });
+     // Calcula el total de los montos y muestra en la fila "TOTAL"
+     var totalMonto = 0;
+    $('tbody').find('tr').each(function() {
+        var monto = parseFloat($(this).find('td:eq(2)').text());
+        if (!isNaN(monto)) {
+            totalMonto += monto;
+        }
+    });
+    $('#totalMonto').text(totalMonto.toFixed(2));
 });
 </script>
 </body>
