@@ -681,3 +681,18 @@ exports.fondosDisponibles = (req, res)=>{
         res.render('login');
     }
 }
+exports.cargarFondo = (req, res)=>{
+    if(req.session.loggedin){
+        const { nombreFondo, montoFondo } = req.body;
+        connection.query('INSERT INTO `dbutn`.`fondos_disponibles` (`nombre_fondo`, `monto`) VALUES (?, ?)', [nombreFondo, montoFondo], (error, results)=>{
+            if(error){
+                console.error('Ha ocurrido un error al cargar los fondos disponibles: ', error);
+                return handleHttpResponse(res, 500, 'Error interno al ingresar un nuevo fondo. Por favor comuníquese con el soporte');
+            }else{
+                res.redirect('fondos-disponibles');
+            }
+        });
+    }else{
+        res.render('login');
+    }
+}

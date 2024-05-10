@@ -100,3 +100,4 @@ app.post('/bl-factura', crud.facturasActivasBL); // No llevas /:id xq no se mand
 
 //FONDOS DISPONIBLES
 app.get('/fondos-disponibles', crud.fondosDisponibles);
+app.post('/agregar-fondo', crud.cargarFondo);

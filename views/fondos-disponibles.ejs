@@ -14,7 +14,7 @@
 <h1>Cargar Fondos Disponibles</h1>
 <div class="container">
     <a href="/" id="volver" class="btn btn-outline-primary mt-4"><i class="bx bxs-chevron-left bx-md"></i></a>
-    <a href="#" id="btnCargarMonto" class="btn btn-outline-primary mt-4" data-secretaria="<%= secretaria %>"><i class="bx bxs-plus-circle bx-md"></i></a>
+    <a href="#" id="btnAgregarFondo" class="btn btn-outline-primary mt-4" data-secretaria="<%= secretaria %>"><i class="bx bxs-plus-circle bx-md"></i></a>
     <% if(login) { %>
         <p><%= nombre %></p>
         <p><%= nombreSecretaria %></p>
@@ -40,10 +40,39 @@
             </tbody>
         </table>
 </div>
+<!-- Modal de Agregar Fondo-->
+<div class="modal fade" id="modalAgregarFondo" tabindex="-1" aria-labelledby="modalAgregarFondoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAgregarFondoLabel">Agregar Fondo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formAgregarFondo" action="/agregar-fondo" method="post">
+                    <div class="mb-3">
+                        <label for="nombreFondo" class="form-label">Nombre de Fondo</label>
+                        <input type="text" class="form-control" id="nombreFondo" name="nombreFondo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="montoFondo" class="form-label">Monto</label>
+                        <input type="text" class="form-control" id="montoFondo" name="montoFondo" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Crear</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+$(document).ready(function() {
+    $('#btnAgregarFondo').click(function() {
+        $('#modalAgregarFondo').modal('show');
+    });
+});
 </script>
 </body>
 </html>
