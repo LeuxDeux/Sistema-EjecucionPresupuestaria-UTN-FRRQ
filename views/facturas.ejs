@@ -9,6 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="resources/css/styles.css">
     <title>FACTURAS</title>
     <style>
         td {
@@ -65,7 +66,7 @@
                     <td><%= factura.fecha_formateada %></td>
                     <td><a href="/descargar-archivo/<%= factura.id %>"><%= factura.nombre_factura %></a></td>
                     <td style="display: none;"><%= factura.categoria_id %></td>
-                    <td><%= factura.monto %></td>
+                    <td class="monto"><%= factura.monto %></td>
                     <td><%= factura.estado %></td>
                     <td><%= factura.nombre_usuario %></td>
                     <td><%= factura.nombre_categoria %></td>
@@ -294,6 +295,21 @@ function getCookie(name) {
 function deleteCookie(name) {
     document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 }
+// $(document).ready(function() {
+//     // Función para formatear el número con comas para separar los miles
+//     function formatNumberWithCommas(number) {
+//         // Divide el número en grupos de tres dígitos, luego agrega comas entre ellos
+//         return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+//     }
+
+//     // Itera sobre todos los elementos con la clase 'monto'
+//     $('.monto').each(function() {
+//         var monto = $(this).text(); // Obtén el texto del elemento
+//         var montoFormateado = formatNumberWithCommas(monto); // Formatea el monto con comas
+//         $(this).text(montoFormateado); // Establece el texto formateado en el elemento
+//     });
+// });
 </script>
+<script src="resources/js/jsformat.js"></script>
 </body>
 </html>

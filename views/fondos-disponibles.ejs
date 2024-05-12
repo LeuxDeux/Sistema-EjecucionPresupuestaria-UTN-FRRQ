@@ -8,6 +8,7 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="resources/css/styles.css">
     <title>CATEGORIAS</title>
 </head>
 <body>
@@ -32,14 +33,14 @@
                 <tr style="background-color: #127cc1;">
                     <td><strong>TOTAL</strong></td>
                     <td style="display: none;"></td>
-                    <td id="totalMonto"></td>
+                    <td class="monto"><strong id="totalMonto"></strong></td>
                     <td></td>
                 </tr>
                 <% resultados.forEach(function(fondos) { %>
                 <tr>
                     <td><%= fondos.nombre_fondo %></td>
                     <td style="display: none;"><%= fondos.id_fondo %></td>
-                    <td><%= fondos.monto %></td>
+                    <td class="monto"><%= fondos.monto %></td>
                     <td><%= fondos.fecha_carga_formateada %></td>
                 </tr>
                 <% }); %>
@@ -74,20 +75,29 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-$(document).ready(function() {
-    $('#btnAgregarFondo').click(function() {
-        $('#modalAgregarFondo').modal('show');
-    });
-     // Calcula el total de los montos y muestra en la fila "TOTAL"
-     var totalMonto = 0;
-    $('tbody').find('tr').each(function() {
-        var monto = parseFloat($(this).find('td:eq(2)').text());
-        if (!isNaN(monto)) {
-            totalMonto += monto;
+    $(document).ready(function() {
+        $('#btnAgregarFondo').click(function() {
+            $('#modalAgregarFondo').modal('show');
+        });
+        // Calcula el total de los montos y muestra en la fila "TOTAL"
+        var totalMonto = 0;
+        $('tbody').find('tr').each(function() {
+            var monto = parseFloat($(this).find('td:eq(2)').text());
+            if (!isNaN(monto)) {
+                totalMonto += monto;
+                // Formatear el monto individual con comas para separar los miles
+                var montoFormateado = formatNumberWithCommas(monto.toFixed(2));
+                $(this).find('td:eq(2)').text(montoFormateado);
+            }
+        });
+        // Formatear el total con comas para separar los miles
+        var totalMontoFormateado = formatNumberWithCommas(totalMonto.toFixed(2));
+        $('#totalMonto').text(totalMontoFormateado);
+        // Función para formatear el número con comas para separar los miles
+        function formatNumberWithCommas(number) {
+            return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
     });
-    $('#totalMonto').text(totalMonto.toFixed(2));
-});
 </script>
 </body>
 </html>

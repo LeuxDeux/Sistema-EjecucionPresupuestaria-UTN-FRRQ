@@ -8,6 +8,7 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="resources/css/styles.css">
     <title>FACTURAS ACEPTADAS</title>
 </head>
 <body>
@@ -54,7 +55,7 @@
                     <td style="display: none;"><%= factura.id %></td>
                     <td><%= factura.fecha_formateada %></td>
                     <td><a href="/descargar-archivo/<%= factura.id %>"><%= factura.nombre_factura %></a></td>
-                    <td><%= factura.monto %></td>
+                    <td class="monto"><%= factura.monto %></td>
                     <td><%= factura.nombre_usuario %></td>
                     <td><%= factura.nombre_categoria %></td>
                     <td>
@@ -135,6 +136,20 @@
             });
         });
     });
+    $(document).ready(function() {
+    // Función para formatear el número con comas para separar los miles
+    function formatNumberWithCommas(number) {
+        // Divide el número en grupos de tres dígitos, luego agrega comas entre ellos
+        return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    // Itera sobre todos los elementos que muestran montos en la tabla
+    $('.monto').each(function() {
+        var monto = $(this).text(); // Obtén el texto del elemento
+        var montoFormateado = formatNumberWithCommas(monto); // Formatea el monto con comas
+        $(this).text(montoFormateado); // Establece el texto formateado en el elemento
+    });
+});
 </script>
 </body>
 </html>
