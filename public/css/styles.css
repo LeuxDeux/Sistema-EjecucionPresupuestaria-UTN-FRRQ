@@ -58,3 +58,7 @@
     background-color: #f87171;
     color: white;
 }
+.monto::before {
+    content: '$';
+    margin-right: 5px;
+}
