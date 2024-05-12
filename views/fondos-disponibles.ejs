@@ -76,28 +76,23 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     $(document).ready(function() {
-        $('#btnAgregarFondo').click(function() {
-            $('#modalAgregarFondo').modal('show');
-        });
-        // Calcula el total de los montos y muestra en la fila "TOTAL"
-        var totalMonto = 0;
-        $('tbody').find('tr').each(function() {
-            var monto = parseFloat($(this).find('td:eq(2)').text());
-            if (!isNaN(monto)) {
-                totalMonto += monto;
-                // Formatear el monto individual con comas para separar los miles
-                var montoFormateado = formatNumberWithCommas(monto.toFixed(2));
-                $(this).find('td:eq(2)').text(montoFormateado);
-            }
-        });
-        // Formatear el total con comas para separar los miles
-        var totalMontoFormateado = formatNumberWithCommas(totalMonto.toFixed(2));
-        $('#totalMonto').text(totalMontoFormateado);
-        // Función para formatear el número con comas para separar los miles
-        function formatNumberWithCommas(number) {
-            return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    $('#btnAgregarFondo').click(function() {
+        $('#modalAgregarFondo').modal('show');
+    });
+
+    // Calcula el total de los montos y muestra en la fila "TOTAL"
+    var totalMonto = 0;
+    $('tbody').find('tr').each(function() {
+        var monto = parseFloat($(this).find('td:eq(2)').text());
+        if (!isNaN(monto)) {
+            totalMonto += monto;
         }
     });
+
+    // Muestra el total sin formatear
+    $('#totalMonto').text(totalMonto.toFixed(2));
+});
 </script>
+<script src="resources/js/jsformat.js"></script>
 </body>
 </html>
