@@ -583,7 +583,8 @@ exports.cargarIngreso = (req, res) => {
                     console.error('Error al insertar el ingreso: ', error);
                     return handleHttpResponse(res, 500, 'Error interno del servidor al cargar el ingreso. Por favor comuníquese con el soporte');
                 } else {
-                    this.ingresoGanancia(req, res);
+                    // this.ingresoGanancia(req, res);
+                    res.redirect('ingresos');
                 }
             }
         );
