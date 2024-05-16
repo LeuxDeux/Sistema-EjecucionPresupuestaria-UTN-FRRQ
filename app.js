@@ -98,6 +98,11 @@ app.get('/tabla_grafica', crud.tablaGrafica);
 app.get('/facturas-activas', crud.facturasActivas);
 app.post('/bl-factura', crud.facturasActivasBL); // No llevas /:id xq no se manda por url 'req.params.id' sino que se manda en el cuerpo por ser POST 'req.body.id'
 
+//FONDOS CATEGORIAS
+app.get('/fondos-categorias', crud.fondosCategorias);
+app.post('/agregar-fondo-categoria', crud.cargarFondoCategoria);
+app.post('/cargar-fondo', crud.cargarFondo);
+
 //FONDOS DISPONIBLES
 app.get('/fondos-disponibles', crud.fondosDisponibles);
 app.post('/agregar-fondo', crud.cargarFondo);

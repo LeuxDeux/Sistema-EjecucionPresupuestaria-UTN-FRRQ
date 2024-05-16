@@ -660,40 +660,100 @@ exports.facturasActivasBL = (req, res)=>{
         res.render('login');
     }
 }
-exports.fondosDisponibles = (req, res)=>{
+exports.fondosCategorias = (req, res)=>{
     if(req.session.loggedin){
-        connection.query('SELECT nombre_fondo, monto, DATE_FORMAT(fecha_carga, "%d/%m/%Y") AS fecha_carga_formateada, id_fondo FROM fondos_disponibles WHERE WEEK(fecha_carga) = WEEK(CURDATE()) AND YEAR(fecha_carga) = YEAR(CURDATE());', (error, results)=>{
+        connection.query('SELECT * from categorias_fondos', (error, results)=>{
             if(error){
                 console.error('Ha ocurrido un error al cargar los fondos disponibles: ', error);
-                return handleHttpResponse(res, 500, 'Error interno al cargar los fondos disponibles');
+                return handleHttpResponse(res, 500, 'Error interno al cargar las categorías de fondos');
             }else{
-                //console.log(results);
-                res.render('fondos-disponibles', {
+                res.render('fondos-categorias', {
                     login: true,
                     nombre: req.session.nombre,
                     id_usuario: req.session.id_usuario,
                     secretaria: req.session.secretaria,
                     nombreSecretaria: req.session.nombreSecretaria,
                     resultados: results
-                });
+                })
             }
         });
     }else{
         res.render('login');
     }
 }
-exports.cargarFondo = (req, res)=>{
+exports.cargarFondoCategoria = (req, res)=>{
     if(req.session.loggedin){
-        const { nombreFondo, montoFondo } = req.body;
-        connection.query('INSERT INTO `fondos_disponibles` (`nombre_fondo`, `monto`) VALUES (?, ?)', [nombreFondo, montoFondo], (error, results)=>{
+        const nombreFondo = req.body.nombreFondo;
+        connection.query('INSERT INTO categorias_fondos (nombre_categoria_fondo) VALUES (?)', [nombreFondo], (error, results)=>{
             if(error){
+                console.error('Ha ocurrido un error al insertar el nuevo fondo ', error);
+                return handleHttpResponse(res, 500, 'Error al insertar un nuevo fondo, recuerda revisar que no exista anteriormente');
+            }else{
+                res.redirect('fondos-categorias');
+            }
+        })
+    }else{
+        res.render('login');
+    }
+}
+
+
+
+
+
+////////////////////////////////
+exports.fondosDisponibles = (req, res) => {
+    if (req.session.loggedin) {
+        const queryFondosDisponibles = `
+            SELECT cf.nombre_categoria_fondo, fd.monto, DATE_FORMAT(fd.fecha_carga, "%d/%m/%Y") AS fecha_carga_formateada, fd.id_fondo
+            FROM fondos_disponibles fd
+            JOIN categorias_fondos cf ON fd.id_categoria_fondo = cf.id_categoria_fondo
+            WHERE WEEK(fd.fecha_carga) = WEEK(CURDATE()) AND YEAR(fd.fecha_carga) = YEAR(CURDATE());
+        `;
+        const queryCategoriasFondos = 'SELECT * FROM categorias_fondos';
+
+        // Ejecutar la primera consulta
+        connection.query(queryFondosDisponibles, (errorFondos, resultadosFondos) => {
+            if (errorFondos) {
+                console.error('Ha ocurrido un error al cargar los fondos disponibles: ', errorFondos);
+                return handleHttpResponse(res, 500, 'Error interno al cargar los fondos disponibles');
+            } else {
+                // Ejecutar la segunda consulta
+                connection.query(queryCategoriasFondos, (errorCategorias, resultadosCategorias) => {
+                    if (errorCategorias) {
+                        console.error('Ha ocurrido un error al cargar las categorías de fondos: ', errorCategorias);
+                        return handleHttpResponse(res, 500, 'Error interno al cargar las categorías de fondos');
+                    } else {
+                        // Renderizar la vista con los resultados de ambas consultas
+                        res.render('fondos-disponibles', {
+                            login: true,
+                            nombre: req.session.nombre,
+                            id_usuario: req.session.id_usuario,
+                            secretaria: req.session.secretaria,
+                            nombreSecretaria: req.session.nombreSecretaria,
+                            resultadosFondos: resultadosFondos,
+                            resultadosCategorias: resultadosCategorias
+                        });
+                    }
+                });
+            }
+        });
+    } else {
+        res.render('login');
+    }
+}
+exports.cargarFondo = (req, res) => {
+    if (req.session.loggedin) {
+        const { idCategoriaFondo, montoFondo } = req.body;
+        connection.query('INSERT INTO `fondos_disponibles` (`id_categoria_fondo`, `monto`) VALUES (?, ?)', [idCategoriaFondo, montoFondo], (error, results) => {
+            if (error) {
                 console.error('Ha ocurrido un error al cargar los fondos disponibles: ', error);
                 return handleHttpResponse(res, 500, 'Error interno al ingresar un nuevo fondo. Por favor comuníquese con el soporte');
-            }else{
+            } else {
                 res.redirect('fondos-disponibles');
             }
         });
-    }else{
+    } else {
         res.render('login');
     }
 }
