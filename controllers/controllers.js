@@ -298,18 +298,26 @@ exports.categorias = (req, res) => {
 //BORRAR CATEGORÍA 
 exports.borrarCategoria = (req, res) => {
     if(req.session.loggedin){
-        const categoriaId = req.body.id; // Obtenemos el ID de la categoría desde el cuerpo de la solicitud
-        // Realizamos la actualización en la base de datos
-        connection.query('DELETE FROM categorias WHERE id = ?', [categoriaId], (error, results) => {
+        const categoriaId = req.body.id;
+        // Primero, eliminamos las filas dependientes en `ingresos`
+        connection.query('DELETE FROM ingresos WHERE categoria_id = ?', [categoriaId], (error, results) => {
             if (error) {
-                console.error('Error al borrar categoría', error);
-                return handleHttpResponse(res, 500, 'Ocurrió un error al borrar la categoría, intente nuevamente o comuníquese con el soporte');
-            } else {
-                console.log('Categoría borrada con éxito');
-                this.categorias(req, res);
+                console.error('Error al borrar filas dependientes en ingresos', error);
+                return handleHttpResponse(res, 500, 'Ocurrió un error al borrar las filas dependientes en ingresos, intente nuevamente o comuníquese con el soporte');
             }
+            // Luego, eliminamos la categoría
+            connection.query('DELETE FROM categorias WHERE id = ?', [categoriaId], (error, results) => {
+                if (error) {
+                    console.error('Error al borrar categoría', error);
+                    return handleHttpResponse(res, 500, 'Ocurrió un error al borrar la categoría, intente nuevamente o comuníquese con el soporte');
+                } else {
+                    console.log('Categoría borrada con éxito');
+                    // this.categorias(req, res);
+                    res.redirect('categorias');
+                }
+            });
         });
-    }else{
+    } else {
         res.render('login');
     }
 };
