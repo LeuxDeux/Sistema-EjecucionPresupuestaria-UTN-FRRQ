@@ -4,6 +4,7 @@ const path = require('path'); // Importar Path para manejar rutas de archivos
 const bcryptjs = require('bcryptjs'); 
 const { render } = require('ejs');
 const Swal = require('sweetalert2');
+const { connect } = require('http2');
 const queryAnaliticas = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE f.estado = "en proceso"';
 const facturasAceptadas = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE f.estado = "aceptado" AND f.visibilidad = "visible" ORDER BY f.fecha_carga DESC';
 const facturasSelect = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE u.secretaria_id = ? AND f.visibilidad = "visible"';
@@ -765,3 +766,28 @@ exports.cargarFondo = (req, res) => {
         res.render('login');
     }
 }
+exports.editarFondo = (req, res) => {
+    if (req.session.loggedin) {
+        const { editarIdCategoriaFondo, editarMontoFondo } = req.body;
+
+        connection.query(
+            'UPDATE `fondos_disponibles` SET `monto` = ? WHERE `id_fondo` = ?',
+            [editarMontoFondo, editarIdCategoriaFondo],
+            (error, results) => {
+                if (error) {
+                    console.error('Ha ocurrido un error al actualizar el fondo disponible: ', error);
+                    return handleHttpResponse(res, 500, 'Error interno al actualizar el fondo. Por favor comuníquese con el soporte');
+                } else {
+                    if (results.affectedRows === 0) {
+                        console.warn('No se encontró ninguna fila para actualizar con id_categoria_fondo:', editarIdCategoriaFondo);
+                        return handleHttpResponse(res, 404, 'No se encontró ninguna fila para actualizar.');
+                    }
+                    console.log('Fondo actualizado con éxito:', results);
+                    res.redirect('fondos-disponibles');
+                }
+            }
+        );
+    } else {
+        res.render('login');
+    }
+};
