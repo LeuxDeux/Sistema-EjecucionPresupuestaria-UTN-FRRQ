@@ -791,3 +791,28 @@ exports.editarFondo = (req, res) => {
         res.render('login');
     }
 };
+exports.borrarFondo = (req, res) => {
+    if (req.session.loggedin) {
+        const { borrarIdCategoriaFondo } = req.body;
+
+        connection.query(
+            'DELETE FROM `fondos_disponibles` WHERE `id_fondo` = ?',
+            [borrarIdCategoriaFondo],
+            (error, results) => {
+                if (error) {
+                    console.error('Ha ocurrido un error al borrar el fondo disponible: ', error);
+                    return handleHttpResponse(res, 500, 'Error interno al borrar el fondo. Por favor comuníquese con el soporte');
+                } else {
+                    if (results.affectedRows === 0) {
+                        console.warn('No se encontró ninguna fila para borrar con id_categoria_fondo:', borrarIdCategoriaFondo);
+                        return handleHttpResponse(res, 404, 'No se encontró ninguna fila para borrar.');
+                    }
+                    console.log('Fondo borrado con éxito:', results);
+                    res.redirect('fondos-disponibles');
+                }
+            }
+        );
+    } else {
+        res.render('login');
+    }
+};

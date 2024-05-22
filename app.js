@@ -107,3 +107,4 @@ app.post('/cargar-fondo', crud.cargarFondo);
 app.get('/fondos-disponibles', crud.fondosDisponibles);
 app.post('/agregar-fondo', crud.cargarFondo);
 app.post('/editar-fondo', crud.editarFondo);
+app.post('/borrar-fondo', crud.borrarFondo);
