@@ -621,6 +621,22 @@ exports.editarIngreso = (req, res) => {
         res.render('login');
     }
 };
+exports.borrarIngreso = (req, res) => {
+    if (req.session.loggedin) {
+        const { borrarIdIngreso } = req.body;
+        connection.query('DELETE FROM ingresos WHERE id_ingreso = ?', [borrarIdIngreso], (error, results) => {
+            if (error) {
+                console.error('Error al borrar el ingreso: ', error);
+                return handleHttpResponse(res, 500, 'Error interno del servidor al borrar el ingreso. Por favor comuníquese con el soporte');
+            } else {
+                res.redirect('ingresos');
+            }
+        });
+    } else {
+        res.render('login');
+    }
+};
+/////////////////////////////////////////////////////////////////////////////
 exports.tablaGrafica = (req,res)=>{
     if (req.session.loggedin) {
         connection.query('SELECT fecha, nombre, tipo, nombre_secretaria, nombre_categoria, nombre_usuario, IF(tipo = "egreso", monto, 0) AS perdida, IF(tipo = "ingreso", monto, 0) AS ganancia FROM (SELECT f.fecha_carga AS fecha, f.nombre_factura AS nombre, "egreso" AS tipo, s.nombre AS nombre_secretaria, c.nombre AS nombre_categoria, u.nombres AS nombre_usuario, f.monto AS monto FROM facturas f JOIN categorias c ON f.categoria_id = c.id JOIN secretarias s ON c.secretaria_id = s.id JOIN usuarios u ON f.usuario_id = u.id WHERE f.estado = "aceptado" UNION ALL SELECT i.fecha_ingreso AS fecha, i.nombre_ingreso AS nombre, "ingreso" AS tipo, s.nombre AS nombre_secretaria, c.nombre AS nombre_categoria, u.nombres AS nombre_usuario, i.monto AS monto FROM ingresos i JOIN categorias c ON i.categoria_id = c.id JOIN secretarias s ON i.secretaria_id = s.id JOIN usuarios u ON i.usuario_id = u.id) AS combined_data ORDER BY fecha', (error, results)=>{
