@@ -34,6 +34,7 @@
                 <th scope="col">Categoría</th>
                 <th scope="col">Monto</th>
                 <th scope="col">Usuario</th>
+                <th scope="col">Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -45,6 +46,10 @@
                     <td><%= ingreso.nombre_categoria %></td>
                     <td class="monto"><%= ingreso.monto %></td>
                     <td><%= ingreso.nombre_usuario %></td>
+                    <td>
+                        <a href="#" class="btn btn-outline-info btnEditarIngreso" data-id="<%= ingreso.id_ingreso %>" data-name="<%= ingreso.nombre_ingreso %>" data-monto="<%= ingreso.monto %>">Editar</a>
+                        <a href="#" class="btn btn-outline-danger btnBorrarIngreso" data-id="<%= ingreso.id_ingreso %>" data-name="<%= ingreso.nombre_ingreso %>">Borrar</a>
+                    </td>
                 </tr>
             <% }); %>
         </tbody>
@@ -83,7 +88,31 @@
         </div>
     </div>
 </div>
-
+<!-- Modal de Editar Ingreso -->
+<div class="modal fade" id="modalEditarIngreso" tabindex="-1" aria-labelledby="modalEditarIngresoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditarIngresoLabel">Editar Ingreso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditarIngreso" action="/editar-ingreso" method="post">
+                    <div class="mb-3">
+                        <label for="editarIngreso" class="form-label">Nombre Ingreso</label>
+                        <input type="text" class="form-control" id="editarIngreso" name="editarIngreso">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editarMontoIngreso" class="form-label">Monto</label>
+                        <input type="number" step="any" class="form-control" id="editarMontoIngreso" name="editarMontoIngreso" required>
+                    </div>
+                    <input type="hidden" id="editarIdIngreso" name="editarIdIngreso">
+                    <button type="submit" class="btn btn-primary">Actualizar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 <script>
@@ -101,6 +130,19 @@
             });
         });
     });
+    $(document).ready(function(){
+        $('.btnEditarIngreso').click(function() {
+            var id = $(this).data('id');
+            var name = $(this).data('name');
+            var monto = $(this).data('monto');
+
+            $('#editarIdIngreso').val(id);
+            $('#editarIngreso').val(name);
+            $('#editarMontoIngreso').val(monto);
+
+            $('#modalEditarIngreso').modal('show');
+        });
+    })
 </script>
 <script src="resources/js/jsformat.js"></script>
 </body>

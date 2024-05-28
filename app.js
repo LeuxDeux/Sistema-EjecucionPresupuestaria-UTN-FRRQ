@@ -90,6 +90,7 @@ app.get('/rechazar-factura/:id', crud.rechazarFactura);
 //INGRESO
 app.get('/ingresos', crud.ingresoGanancia);
 app.post('/registrar-ingreso', crud.cargarIngreso);
+app.post('/editar-ingreso', crud.editarIngreso);
 
 //COMIENZO ESTADISTICAS/GRAFICO/TABLA
 app.get('/tabla_grafica', crud.tablaGrafica);

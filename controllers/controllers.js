@@ -599,11 +599,26 @@ exports.cargarIngreso = (req, res) => {
         );
     } else {
         res.render('login');
-        // res.render('index', {
-        //     login: false,
-        //     nombre: 'Debe iniciar sesión',
-        //     secretaria: ''
-        // });
+    }
+};
+exports.editarIngreso = (req, res) => {
+    if (req.session.loggedin) {
+        const { editarIngreso, editarMontoIngreso, editarIdIngreso } = req.body;
+        // Actualizar el ingreso en la base de datos
+        connection.query(
+            'UPDATE ingresos SET nombre_ingreso = ?, monto = ? WHERE id_ingreso = ?',
+            [editarIngreso, editarMontoIngreso, editarIdIngreso],
+            (error, results) => {
+                if (error) {
+                    console.error('Error al actualizar el ingreso: ', error);
+                    return handleHttpResponse(res, 500, 'Error interno del servidor al actualizar el ingreso. Por favor comuníquese con el soporte');
+                } else {
+                    res.redirect('ingresos');
+                }
+            }
+        );
+    } else {
+        res.render('login');
     }
 };
 exports.tablaGrafica = (req,res)=>{
