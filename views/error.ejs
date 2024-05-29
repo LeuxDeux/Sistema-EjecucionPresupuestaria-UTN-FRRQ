@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error <%= statusCode %></title>
+    <link rel="stylesheet" href="resources/css/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="flex justify-center items-center min-h-screen">
+        <div class="text-center">
+            <h2 class="text-3xl font-bold mb-4">Error <%= statusCode %></h2>
+            <p class="mb-4"><%= message %></p>
+            <a href="/" class="block px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Volver a la página principal</a>
+        </div>
+    </div>
+</body>
+</html>

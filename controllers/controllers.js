@@ -10,12 +10,18 @@ const facturasAceptadas = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS
 const facturasSelect = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE u.secretaria_id = ? AND f.visibilidad = "visible"';
 const categoriasSelect = 'SELECT id, nombre FROM categorias WHERE secretaria_id = ?';
 // Función de utilidad para manejar respuestas HTTP
+// function handleHttpResponse(res, statusCode, message) {
+//     res.status(statusCode).send(`
+//         <h2>Error ${statusCode}</h2>
+//         <p>${message}</p>
+//         <a href="/">Volver a la página principal</a>
+//     `);
+// }
 function handleHttpResponse(res, statusCode, message) {
-    res.status(statusCode).send(`
-        <h2>Error ${statusCode}</h2>
-        <p>${message}</p>
-        <a href="/">Volver a la página principal</a>
-    `);
+    res.status(statusCode).render('error', {
+        statusCode: statusCode,
+        message: message
+    });
 }
 /* 
 //////////////////////
