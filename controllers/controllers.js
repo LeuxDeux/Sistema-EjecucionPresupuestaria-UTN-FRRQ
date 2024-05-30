@@ -493,7 +493,7 @@ CONTROLLERS ANALITICAS
 */
 
 exports.analiticas = (req, res) => {
-    if (req.session.loggedin) {
+    if (req.session.loggedin && req.session.secretaria == '1') {
         connection.query(queryAnaliticas, (error, results) => {  
             if (error) {
                 console.error('Ha ocurrido un error interno al consultar con la base de datos: ', error);
