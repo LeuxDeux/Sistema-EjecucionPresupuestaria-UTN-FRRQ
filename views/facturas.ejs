@@ -309,6 +309,21 @@ function deleteCookie(name) {
 //         $(this).text(montoFormateado); // Establece el texto formateado en el elemento
 //     });
 // });
+$(document).ready(function() {
+        // Función para aplicar clases de color según el estado de la factura
+        $('tbody tr').each(function() {
+            var estado = $(this).find('td:eq(5)').text().trim().toLowerCase();
+            var estadoTd = $(this).find('td:eq(5)');
+            
+            if (estado === 'aceptado') {
+                estadoTd.addClass('estado-aceptado');
+            } else if (estado === 'denegado') {
+                estadoTd.addClass('estado-denegado');
+            } else if (estado === 'en proceso') {
+                estadoTd.addClass('estado-en-proceso');
+            }
+        });
+    });
 </script>
 <script src="resources/js/jsformat.js"></script>
 </body>
