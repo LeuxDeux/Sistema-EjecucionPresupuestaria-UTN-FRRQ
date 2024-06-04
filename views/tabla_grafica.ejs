@@ -453,11 +453,11 @@
             }));
         }
 
-        // Se calcula los egresos e ingresos por secretaría
+        // Calculamos los egresos e ingresos por secretaría
         var egresosPorSecretaria = calcularEgresosPorSecretaria(resultados);
         var ingresosPorSecretaria = calcularIngresosPorSecretaria(resultados);
 
-        // Se crea la serie de datos principales
+        // Creamos la serie de datos principales
         var seriesData = [];
         var drilldownSeries = [];
 
@@ -472,7 +472,7 @@
 
             var categoriaData = datosPorCategoria.map(item => ({
                 name: item.name,
-                y: item.ingresos + item.egresos, // Mostramos la suma de ingresos y egresos para que siempre haya un valor
+                y: item.ingresos - item.egresos, // Se muestra la diferencia entre ingresos y egresos
                 drilldown: secretaria + '-' + item.name
             }));
 
@@ -493,7 +493,7 @@
             });
         });
 
-        // Creamos el gráfico de barras con drilldown
+        // Crear el gráfico de barras con drilldown
         Highcharts.chart('containerSecretariasBar2', {
             chart: {
                 type: 'column'
