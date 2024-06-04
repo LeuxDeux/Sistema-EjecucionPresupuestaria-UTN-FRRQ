@@ -599,7 +599,7 @@ exports.cargarIngreso = (req, res) => {
                     return handleHttpResponse(res, 500, 'Error interno del servidor al cargar el ingreso. Por favor comuníquese con el soporte');
                 } else {
                     // this.ingresoGanancia(req, res);
-                    res.redirect('ingresos');
+                    res.redirect('ingresos?success=true');
                 }
             }
         );

@@ -136,6 +136,7 @@
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     $(document).ready(function() {
         $('.btnCargarIngreso').click(function() {
@@ -173,6 +174,53 @@
 
             $('#modalConfirmarBorrar').modal('show');
         });
+        //código de prueba para los alerts + cookies
+
+    window.onload = function() {
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // Verificar si se ha cargado correctamente un ingreso
+    const successCargado = urlParams.get('success');
+    if (successCargado === 'true' && getCookie('alertaCargada') !== 'true') {
+        setCookie('alertaCargada', 'true', 1); // Establecer cookie para evitar que se muestre nuevamente
+        Swal.fire({
+            icon: 'success',
+            title: '¡Ingreso cargado correctamente!',
+            showConfirmButton: false,
+            timer: 2000
+        });
+    } else {
+        // Eliminar cookie para permitir que se muestre la alerta en la próxima carga de página
+        deleteCookie('alertaCargada');
+    }
+    };
+    // Función para establecer una cookie
+    function setCookie(name, value, days) {
+    var expires = '';
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = '; expires=' + date.toUTCString();
+    }
+    document.cookie = name + '=' + (value || '') + expires + '; path=/';
+    }
+
+    // Función para obtener el valor de una cookie
+    function getCookie(name) {
+        var nameEQ = name + '=';
+        var ca = document.cookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
+
+    // Función para eliminar una cookie
+    function deleteCookie(name) {
+        document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    }
 </script>
 <script src="resources/js/jsformat.js"></script>
 </body>
