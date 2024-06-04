@@ -67,3 +67,15 @@ input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
+.estado-aceptado {
+    color: green;
+    font-weight: bold;
+}
+.estado-denegado {
+    color: red;
+    font-weight: bold;
+}
+.estado-en-proceso {
+    color: gray;
+    font-weight: bold;
+}
