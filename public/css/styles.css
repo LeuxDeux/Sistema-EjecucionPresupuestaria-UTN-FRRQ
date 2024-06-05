@@ -6,7 +6,9 @@
 #sidebarToggle {
     font-size: 24px; /* Cambiar el tamaño del botón */
 }
-
+body {
+    background-color: #ffffff;
+}
 .select-css {
     display: block;
     font-size: 16px;

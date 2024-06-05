@@ -14,13 +14,17 @@
             <div class="flex flex-col min-h-screen">
                 <!-- Encabezados -->
                 <p style="display: none;"><%= secretaria %></p>
-                <div class="flex justify-center items-center py-4 shadow-md" style="background-image: linear-gradient(to right, #127cc1, #FFFFFF);">
+                <div class="flex justify-center items-center py-4 shadow-md" style="background-image: linear-gradient(to right, #127cc1, #127cc1);">
                     <div class="text-center">
                         <h1 class="text-lg font-bold mb-1 text-white">Bienvenido</h1>
                         <h1 class="text-xl font-bold mb-1 text-white"><strong><%= nombre %></strong></h1>
                         <h2 class="text-md font-bold mb-4 text-white"><strong><%= nombreSecretaria %></strong></h2>
                     </div>
+                    <div class="absolute top-0 right-0 m-4">
+                        <img src="img/UTN_logo_negro.png" alt="Imagen" class="h-16 w-16 object-cover">
+                    </div>
                 </div>
+                
                 
                 <!-- Contenedor principal -->
                 <div class="flex min-h-screen">
@@ -30,7 +34,7 @@
                     </button>
                     
                     <!-- Sidebar -->
-                    <nav id="sidebar" class="bg-blue-700 w-64 flex-shrink-0 hidden md:block shadow-md" style="background-image: linear-gradient(to right, #127cc1, #FFFFFF);">
+                    <nav id="sidebar" class="bg-blue-700 w-64 flex-shrink-0 hidden md:block shadow-md" style="background-image: linear-gradient(to bottom, #127cc1, #fff);">
                         <ul class="py-4">
                             <li>
                                 <li><a href="/categorias" class="block py-2 px-4 text-white hover:text-blue-800">Categorías</a></li>
@@ -61,7 +65,7 @@
             <div class="flex flex-col min-h-screen">
                 <!-- Encabezados -->
                 <p style="display: none;"><%= secretaria %></p>
-                <div class="flex justify-center items-center py-4 shadow-md" style="background-image: linear-gradient(to right, #127cc1, #FFFFFF);">
+                <div class="flex justify-center items-center py-4 shadow-md" style="background-image: linear-gradient(to right, #127cc1, #127cc1);">
                     <div class="text-center">
                         <h1 class="text-lg font-bold mb-1 text-white">Bienvenido</h1>
                         <h1 class="text-xl font-bold mb-1 text-white"><strong><%= nombre %></strong></h1>
@@ -77,7 +81,7 @@
                     </button>
                     
                     <!-- Sidebar -->
-                    <nav id="sidebar" class="bg-blue-700 w-64 flex-shrink-0 hidden md:block shadow-md" style="background-image: linear-gradient(to right, #127cc1, #FFFFFF);">
+                    <nav id="sidebar" class="bg-blue-700 w-64 flex-shrink-0 hidden md:block shadow-md" style="background-image: linear-gradient(to bottom, #127cc1, #FFFFFF);">
                         <ul class="py-4">
                             <li><a href="/categorias" class="block py-2 px-4 text-white hover:text-blue-800">Categorías</a></li>
                             <li><a href="/facturas" class="block py-2 px-4 text-white hover:text-blue-800">Facturas</a></li>
