@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="resources/css/styles.css">
     <title>CATEGORIAS FONDOS</title>
 </head>
@@ -25,6 +25,57 @@
             <img src="img/UTN_logo_negro.png" alt="Imagen" class="h-16 w-16 object-cover">
         </div>
     </div>
+    <% if (login) { %>
+        <% if(secretaria == 1){ %>
+    <div class="flex min-h-screen">
+        <!-- Botón para desplegar la sidebar en los celulares -->
+        <button id="sidebarToggle" class="block md:hidden bg-blue-700 text-white py-2 px-4">
+            <span class="material-icons">menu</span>
+        </button>
+        
+        <!-- Sidebar -->
+        <nav id="sidebar" class="bg-blue-700 w-64 flex-shrink-0 hidden md:block shadow-md" style="background-image: linear-gradient(to bottom, #127cc1, #fff);">
+            <ul class="py-4">
+                <li>
+                    <li><a href="/categorias" class="block py-2 px-4 text-white hover:text-blue-800">Categorías</a></li>
+                    <a href="#" class="block py-2 px-4 text-white hover:text-blue-800 flex justify-between items-center" id="toggleFacturas">
+                        <span>Facturas</span>
+                        <span id="arrowIcon">></span>
+                    </a>
+                    <ul class="pl-4" id="submenuFacturas" style="display: none;">
+                        <li><a href="/facturas" class="block py-2 px-4 text-white hover:text-blue-800">Carga de Facturas</a></li>
+                        <li><a href="/facturas-activas" class="block py-2 px-4 text-white hover:text-blue-800">Facturas Activas</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ingresos" class="block py-2 px-4 text-white hover:text-blue-800">Ingresos</a></li>
+                <li><a href="/analiticas" class="block py-2 px-4 text-white hover:text-blue-800">Aprobar/Rechazar Facturas</a></li>
+                <li><a href="/fondos-categorias" class="block py-2 px-4 text-white hover:text-blue-800">Cargar Fondos</a></li>
+                <li><a href="/fondos-disponibles" class="block py-2 px-4 text-white hover:text-blue-800">Fondos Disponibles</a></li>
+                <li><a href="/logout" class="block py-2 px-4 text-white hover:text-blue-800">Cerrar Sesión</a></li>
+            </ul>
+        </nav>
+        <% }else{ %>
+            <div class="flex flex-col min-h-screen">
+                <!-- Encabezados -->
+                <p style="display: none;"><%= secretaria %></p>
+                
+                <!-- Contenedor principal -->
+                <div class="flex min-h-screen">
+                    <!-- Botón para desplegar la sidebar en los celulares -->
+                    <button id="sidebarToggle" class="block md:hidden bg-blue-700 text-white py-2 px-4" style="background-image: #127cc1;">
+                        <span class="material-icons">menu</span>
+                    </button>
+                    
+                    <!-- Sidebar -->
+                    <nav id="sidebar" class="bg-blue-700 w-64 flex-shrink-0 hidden md:block shadow-md" style="background-image: linear-gradient(to bottom, #127cc1, #FFFFFF);">
+                        <ul class="py-4">
+                            <li><a href="/categorias" class="block py-2 px-4 text-white hover:text-blue-800">Categorías</a></li>
+                            <li><a href="/facturas" class="block py-2 px-4 text-white hover:text-blue-800">Facturas</a></li>
+                            <li><a href="/ingresos" class="block py-2 px-4 text-white hover:text-blue-800">Ingresos</a></li>
+                            <li><a href="/logout" class="block py-2 px-4 text-white hover:text-blue-800">Cerrar Sesión</a></li>
+                        </ul>
+                    </nav>
+                <% } %>
 <div class="container">
     <a href="/" id="volver" class="btn btn-outline-primary mt-4"><i class="bx bxs-chevron-left bx-md"></i></a>
     <a href="#" id="btnAgregarFondo" class="btn btn-outline-primary mt-4" data-secretaria="<%= secretaria %>"><i class="bx bxs-plus-circle bx-md"></i></a>
@@ -47,6 +98,14 @@
             </tbody>
         </table>
 </div>
+<%} else { %>
+    <div class="flex justify-center items-center h-screen">
+        <div class="text-center">
+            <h1 class="text-3xl font-bold mb-4"><strong><%= nombre %></strong></h1>
+            <a href="login" class="block px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Ir a Inicio</a>
+        </div>
+    </div>
+<% } %>
 <!-- Modal de Agregar Fondo-->
 <div class="modal fade" id="modalAgregarFondo" tabindex="-1" aria-labelledby="modalAgregarFondoLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -110,6 +169,28 @@
             $('#modalSeleccionarFondo').modal('show');
         });
     })
+    $(document).ready(function(){
+            $('#sidebarToggle').click(function(){
+                $('#sidebar').toggleClass('hidden');
+            });
+        });
+
+        //Script para cambiar entre el submenú minimizado y desplegado junto con la flecha ">" "v"
+        document.addEventListener("DOMContentLoaded", function() {
+            const toggleFacturas = document.getElementById("toggleFacturas");
+            const submenuFacturas = document.getElementById("submenuFacturas");
+            const arrowIcon = document.getElementById("arrowIcon");
+
+            toggleFacturas.addEventListener("click", function() {
+                if (submenuFacturas.style.display === "none") {
+                    submenuFacturas.style.display = "block";
+                    arrowIcon.textContent = "v";
+                } else {
+                    submenuFacturas.style.display = "none";
+                    arrowIcon.textContent = ">";
+                }
+            });
+        });
 </script>
 <script src="resources/js/jsformat.js"></script>
 </body>
