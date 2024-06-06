@@ -83,4 +83,5 @@ input[type=number]::-webkit-outer-spin-button {
 }
 .hover-links:hover {
     color: #1e3a8a!important;
+    background-color: #ffffff98;
 }
