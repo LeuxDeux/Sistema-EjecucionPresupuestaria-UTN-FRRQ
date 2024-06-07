@@ -383,6 +383,7 @@ exports.cargarFactura = (req, res) => {
         const nombreFactura = uploadedFile.originalname; // Usar el nombre original del archivo como nombre de factura
         const categoriaId = req.body.categoria; // Obtener el ID de la categoría seleccionada del cuerpo de la solicitud
         const monto = req.body.monto; // Obtener el monto del cuerpo de la solicitud
+        const destino = req.body.destino;
         const estado = 'en proceso'; // Valor predeterminado para el estado de la factura
         const usuarioId = req.body.idUsuario; // Obtener el ID de usuario del cuerpo de la solicitud
 
@@ -398,9 +399,9 @@ exports.cargarFactura = (req, res) => {
                     const fechaActual = new Date();
                     const fechaLocal = new Date(fechaActual.getTime() - (fechaActual.getTimezoneOffset() * 60000));
                     const fechaFormateada = fechaLocal.toISOString().slice(0, 19).replace('T', ' ');
-                    const sql = 'INSERT INTO facturas (fecha_carga, nombre_factura, categoria_id, monto, estado, usuario_id, archivo_factura) VALUES (?, ?, ?, ?, ?, ?, ?)';
+                    const sql = 'INSERT INTO facturas (fecha_carga, nombre_factura, categoria_id, monto, estado, usuario_id, archivo_factura, destino) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
                     // Insertar los datos de la factura en la base de datos
-                    connection.query(sql, [fechaFormateada, nombreFactura, categoriaId, monto, estado, usuarioId, newPath], (err, result) => {
+                    connection.query(sql, [fechaFormateada, nombreFactura, categoriaId, monto, estado, usuarioId, newPath, destino], (err, result) => {
                         if (err) { // Manejar errores si ocurren al insertar datos en la base de datos
                             console.error('Error al insertar datos en la base de datos:', err);
                             return handleHttpResponse(res, 500, 'Error interno del servidor al insertar los datos en la base de datos.')
