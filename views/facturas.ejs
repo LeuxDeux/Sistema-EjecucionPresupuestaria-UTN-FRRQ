@@ -109,6 +109,7 @@
                 <th scope="col">Estado</th>
                 <th scope="col">Personal</th>
                 <th scope="col">Categoría</th>
+                <th scope="col">Destino</th>
                 <th scope="col" style="display: none;">Archivo de la Factura</th>
                 <th scope="col">ACCIONES</th>
             </tr>
@@ -126,6 +127,7 @@
                     <td><%= factura.estado %></td>
                     <td><%= factura.nombre_usuario %></td>
                     <td><%= factura.nombre_categoria %></td>
+                    <td><%= factura.destino %></td>
                     <td style="display: none;"><%= factura.archivo_factura %></td>
                     <td style="display: flex; gap: 10px">
                         <% if (factura.estado.trim().toLowerCase() === 'aceptado') { %>
@@ -175,6 +177,13 @@
                     <div class="mb-3">
                         <label for="pdf" class="form-label">Archivo PDF</label>
                         <input type="file" id="pdf" name="pdf" class="form-control" accept=".pdf" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="destino" class="form-label">Destino</label>
+                        <select name="destino" id="destino" class="form-select" required>
+                            <option value="universidad">Universidad</option>
+                            <option value="fundación">Fundación</option>
+                        </select>
                     </div>
                     <!-- Campos para mostrar el nombre del usuario y la fecha actual -->
                     <div class="mb-3">
