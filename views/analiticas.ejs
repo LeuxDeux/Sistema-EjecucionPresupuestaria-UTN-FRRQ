@@ -90,9 +90,10 @@
                 <th scope="col">Nombre de la Factura</th>
                 <th scope="col">Categoría</th>
                 <th scope="col">Monto</th>
-                <th scope="col">Estado</th>
+                <!-- <th scope="col">Estado</th> -->
                 <th scope="col">Personal</th>
                 <th scope="col">Secretaria</th>
+                <th scope="col">Destino</th>
                 <th scope="col">Acciones</th>
             </tr>
         </thead>
@@ -105,9 +106,10 @@
                     <td><a href="/descargar-archivo/<%= factura.id %>"><%= factura.nombre_factura %></a></td>
                     <td><%= factura.nombre_categoria %></td>
                     <td class="monto"><%= factura.monto %></td>
-                    <td><%= factura.estado %></td>
+                    <!-- <td><%= factura.estado %></td> -->
                     <td><%= factura.nombre_usuario %></td>
                     <td><%= factura.nombre_secretaria %></td>
+                    <td><%= factura.destino %></td>
                     <td>
                         <a href="/descargar-archivo/<%= factura.id %>" class="btn btn-outline-info" data-id="<%= factura.id %>">Descargar</a>
                         <a href="#" class="btn btn-outline-info btn-accion" data-id="<%= factura.id %>" data-nombre="<%= factura.nombre_factura %>" data-monto="<%= factura.monto %>" data-bs-toggle="modal" data-bs-target="#modalAccion">Acción</a>
