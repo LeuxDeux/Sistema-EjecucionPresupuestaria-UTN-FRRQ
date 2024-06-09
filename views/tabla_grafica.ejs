@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tabla Gráfica</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
@@ -29,20 +30,41 @@
         </table>
     </div>
 
-     <!-- Grafico torta para todas las secretarías -->
+    <!--Tabla de categorías para la secretaría seleccionada-->
+    <div id="tablaCategoriasContainer" class="hidden container mt-5">
+        <table id="tablaCategorias" class="table table-bordered table-striped text-center mt-4">
+            <thead id="tablaCategoriasHead" class="bg-primary text-white">
+                <!-- Encabezados generados dinámicamente -->
+            </thead>
+            <tbody id="tablaCategoriasBody">
+                <!-- Filas generadas dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+
+     
+
+    <!-- Contenedor para los gráficos de torta -->
+    <div class="container mt-5">
+        <div class="row">
+            <!-- Gráfico torta de egresos para la secretaría seleccionada -->
+            <div id="containerEgresos" class="hidden col-md-6" style="height:400px;"></div>
+
+            <!-- Gráfico torta para los ingresos de la secretaría seleccionada -->
+            <div id="containerIngresos" class="hidden col-md-6" style="height:400px;"></div>
+        </div>
+    </div>
+
+    <!-- Grafico torta para todas las secretarías -->
     <div id="containerSecretariasPie" style="width:100%; height:400px;"></div>
 
-    <!-- Grafico torta de egresos para la secretaría seleccionada -->
-    <div id="containerEgresos" style="width:100%; height:400px;"></div>
-
-    <!-- Gráfico torta para los ingresos de la secretaría seleccionada -->
-    <div id="containerIngresos" style="width:100%; height:400px;"></div>
+    <!-- Gráfico barra que contrapone los ingresos y egresos de cada secretaría-->
+    <div id="containerSecretariasBar" style="width:100%; height:400px;"></div>
 
     <!-- Gráfico drilldown -->
     <div id="containerSecretariasBar2" style="width:100%; height:400px;"></div>
 
-    <!-- Gráfico barra que contrapone los ingresos y egresos de cada secretaría-->
-    <div id="containerSecretariasBar" style="width:100%; height:400px;"></div>
+
     
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -132,6 +154,9 @@
         });
 
         //Tabla para secretarias//
+        // Variable para almacenar la última secretaría seleccionada
+        var ultimaSecretariaSeleccionada = null;
+
         // Función para generar las filas de la tabla
         function generarFilas(resultados) {
             var tbody = $('#tablaSecretariasBody');
@@ -155,6 +180,11 @@
                 }
             });
 
+            // Función para formatear los números del monto
+            function formatearMoneda(numero) {
+                return '$' + numero.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,').replace('.', ',');
+            }
+
             // Pegamos limpiada del el contenido existente de la tabla
             tbody.empty();
 
@@ -167,20 +197,94 @@
                 // Se convierte el nombre de la secretaría un enlace
                 var link = $('<a href="#">').text(secretaria).on('click', function(e) {
                     e.preventDefault();
-                    // Llamamos a la función para actualizar los gráficos con la secretaría seleccionada
-                    actualizarGraficoEgresosPorSecretaria(secretaria);
-                    actualizarGraficoIngresosPorSecretaria(secretaria);
+                    // Verificamos si la misma secretaría está seleccionada
+                    if (ultimaSecretariaSeleccionada === secretaria) {
+                        $('#tablaCategoriasContainer').toggleClass('hidden');
+                        $('#containerEgresos').toggleClass('hidden');
+                        $('#containerIngresos').toggleClass('hidden');
+                    } else {
+                        // Llamamos a la función para actualizar los gráficos con la secretaría seleccionada
+                        actualizarGraficoEgresosPorSecretaria(secretaria);
+                        actualizarGraficoIngresosPorSecretaria(secretaria);
+                        // Llamamo a la función para generar la tabla de categorías
+                        generarTablaCategorias(secretaria, resultados);
+                        $('#tablaCategoriasContainer').removeClass('hidden');
+                        $('#containerEgresos').removeClass('hidden');
+                        $('#containerIngresos').removeClass('hidden');
+                    }
+
+                    // Actualizar la última secretaría seleccionada
+                    ultimaSecretariaSeleccionada = secretaria;
                 });
 
                 $('<td>').append(link).appendTo(row);
-                $('<td>').text(resumen.egresos.toLocaleString()).appendTo(row); // Formatear número
-                $('<td>').text(resumen.ingresos.toLocaleString()).appendTo(row); // Formatear número
-                $('<td>').text(total.toLocaleString()).appendTo(row); // Formatear número
+                $('<td>').text(formatearMoneda(resumen.egresos)).appendTo(row); // Formatear número
+                $('<td>').text(formatearMoneda(resumen.ingresos)).appendTo(row);// Formatear número
+                $('<td>').text(formatearMoneda(total)).appendTo(row); // Formatear número
 
                 tbody.append(row);
             });
         }
-        //Función Egresos//
+
+        // Función para generar la tabla de categorías para una secretaría seleccionada
+        function generarTablaCategorias(secretaria, resultados) {
+            var tbody = $('#tablaCategoriasBody');
+            var thead = $('#tablaCategoriasHead');
+
+            // Se filtra los datos para obtener solo los relacionados con la secretaría seleccionada
+            var datosSecretaria = resultados.filter(item => item.nombre_secretaria === secretaria);
+
+            // Objeto para almacenar los egresos e ingresos por categoría
+            var resumenPorCategoria = {};
+
+            // Iteramos sobre los datos filtrados y sumar egresos e ingresos por categoría
+            $.each(datosSecretaria, function(index, resultado) {
+                var perdida = parseFloat(resultado.perdida) || 0; // Validar y parsear pérdida
+                var ganancia = parseFloat(resultado.ganancia) || 0; // Validar y parsear ganancia
+
+                if (resumenPorCategoria[resultado.nombre_categoria]) {
+                    resumenPorCategoria[resultado.nombre_categoria].egresos += perdida;
+                    resumenPorCategoria[resultado.nombre_categoria].ingresos += ganancia;
+                } else {
+                    resumenPorCategoria[resultado.nombre_categoria] = {
+                        egresos: perdida,
+                        ingresos: ganancia
+                    };
+                }
+            });
+
+            // Se limpia el contenido existente de la tabla
+            tbody.empty();
+            thead.empty();
+
+            // Generamos el encabezado de la tabla
+            var headerRow = $('<tr>');
+            $('<th scope="col">').text(secretaria).appendTo(headerRow);
+            $('<th scope="col">').text('Egresos').appendTo(headerRow);
+            $('<th scope="col">').text('Ingresos').appendTo(headerRow);
+            $('<th scope="col">').text('Ingreso Neto').appendTo(headerRow);
+            thead.append(headerRow);
+
+            // Función para formatear los números como moneda
+            function formatearMoneda(numero) {
+                return '$' + numero.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,').replace('.', ',');
+            }
+
+            // Iterar sobre el objeto resumenPorCategoria y generar una fila por cada categoría
+            $.each(resumenPorCategoria, function(categoria, resumen) {
+                var total = resumen.ingresos - resumen.egresos;
+
+                var row = $('<tr>');
+
+                $('<td>').text(categoria).appendTo(row);
+                $('<td>').text(formatearMoneda(resumen.egresos)).appendTo(row);
+                $('<td>').text(formatearMoneda(resumen.ingresos)).appendTo(row);
+                $('<td>').text(formatearMoneda(total)).appendTo(row);
+
+                tbody.append(row);
+            });
+        }
+
         // Función para obtener los datos de egresos de una secretaría para el gráfico de torta
         function obtenerDatosParaPieChart(secretaria, resultados) {
             const datosSecretaria = resultados.filter(item => item.nombre_secretaria === secretaria && parseFloat(item.perdida) > 0);
@@ -205,7 +309,6 @@
             return dataParaPieChart;
         }
 
-        //Función Ingresos
         // Función para obtener los datos de ingresos de una secretaría para el gráfico de torta
         function obtenerDatosParaPieChartIngresos(secretaria, resultados) {
             const datosSecretaria = resultados.filter(item => item.nombre_secretaria === secretaria && parseFloat(item.ganancia) > 0);
@@ -230,7 +333,6 @@
             return dataParaPieChart;
         }
 
-        //Torta Egresos de Secretaría
         // Función para actualizar el gráfico de egresos por secretaría
         function actualizarGraficoEgresosPorSecretaria(secretaria) {
             const datosSecretaria = obtenerDatosParaPieChart(secretaria, resultados);
@@ -273,8 +375,7 @@
                 }
             });
         }
-        
-        //Torta Ingresos de Ssecretaría
+
         // Función para actualizar el gráfico de ingresos por secretaría
         function actualizarGraficoIngresosPorSecretaria(secretaria) {
             const datosSecretaria = obtenerDatosParaPieChartIngresos(secretaria, resultados);
@@ -349,7 +450,7 @@
             }, {});
         }
 
-        // Se calcula los egresos e ingresos por secretaría
+        // Calculamo los egresos e ingresos por secretaría
         var egresosPorSecretaria = calcularEgresosPorSecretaria(resultados);
         var ingresosPorSecretaria = calcularIngresosPorSecretaria(resultados);
 
@@ -381,12 +482,14 @@
                 }
             },
             series: [{
+                    pointWidth: 100,
                     name: 'Ingresos',
                     data: Object.keys(ingresosPorSecretaria).map(function(secretaria) {
                         return ingresosPorSecretaria[secretaria] || 0; // Se usan los montos de ingresos acumulados
                     }),
                     color: 'green' 
                 }, {
+                    pointWidth: 100,
                     name: 'Egresos',
                     data: Object.keys(egresosPorSecretaria).map(function(secretaria) {
                         return egresosPorSecretaria[secretaria] || 0; // Se usan los montos de egresos acumulados
@@ -405,24 +508,16 @@
         });
 
         //Gráfico DrillDown
-        // Función para calcular los egresos por secretaría
-        function calcularEgresosPorSecretaria(resultados) {
-            return resultados.reduce(function(acc, item) {
-                var secretaria = item.nombre_secretaria;
-                var egreso = parseFloat(item.perdida);
-                acc[secretaria] = (acc[secretaria] || 0) + egreso;
-                return acc;
-            }, {});
+       // Función para aplicar transformación logarítmica a los datos
+        function transformarDato(dato) {
+            if (dato === 0) return 0; // Manejar el caso de dato igual a 0
+            return dato > 0 ? Math.log10(dato) : -Math.log10(Math.abs(dato));
         }
 
-        // Función para calcular los ingresos por secretaría
-        function calcularIngresosPorSecretaria(resultados) {
-            return resultados.reduce(function(acc, item) {
-                var secretaria = item.nombre_secretaria;
-                var ingreso = parseFloat(item.ganancia);
-                acc[secretaria] = (acc[secretaria] || 0) + ingreso;
-                return acc;
-            }, {});
+        // Función para revertir transformación logarítmica a los datos
+        function revertirTransformacion(datoTransformado) {
+            if (datoTransformado === 0) return 0; // Manejar el caso de dato transformado igual a 0
+            return datoTransformado > 0 ? Math.pow(10, datoTransformado) : -Math.pow(10, Math.abs(datoTransformado));
         }
 
         // Función para obtener los datos de una secretaría por categoría
@@ -432,8 +527,8 @@
 
             datosSecretaria.forEach(item => {
                 const categoria = item.nombre_categoria;
-                const egresos = parseFloat(item.perdida);
-                const ingresos = parseFloat(item.ganancia);
+                const egresos = parseFloat(item.perdida) || 0;
+                const ingresos = parseFloat(item.ganancia) || 0;
 
                 if (!datosPorCategoria[categoria]) {
                     datosPorCategoria[categoria] = {
@@ -462,9 +557,11 @@
         var drilldownSeries = [];
 
         Object.keys(egresosPorSecretaria).forEach(secretaria => {
+            var ingresoNetoTransformado = transformarDato(ingresosPorSecretaria[secretaria] - egresosPorSecretaria[secretaria]);
+
             seriesData.push({
                 name: secretaria,
-                y: ingresosPorSecretaria[secretaria] - egresosPorSecretaria[secretaria], // Ingresos netos
+                y: ingresoNetoTransformado, // Ingresos netos transformados
                 drilldown: secretaria
             });
 
@@ -472,7 +569,7 @@
 
             var categoriaData = datosPorCategoria.map(item => ({
                 name: item.name,
-                y: item.ingresos - item.egresos, // Se muestra la diferencia entre ingresos y egresos
+                y: transformarDato(item.ingresos - item.egresos), // Transformar la diferencia entre ingresos y egresos
                 drilldown: secretaria + '-' + item.name
             }));
 
@@ -483,8 +580,8 @@
             });
 
             datosPorCategoria.forEach(item => {
-                var ingresosData = { name: 'Ingresos', y: item.ingresos, color: 'green' };
-                var egresosData = { name: 'Egresos', y: item.egresos, color: 'red' };
+                var ingresosData = { name: 'Ingresos', y: transformarDato(item.ingresos), color: 'green' };
+                var egresosData = { name: 'Egresos', y: transformarDato(-item.egresos), color: 'red' }; // Egresos negativos transformados
                 drilldownSeries.push({
                     name: item.name,
                     id: secretaria + '-' + item.name,
@@ -493,7 +590,7 @@
             });
         });
 
-        // Crear el gráfico de barras con drilldown
+        // Creamos el gráfico de barras con drilldown
         Highcharts.chart('containerSecretariasBar2', {
             chart: {
                 type: 'column'
@@ -505,26 +602,61 @@
                 type: 'category'
             },
             yAxis: {
-                min: 0,
                 title: {
                     text: 'Monto'
+                },
+                plotLines: [{
+                    color: 'black', // Color de la línea
+                    width: 2, // Grosor de la línea
+                    value: 0, // Posición de la línea
+                    zIndex: 5 // Asegura que la línea esté por encima de las barras
+                }],
+                labels: {
+                    formatter: function() {
+                        if (this.value === 0) return '0';
+                        const value = revertirTransformacion(this.value);
+                        if (Math.abs(value) >= 1e6) {
+                            return (value / 1e6).toFixed(1) + 'M';
+                        } else if (Math.abs(value) >= 1e3) {
+                            return (value / 1e3).toFixed(1) + 'K';
+                        }
+                        return value.toFixed(2); // Revertir la transformación para mostrar los valores originales
+                    }
                 }
             },
             legend: {
                 enabled: true
             },
             plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0,
+                    pointWidth: 100 // Valor para hacer las columnas más finas
+                },
                 series: {
                     borderWidth: 0,
                     dataLabels: {
                         enabled: true,
-                        format: '${point.y:.1f}'
+                        formatter: function() {
+                            const value = revertirTransformacion(this.y);
+                            if (Math.abs(value) >= 1e6) {
+                                return '$' + (value / 1e6).toFixed(1) + 'M';
+                            } else if (Math.abs(value) >= 1e3) {
+                                return '$' + (value / 1e3).toFixed(1) + 'K';
+                            }
+                            return '$' + value.toFixed(2); // Revertir la transformación para mostrar los valores originales
+                        }
                     }
                 }
             },
             tooltip: {
                 headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
-                pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>${point.y:.2f}</b><br/>'
+                pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>${point.y:,.2f}</b><br/>',
+                formatter: function() {
+                    const value = revertirTransformacion(this.y);
+                    return '<span style="font-size:11px">' + this.series.name + '</span><br>' +
+                        '<span style="color:' + this.point.color + '">' + this.point.name + '</span>: <b>$' + value.toFixed(2) + '</b><br/>';
+                }
             },
             series: [{
                 name: 'Secretarías',
