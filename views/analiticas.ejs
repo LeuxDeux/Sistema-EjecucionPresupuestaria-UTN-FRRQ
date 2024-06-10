@@ -103,7 +103,7 @@
                 <tr>
                     <td style="display: none;"><%= factura.id %></td>
                     <td><%= factura.fecha_formateada %></td>
-                    <td><a href="/descargar-archivo/<%= factura.id %>"><%= factura.nombre_factura %></a></td>
+                    <td><a href="/descargar-archivo/<%= factura.id %>" data-url="/descargar-archivo/<%= factura.id %>" class="descargaFirebase" target="_blank"><%= factura.nombre_factura %></a></td>
                     <td><%= factura.nombre_categoria %></td>
                     <td class="monto"><%= factura.monto %></td>
                     <!-- <td><%= factura.estado %></td> -->
@@ -111,7 +111,7 @@
                     <td><%= factura.nombre_secretaria %></td>
                     <td><%= factura.destino %></td>
                     <td>
-                        <a href="/descargar-archivo/<%= factura.id %>" class="btn btn-outline-info" data-id="<%= factura.id %>">Descargar</a>
+                        <a href="/descargar-archivo/<%= factura.id %>" class="btn btn-outline-info descargaFirebase" data-id="<%= factura.id %>" data-url="/descargar-archivo/<%= factura.id %>" target="_blank">Descargar</a>
                         <a href="#" class="btn btn-outline-info btn-accion" data-id="<%= factura.id %>" data-nombre="<%= factura.nombre_factura %>" data-monto="<%= factura.monto %>" data-bs-toggle="modal" data-bs-target="#modalAccion">Acción</a>
                     </td>
                 </tr>
@@ -223,6 +223,23 @@
                 }
             });
         });
+        document.addEventListener('DOMContentLoaded', function () {
+        const linksDescarga = document.querySelectorAll('.descargaFirebase');
+
+        linksDescarga.forEach(link => {
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+                const url = link.getAttribute('data-url');
+
+                if (url) {
+                    window.open(url, '_blank');
+                } else {
+                    console.error('URL no disponible');
+                }
+            });
+        });
+    });
+
 </script>
 <script src="resources/js/jsformat.js"></script>
 </body>

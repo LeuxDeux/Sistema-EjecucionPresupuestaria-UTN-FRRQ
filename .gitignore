@@ -1,4 +1,5 @@
 env/.env
+env/firebaseServiceAccountKey.json
 node_modules
 uploads/*
 !uploads/.gitkeep

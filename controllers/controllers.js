@@ -5,6 +5,7 @@ const bcryptjs = require('bcryptjs');
 const { render } = require('ejs');
 const Swal = require('sweetalert2');
 const { connect } = require('http2');
+const { bucket } = require('../app');
 const queryAnaliticas = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE f.estado = "en proceso"';
 const facturasAceptadas = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE f.estado = "aceptado" AND f.visibilidad = "visible" ORDER BY f.fecha_carga DESC';
 const facturasSelect = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE u.secretaria_id = ? AND f.visibilidad = "visible"';
@@ -377,52 +378,181 @@ exports.facturas = (req, res) => {
 };
 
 //CARGAR FACTURAS
+// exports.cargarFactura = (req, res) => {
+//     if(req.session.loggedin){
+//         const uploadedFile = req.file; // Obtener el archivo subido
+//         const nombreFactura = uploadedFile.originalname; // Usar el nombre original del archivo como nombre de factura
+//         const categoriaId = req.body.categoria; // Obtener el ID de la categoría seleccionada del cuerpo de la solicitud
+//         const monto = req.body.monto; // Obtener el monto del cuerpo de la solicitud
+//         const destino = req.body.destino;
+//         const estado = 'en proceso'; // Valor predeterminado para el estado de la factura
+//         const usuarioId = req.body.idUsuario; // Obtener el ID de usuario del cuerpo de la solicitud
+
+//         if (uploadedFile) { // Verificar si se ha subido un archivo
+//             const newPath = path.join('uploads', uploadedFile.originalname); // Construir la ruta completa del nuevo archivo
+
+//             // Renombrar el archivo en el sistema de archivos
+//             fs.rename(uploadedFile.path, newPath, (error) => {
+//                 if (error) { // Manejar errores si ocurren al renombrar el archivo
+//                     console.error('Error al renombrar el archivo:', error);
+//                     return handleHttpResponse(res, 500, 'Error interno del servidor al renombrar el archivo. Por favor comuníquese con soporte.');
+//                 } else { // Si el archivo se ha renombrado correctamente
+//                     const fechaActual = new Date();
+//                     const fechaLocal = new Date(fechaActual.getTime() - (fechaActual.getTimezoneOffset() * 60000));
+//                     const fechaFormateada = fechaLocal.toISOString().slice(0, 19).replace('T', ' ');
+//                     const sql = 'INSERT INTO facturas (fecha_carga, nombre_factura, categoria_id, monto, estado, usuario_id, archivo_factura, destino) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+//                     // Insertar los datos de la factura en la base de datos
+//                     connection.query(sql, [fechaFormateada, nombreFactura, categoriaId, monto, estado, usuarioId, newPath, destino], (err, result) => {
+//                         if (err) { // Manejar errores si ocurren al insertar datos en la base de datos
+//                             console.error('Error al insertar datos en la base de datos:', err);
+//                             return handleHttpResponse(res, 500, 'Error interno del servidor al insertar los datos en la base de datos.')
+//                         } else { // Si los datos se insertaron correctamente en la base de datos
+//                             console.log('Datos insertados correctamente en la base de datos');
+//                             res.redirect('facturas?success=true'); // Redirigir a la página de inicio después de cargar la factura
+//                         }
+//                     });
+//                 }
+//             });
+//         } else { // Si no se ha subido ningún archivo
+//             return handleHttpResponse(res, 400, 'No se ha podido subir ningún archivo');
+//         }
+//     }else{
+//         res.render('login');
+//     }
+// };
+// exports.cargarFactura = (req, res) => { //FUNCIONA PERO GUARDA LOCALMENTE Y EN FIREBASE
+//     if (req.session.loggedin) {
+//         const uploadedFile = req.file;
+//         const nombreFactura = uploadedFile.originalname;
+//         const categoriaId = req.body.categoria;
+//         const monto = req.body.monto;
+//         const destino = req.body.destino;
+//         const estado = 'en proceso';
+//         const usuarioId = req.body.idUsuario;
+
+//         if (uploadedFile) {
+//             const newPath = `uploads/${uploadedFile.originalname}`;
+//             const fileUpload = bucket.file(newPath);
+//             const stream = fileUpload.createWriteStream({
+//                 metadata: {
+//                     contentType: uploadedFile.mimetype
+//                 }
+//             });
+
+//             stream.on('error', (err) => {
+//                 console.error('Error al subir archivo a Firebase Storage:', err);
+//                 return handleHttpResponse(res, 500, 'Error interno del servidor al subir el archivo.');
+//             });
+
+//             stream.on('finish', () => {
+//                 const fechaActual = new Date();
+//                 const fechaLocal = new Date(fechaActual.getTime() - (fechaActual.getTimezoneOffset() * 60000));
+//                 const fechaFormateada = fechaLocal.toISOString().slice(0, 19).replace('T', ' ');
+//                 const sql = 'INSERT INTO facturas (fecha_carga, nombre_factura, categoria_id, monto, estado, usuario_id, archivo_factura, destino) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+//                 const firebaseFileUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(newPath)}?alt=media`;
+
+//                 connection.query(sql, [fechaFormateada, nombreFactura, categoriaId, monto, estado, usuarioId, firebaseFileUrl, destino], (err, result) => {
+//                     if (err) {
+//                         console.error('Error al insertar datos en la base de datos:', err);
+//                         return handleHttpResponse(res, 500, 'Error interno del servidor al insertar los datos en la base de datos.');
+//                     } else {
+//                         console.log('Datos insertados correctamente en la base de datos');
+//                         res.redirect('facturas?success=true');
+//                     }
+//                 });
+//             });
+
+//             stream.end(uploadedFile.buffer);
+//         } else {
+//             return handleHttpResponse(res, 400, 'No se ha podido subir ningún archivo');
+//         }
+//     } else {
+//         res.render('login');
+//     }
+// };
 exports.cargarFactura = (req, res) => {
-    if(req.session.loggedin){
-        const uploadedFile = req.file; // Obtener el archivo subido
-        const nombreFactura = uploadedFile.originalname; // Usar el nombre original del archivo como nombre de factura
-        const categoriaId = req.body.categoria; // Obtener el ID de la categoría seleccionada del cuerpo de la solicitud
-        const monto = req.body.monto; // Obtener el monto del cuerpo de la solicitud
+    if (req.session.loggedin) {
+        const uploadedFile = req.file;
+        const nombreFactura = uploadedFile.originalname;
+        const categoriaId = req.body.categoria;
+        const monto = req.body.monto;
         const destino = req.body.destino;
-        const estado = 'en proceso'; // Valor predeterminado para el estado de la factura
-        const usuarioId = req.body.idUsuario; // Obtener el ID de usuario del cuerpo de la solicitud
+        const estado = 'en proceso';
+        const usuarioId = req.body.idUsuario;
 
-        if (uploadedFile) { // Verificar si se ha subido un archivo
-            const newPath = path.join('uploads', uploadedFile.originalname); // Construir la ruta completa del nuevo archivo
-
-            // Renombrar el archivo en el sistema de archivos
-            fs.rename(uploadedFile.path, newPath, (error) => {
-                if (error) { // Manejar errores si ocurren al renombrar el archivo
-                    console.error('Error al renombrar el archivo:', error);
-                    return handleHttpResponse(res, 500, 'Error interno del servidor al renombrar el archivo. Por favor comuníquese con soporte.');
-                } else { // Si el archivo se ha renombrado correctamente
-                    const fechaActual = new Date();
-                    const fechaLocal = new Date(fechaActual.getTime() - (fechaActual.getTimezoneOffset() * 60000));
-                    const fechaFormateada = fechaLocal.toISOString().slice(0, 19).replace('T', ' ');
-                    const sql = 'INSERT INTO facturas (fecha_carga, nombre_factura, categoria_id, monto, estado, usuario_id, archivo_factura, destino) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-                    // Insertar los datos de la factura en la base de datos
-                    connection.query(sql, [fechaFormateada, nombreFactura, categoriaId, monto, estado, usuarioId, newPath, destino], (err, result) => {
-                        if (err) { // Manejar errores si ocurren al insertar datos en la base de datos
-                            console.error('Error al insertar datos en la base de datos:', err);
-                            return handleHttpResponse(res, 500, 'Error interno del servidor al insertar los datos en la base de datos.')
-                        } else { // Si los datos se insertaron correctamente en la base de datos
-                            console.log('Datos insertados correctamente en la base de datos');
-                            res.redirect('facturas?success=true'); // Redirigir a la página de inicio después de cargar la factura
-                        }
-                    });
+        if (uploadedFile) {
+            const newPath = `uploads/${uploadedFile.originalname}`;
+            const fileUpload = bucket.file(newPath);
+            const stream = fileUpload.createWriteStream({
+                metadata: {
+                    contentType: uploadedFile.mimetype
                 }
             });
-        } else { // Si no se ha subido ningún archivo
+
+            stream.on('error', (err) => {
+                console.error('Error al subir archivo a Firebase Storage:', err);
+                return handleHttpResponse(res, 500, 'Error interno del servidor al subir el archivo.');
+            });
+
+            stream.on('finish', () => {
+                const fechaActual = new Date();
+                const fechaLocal = new Date(fechaActual.getTime() - (fechaActual.getTimezoneOffset() * 60000));
+                const fechaFormateada = fechaLocal.toISOString().slice(0, 19).replace('T', ' ');
+                const firebaseFileUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(newPath)}?alt=media`;
+
+                const sql = 'INSERT INTO facturas (fecha_carga, nombre_factura, categoria_id, monto, estado, usuario_id, archivo_factura, destino) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+                connection.query(sql, [fechaFormateada, nombreFactura, categoriaId, monto, estado, usuarioId, firebaseFileUrl, destino], (err, result) => {
+                    if (err) {
+                        console.error('Error al insertar datos en la base de datos:', err);
+                        return handleHttpResponse(res, 500, 'Error interno del servidor al insertar los datos en la base de datos.');
+                    } else {
+                        console.log('Datos insertados correctamente en la base de datos');
+                        res.redirect('facturas?success=true');
+                    }
+                });
+            });
+
+            stream.end(uploadedFile.buffer);
+        } else {
             return handleHttpResponse(res, 400, 'No se ha podido subir ningún archivo');
         }
-    }else{
+    } else {
         res.render('login');
     }
 };
-
 //DESCARGAR PDF FACTURA
+// exports.descargarArchivo = (req, res) => {
+//     if(req.session.loggedin){
+//         const fileId = req.params.id; // Obtener el ID del archivo de la solicitud
+
+//         // Consultar la base de datos para obtener la información del archivo y su nombre
+//         const sql = 'SELECT nombre_factura, archivo_factura FROM facturas WHERE id = ?';
+//         connection.query(sql, [fileId], (err, result) => {
+//             if (err) { // Manejar errores si ocurren al realizar la consulta en la base de datos
+//                 console.error('Error al obtener el archivo de la base de datos:', err);
+//                 return handleHttpResponse(res, 500, 'Error interno del servidor al obtener el archivo de la base de datos. Por favor comuníquese con soporte.');
+//             } else {
+//                 if (result.length > 0) { // Si se encontró el archivo en la base de datos
+//                     const nombreFactura = result[0].nombre_factura; // Obtener el nombre de la factura
+//                     const rutaArchivo = result[0].archivo_factura; // Obtener la ruta del archivo
+//                     // Configurar los encabezados de la respuesta para indicar que es un archivo PDF
+//                     res.setHeader('Content-Type', 'application/pdf');
+//                     // Utilizar el nombre de la factura como nombre de archivo para la descarga
+//                     // res.setHeader('Content-Disposition', `attachment; filename="${nombreFactura}.pdf"`);
+//                     res.setHeader('Content-Disposition', `attachment; filename="${nombreFactura}"`);
+//                     // enviar el contenido del archivo como respuesta
+//                     fs.createReadStream(rutaArchivo).pipe(res);
+//                 } else { // Si no se encontró el archivo con el ID proporcionado
+//                     return handleHttpResponse(res, 400, 'Archivo no encontrado.');
+//                 }
+//             }
+//         });
+//     }else{
+//         res.render('login');
+//     }
+// };
 exports.descargarArchivo = (req, res) => {
-    if(req.session.loggedin){
+    if (req.session.loggedin) {
         const fileId = req.params.id; // Obtener el ID del archivo de la solicitud
 
         // Consultar la base de datos para obtener la información del archivo y su nombre
@@ -434,24 +564,24 @@ exports.descargarArchivo = (req, res) => {
             } else {
                 if (result.length > 0) { // Si se encontró el archivo en la base de datos
                     const nombreFactura = result[0].nombre_factura; // Obtener el nombre de la factura
-                    const rutaArchivo = result[0].archivo_factura; // Obtener la ruta del archivo
+                    const firebaseFileUrl = result[0].archivo_factura; // Obtener la URL del archivo en Firebase Storage
+
                     // Configurar los encabezados de la respuesta para indicar que es un archivo PDF
                     res.setHeader('Content-Type', 'application/pdf');
                     // Utilizar el nombre de la factura como nombre de archivo para la descarga
-                    // res.setHeader('Content-Disposition', `attachment; filename="${nombreFactura}.pdf"`);
                     res.setHeader('Content-Disposition', `attachment; filename="${nombreFactura}"`);
-                    // enviar el contenido del archivo como respuesta
-                    fs.createReadStream(rutaArchivo).pipe(res);
+
+                    // Redirigir la respuesta al archivo almacenado en Firebase Storage
+                    res.redirect(firebaseFileUrl);
                 } else { // Si no se encontró el archivo con el ID proporcionado
                     return handleHttpResponse(res, 400, 'Archivo no encontrado.');
                 }
             }
         });
-    }else{
+    } else {
         res.render('login');
     }
 };
-
 //BORRAR FACTURA 
 exports.borrarFactura = (req, res) => {
     if(req.session.loggedin){

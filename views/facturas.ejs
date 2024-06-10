@@ -121,7 +121,7 @@
                 <tr>
                     <td style="display: none;"><%= factura.id %></td>
                     <td><%= factura.fecha_formateada %></td>
-                    <td><a href="/descargar-archivo/<%= factura.id %>"><%= factura.nombre_factura %></a></td>
+                    <td><a href="/descargar-archivo/<%= factura.id %>" class="descargaFirebase" target="_blank" data-url="/descargar-archivo/<%= factura.id %>"><%= factura.nombre_factura %></a></td>
                     <td style="display: none;"><%= factura.categoria_id %></td>
                     <td class="monto"><%= factura.monto %></td>
                     <td><%= factura.estado %></td>
@@ -135,7 +135,7 @@
                         <% } else { %>
                             <a href="#" class="btn btn-outline-info borrar-factura" data-id="<%= factura.id %>" style="height: 2.5rem;">Borrar</a>
                         <% } %>
-                        <a href="/descargar-archivo/<%= factura.id %>" class="btn btn-outline-info" data-id="<%= factura.id %>" style="height: 2.5rem;">Descargar</a>
+                        <a href="/descargar-archivo/<%= factura.id %>" class="btn btn-outline-info descargaFirebase" data-id="<%= factura.id %>" data-url="/descargar-archivo/<%= factura.id %>" style="height: 2.5rem;" target="_blank">Descargar</a>
                     </td>
                 </tr>
             <% }); %>
@@ -419,6 +419,22 @@ $(document).ready(function() {
                 }
             });
         });
+        document.addEventListener('DOMContentLoaded', function () {
+        const linksDescarga = document.querySelectorAll('.descargaFirebase');
+
+        linksDescarga.forEach(link => {
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+                const url = link.getAttribute('data-url');
+
+                if (url) {
+                    window.open(url, '_blank');
+                } else {
+                    console.error('URL no disponible');
+                }
+            });
+        });
+    });
 </script>
 <script src="resources/js/jsformat.js"></script>
 </body>
