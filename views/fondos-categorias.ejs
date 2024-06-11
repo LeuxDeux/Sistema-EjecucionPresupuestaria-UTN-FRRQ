@@ -83,6 +83,7 @@
             <thead>
                 <tr class="bg-primary text-white">
                     <th scope="col">CATEGORIA</th>
+                    <th scope="col">DESTINO</th>
                     <th scope="col">SELECCIÓN</th>
                 </tr>
             </thead>
@@ -90,8 +91,9 @@
                 <% resultados.forEach(function(fondos) { %>
                 <tr>
                     <td><%= fondos.nombre_categoria_fondo %></td>
+                    <td><%= fondos.destino %></td>
                     <td>
-                        <a href="#" class="btn btn-outline-info btnSeleccionarFondo" data-id="<%= fondos.id_categoria_fondo %>" data-name=" <%= fondos.nombre_categoria_fondo %>">Seleccionar</a>
+                        <a href="#" class="btn btn-outline-info btnSeleccionarFondo" data-id="<%= fondos.id_categoria_fondo %>" data-name=" <%= fondos.nombre_categoria_fondo %>" data-destino="<%= fondos.destino %>">Seleccionar</a>
                     </td>
                 </tr>
                 <% }); %>
@@ -120,6 +122,14 @@
                         <label for="nombreFondo" class="form-label">Nombre de Fondo</label>
                         <input type="text" class="form-control" id="nombreFondo" name="nombreFondo" required>
                     </div>
+                    <div class="mb-3">
+                        <label for="destino" class="form-label">Destino</label>
+                        <select class="form-control" id="destino" name="destino" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="universidad">Universidad</option>
+                            <option value="fundacion">Fundación</option>
+                        </select>
+                    </div>
                     <button type="submit" class="btn btn-primary">Crear</button>
                 </form>
             </div>
@@ -127,7 +137,7 @@
     </div>
 </div>
 <!-- Modal de Selección de Fondo -->
-<div class="modal fade" id="modalSeleccionarFondo" tabindex="-1" aria-labelledby="modalSeleccionarFondoLabel" aria-hidden="true">
+<!-- <div class="modal fade" id="modalSeleccionarFondo" tabindex="-1" aria-labelledby="modalSeleccionarFondoLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -150,6 +160,35 @@
             </div>
         </div>
     </div>
+</div> -->
+<div class="modal fade" id="modalSeleccionarFondo" tabindex="-1" aria-labelledby="modalSeleccionarFondoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalSeleccionarFondoLabel">Seleccionar Fondo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formSeleccionarFondo" action="/cargar-fondo" method="post">
+                    <div class="mb-3">
+                        <label for="nombreCategoriaFondo" class="form-label">Nombre de la Categoría del Fondo</label>
+                        <input type="text" class="form-control" id="nombreCategoriaFondo" name="nombreCategoriaFondo" readonly>
+                    </div>
+                    <div class="mb-3" id="montoPesosDiv">
+                        <label for="montoPeso" class="form-label">Monto en Pesos</label>
+                        <input type="number" class="form-control" id="montoPeso" name="montoPeso" step="0.01">
+                    </div>
+                    <div class="mb-3" id="montoDolarDiv">
+                        <label for="montoDolar" class="form-label">Monto en Dólares</label>
+                        <input type="number" class="form-control" id="montoDolar" name="montoDolar" step="0.01">
+                    </div>
+                    <input type="hidden" id="idCategoriaFondo" name="idCategoriaFondo">
+                    <input type="hidden" id="destinoSelect" name="destinoSelect">
+                    <button type="submit" class="btn btn-primary">Cargar</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
@@ -159,16 +198,77 @@
     $('#btnAgregarFondo').click(function() {
         $('#modalAgregarFondo').modal('show');
     });
-    $('.btnSeleccionarFondo').click(function() {
-            var idFondo = $(this).data('id');
-            var nombreFondo = $(this).data('name');
+    // $('.btnSeleccionarFondo').click(function() {
+    //         var idFondo = $(this).data('id');
+    //         var nombreFondo = $(this).data('name');
 
-            $('#idCategoriaFondo').val(idFondo);
-            $('#nombreCategoriaFondo').val(nombreFondo);
+    //         $('#idCategoriaFondo').val(idFondo);
+    //         $('#nombreCategoriaFondo').val(nombreFondo);
 
-            $('#modalSeleccionarFondo').modal('show');
-        });
+    //         $('#modalSeleccionarFondo').modal('show');
+    //     });
     })
+    document.addEventListener('DOMContentLoaded', () => {
+    const btnSeleccionarFondo = document.querySelectorAll('.btnSeleccionarFondo');
+    const modalSeleccionarFondo = new bootstrap.Modal(document.getElementById('modalSeleccionarFondo'));
+    const nombreCategoriaFondo = document.getElementById('nombreCategoriaFondo');
+    const idCategoriaFondo = document.getElementById('idCategoriaFondo');
+    const montoPeso = document.getElementById('montoPeso');
+    const montoDolar = document.getElementById('montoDolar');
+    const montoPesosDiv = document.getElementById('montoPesosDiv');
+    const montoDolarDiv = document.getElementById('montoDolarDiv');
+    const destino = document.getElementById('destinoSelect');
+
+    btnSeleccionarFondo.forEach(button => {
+        button.addEventListener('click', (event) => {
+            event.preventDefault();
+            const id = button.getAttribute('data-id');
+            const name = button.getAttribute('data-name');
+            const datadestino = button.getAttribute('data-destino');
+
+            nombreCategoriaFondo.value = name;
+            idCategoriaFondo.value = id;
+            destino.value = datadestino;
+
+            // Mostrar o ocultar los campos de monto según el destino
+            if (destino.value === 'universidad') {
+                montoPesosDiv.style.display = 'block';
+                montoDolarDiv.style.display = 'none';
+                montoPeso.required = true;
+                montoDolar.required = false;
+                montoDolar.value = ''; // Limpiar el valor de montoDolar si es que se había escrito algo
+                montoDolar.disabled = true; // Deshabilitar el campo de montoDolar
+            } else if (destino.value === 'fundacion') {
+                montoPesosDiv.style.display = 'block';
+                montoDolarDiv.style.display = 'block';
+                montoPeso.required = false;
+                montoDolar.required = false;
+                montoPeso.disabled = false; // Habilitar el campo de montoPeso
+                montoDolar.disabled = false; // Habilitar el campo de montoDolar
+
+                // Asegurarse de que solo uno de los montos se pueda rellenar
+                montoPeso.addEventListener('input', () => {
+                    if (montoPeso.value) {
+                        montoDolar.value = ''; // Limpiar montoDolar si se escribe algo en montoPeso
+                        montoDolar.disabled = true; // Deshabilitar montoDolar
+                    } else {
+                        montoDolar.disabled = false; // Habilitar montoDolar si montoPeso está vacío
+                    }
+                });
+                montoDolar.addEventListener('input', () => {
+                    if (montoDolar.value) {
+                        montoPeso.value = ''; // Limpiar montoPeso si se escribe algo en montoDolar
+                        montoPeso.disabled = true; // Deshabilitar montoPeso
+                    } else {
+                        montoPeso.disabled = false; // Habilitar montoPeso si montoDolar está vacío
+                    }
+                });
+            }
+
+            modalSeleccionarFondo.show();
+        });
+    });
+});
     $(document).ready(function(){
             $('#sidebarToggle').click(function(){
                 $('#sidebar').toggleClass('hidden');

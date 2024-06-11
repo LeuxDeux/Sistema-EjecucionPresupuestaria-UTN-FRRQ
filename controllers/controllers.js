@@ -731,7 +731,8 @@ exports.fondosCategorias = (req, res)=>{
 exports.cargarFondoCategoria = (req, res)=>{
     if(req.session.loggedin){
         const nombreFondo = req.body.nombreFondo;
-        connection.query('INSERT INTO categorias_fondos (nombre_categoria_fondo) VALUES (?)', [nombreFondo], (error, results)=>{
+        const destino = req.body.destino;
+        connection.query('INSERT INTO categorias_fondos (nombre_categoria_fondo, destino) VALUES (?, ?)', [nombreFondo, destino], (error, results)=>{
             if(error){
                 console.error('Ha ocurrido un error al insertar el nuevo fondo ', error);
                 return handleHttpResponse(res, 500, 'Error al insertar un nuevo fondo, recuerda revisar que no exista anteriormente');
@@ -749,10 +750,55 @@ exports.cargarFondoCategoria = (req, res)=>{
 
 
 ////////////////////////////////
+// exports.fondosDisponibles = (req, res) => {
+//     if (req.session.loggedin) {
+//         const queryFondosDisponibles = `
+//             SELECT cf.nombre_categoria_fondo, fd.monto, DATE_FORMAT(fd.fecha_carga, "%d/%m/%Y") AS fecha_carga_formateada, fd.id_fondo
+//             FROM fondos_disponibles fd
+//             JOIN categorias_fondos cf ON fd.id_categoria_fondo = cf.id_categoria_fondo
+//             WHERE WEEK(fd.fecha_carga) = WEEK(CURDATE()) AND YEAR(fd.fecha_carga) = YEAR(CURDATE());
+//         `;
+//         const queryCategoriasFondos = 'SELECT * FROM categorias_fondos';
+
+//         // Ejecutar la primera consulta
+//         connection.query(queryFondosDisponibles, (errorFondos, resultadosFondos) => {
+//             if (errorFondos) {
+//                 console.error('Ha ocurrido un error al cargar los fondos disponibles: ', errorFondos);
+//                 return handleHttpResponse(res, 500, 'Error interno al cargar los fondos disponibles');
+//             } else {
+//                 // Ejecutar la segunda consulta
+//                 connection.query(queryCategoriasFondos, (errorCategorias, resultadosCategorias) => {
+//                     if (errorCategorias) {
+//                         console.error('Ha ocurrido un error al cargar las categorías de fondos: ', errorCategorias);
+//                         return handleHttpResponse(res, 500, 'Error interno al cargar las categorías de fondos');
+//                     } else {
+//                         // Renderizar la vista con los resultados de ambas consultas
+//                         res.render('fondos-disponibles', {
+//                             login: true,
+//                             nombre: req.session.nombre,
+//                             id_usuario: req.session.id_usuario,
+//                             secretaria: req.session.secretaria,
+//                             nombreSecretaria: req.session.nombreSecretaria,
+//                             resultadosFondos: resultadosFondos,
+//                             resultadosCategorias: resultadosCategorias
+//                         });
+//                     }
+//                 });
+//             }
+//         });
+//     } else {
+//         res.render('login');
+//     }
+// }
 exports.fondosDisponibles = (req, res) => {
     if (req.session.loggedin) {
         const queryFondosDisponibles = `
-            SELECT cf.nombre_categoria_fondo, fd.monto, DATE_FORMAT(fd.fecha_carga, "%d/%m/%Y") AS fecha_carga_formateada, fd.id_fondo
+            SELECT cf.nombre_categoria_fondo, 
+                   fd.monto_peso, 
+                   fd.monto_dolar, 
+                   DATE_FORMAT(fd.fecha_carga, "%d/%m/%Y") AS fecha_carga_formateada, 
+                   fd.id_fondo, 
+                   cf.destino 
             FROM fondos_disponibles fd
             JOIN categorias_fondos cf ON fd.id_categoria_fondo = cf.id_categoria_fondo
             WHERE WEEK(fd.fecha_carga) = WEEK(CURDATE()) AND YEAR(fd.fecha_carga) = YEAR(CURDATE());
@@ -788,11 +834,41 @@ exports.fondosDisponibles = (req, res) => {
     } else {
         res.render('login');
     }
-}
+};
+// exports.cargarFondo = (req, res) => {
+//     if (req.session.loggedin) {
+//         const { idCategoriaFondo, montoFondo } = req.body;
+//         connection.query('INSERT INTO `fondos_disponibles` (`id_categoria_fondo`, `monto`) VALUES (?, ?)', [idCategoriaFondo, montoFondo], (error, results) => {
+//             if (error) {
+//                 console.error('Ha ocurrido un error al cargar los fondos disponibles: ', error);
+//                 return handleHttpResponse(res, 500, 'Error interno al ingresar un nuevo fondo. Por favor comuníquese con el soporte');
+//             } else {
+//                 res.redirect('fondos-disponibles');
+//             }
+//         });
+//     } else {
+//         res.render('login');
+//     }
+// }
 exports.cargarFondo = (req, res) => {
     if (req.session.loggedin) {
-        const { idCategoriaFondo, montoFondo } = req.body;
-        connection.query('INSERT INTO `fondos_disponibles` (`id_categoria_fondo`, `monto`) VALUES (?, ?)', [idCategoriaFondo, montoFondo], (error, results) => {
+        const { idCategoriaFondo, montoPeso, montoDolar, destinoSelect } = req.body;
+        // const destino = req.body.destino; // Agregar la obtención del destino desde req.body
+        console.log(destinoSelect);
+        let query;
+        let values;
+
+        if (destinoSelect === 'universidad') {
+            query = 'INSERT INTO `fondos_disponibles` (`id_categoria_fondo`, `monto_peso`) VALUES (?, ?)';
+            values = [idCategoriaFondo, montoPeso];
+        } else if (destinoSelect === 'fundacion') {
+            query = 'INSERT INTO `fondos_disponibles` (`id_categoria_fondo`, `monto_peso`, `monto_dolar`) VALUES (?, ?, ?)';
+            values = [idCategoriaFondo, montoPeso, montoDolar];
+        } else {
+            return res.status(400).send('Destino inválido');
+        }
+
+        connection.query(query, values, (error, results) => {
             if (error) {
                 console.error('Ha ocurrido un error al cargar los fondos disponibles: ', error);
                 return handleHttpResponse(res, 500, 'Error interno al ingresar un nuevo fondo. Por favor comuníquese con el soporte');
@@ -803,7 +879,7 @@ exports.cargarFondo = (req, res) => {
     } else {
         res.render('login');
     }
-}
+};
 exports.editarFondo = (req, res) => {
     if (req.session.loggedin) {
         const { editarIdCategoriaFondo, editarMontoFondo } = req.body;
