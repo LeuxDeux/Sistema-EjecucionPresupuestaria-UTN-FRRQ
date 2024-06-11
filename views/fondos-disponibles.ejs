@@ -84,7 +84,9 @@
             <tr class="bg-primary text-white">
                 <th scope="col">CATEGORIA</th>
                 <th scope="col" style="display: none;">ID</th>
-                <th scope="col">MONTO</th>
+                <th scope="col">MONTO PESO</th>
+                <th scope="col">MONTO DOLAR</th>
+                <th scope="col">DESTINO</th>
                 <th scope="col">FECHA CARGA</th>
                 <th scope="col">ACCIONES</th>
             </tr>
@@ -96,12 +98,16 @@
                 <td class="monto"><strong id="totalMonto"></strong></td>
                 <td></td>
                 <td></td>
+                <td></td>
+                <td></td>
             </tr>
             <% resultadosFondos.forEach(function(fondos) { %>
             <tr>
                 <td><%= fondos.nombre_categoria_fondo %></td>
                 <td style="display: none;"><%= fondos.id_fondo %></td>
-                <td class="monto"><%= fondos.monto %></td>
+                <td class="monto"><%= fondos.monto_peso %></td>
+                <td class="monto"><%= fondos.monto_dolar %></td>
+                <td><%= fondos.destino %></td>
                 <td><%= fondos.fecha_carga_formateada %></td>
                 <td>
                     <a href="#" class="btn btn-outline-info btnEditarFondo" data-id="<%= fondos.id_fondo %>" data-name="<%= fondos.nombre_categoria_fondo %>" data-monto="<%= fondos.monto %>">Editar</a>
