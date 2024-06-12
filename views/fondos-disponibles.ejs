@@ -76,48 +76,54 @@
                         </ul>
                     </nav>
                 <% } %>
-<div class="container">
-    <a href="/" id="volver" class="btn btn-outline-primary mt-4"><i class="bx bxs-chevron-left bx-md"></i></a>
-    <a href="#" id="btnAgregarFondo" class="btn btn-outline-primary mt-4" data-secretaria="<%= secretaria %>"><i class="bx bxs-plus-circle bx-md"></i></a>
-    <table class="table table-bordered table-striped text-center mt-4">
-        <thead>
-            <tr class="bg-primary text-white">
-                <th scope="col">CATEGORIA</th>
-                <th scope="col" style="display: none;">ID</th>
-                <th scope="col">MONTO PESO</th>
-                <th scope="col">MONTO DOLAR</th>
-                <th scope="col">DESTINO</th>
-                <th scope="col">FECHA CARGA</th>
-                <th scope="col">ACCIONES</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr style="background-color: #127cc1;">
-                <td><strong>TOTAL</strong></td>
-                <td style="display: none;"></td>
-                <td class="monto"><strong id="totalMonto"></strong></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <% resultadosFondos.forEach(function(fondos) { %>
-            <tr>
-                <td><%= fondos.nombre_categoria_fondo %></td>
-                <td style="display: none;"><%= fondos.id_fondo %></td>
-                <td class="monto"><%= fondos.monto_peso %></td>
-                <td class="monto"><%= fondos.monto_dolar %></td>
-                <td><%= fondos.destino %></td>
-                <td><%= fondos.fecha_carga_formateada %></td>
-                <td>
-                    <a href="#" class="btn btn-outline-info btnEditarFondo" data-id="<%= fondos.id_fondo %>" data-name="<%= fondos.nombre_categoria_fondo %>" data-monto="<%= fondos.monto %>">Editar</a>
-                    <a href="#" class="btn btn-outline-danger btnBorrarFondo" data-id="<%= fondos.id_fondo %>" data-name="<%= fondos.nombre_categoria_fondo %>">Borrar</a>
-                </td>
-            </tr>
-            <% }); %>
-        </tbody>
-    </table>
-</div>
+                <div class="container">
+                    <a href="/" id="volver" class="btn btn-outline-primary mt-4"><i class="bx bxs-chevron-left bx-md"></i></a>
+                    <a href="#" id="btnAgregarFondo" class="btn btn-outline-primary mt-4" data-secretaria="<%= secretaria %>"><i class="bx bxs-plus-circle bx-md"></i></a>
+                    <table class="table table-bordered table-striped text-center mt-4">
+                        <thead>
+                            <tr class="bg-primary text-white">
+                                <th scope="col">CATEGORIA</th>
+                                <th scope="col" style="display: none;">ID</th>
+                                <th scope="col">MONTO FUNDACIÓN PESO</th>
+                                <th scope="col">MONTO FUNDACIÓN DOLAR</th>
+                                <th scope="col">MONTO UNIVERSIDAD PESO</th>
+                                <th scope="col">FECHA CARGA</th>
+                                <th scope="col">ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background-color: #127cc1;">
+                                <td><strong>TOTAL</strong></td>
+                                <td style="display: none;"></td>
+                                <td class="monto"><strong id="totalMontoFundacionPeso"></strong></td>
+                                <td class="monto"><strong id="totalMontoFundacionDolar"></strong></td>
+                                <td class="monto"><strong id="totalMontoUniversidadPeso"></strong></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <% resultadosFondos.forEach(function(fondos) { %>
+                            <tr>
+                                <td><%= fondos.nombre_categoria_fondo %></td>
+                                <td style="display: none;"><%= fondos.id_fondo %></td>
+                                <% if (fondos.destino === 'fundacion') { %>
+                                    <td class="monto"><%= fondos.monto_peso %></td>
+                                    <td class="monto"><%= fondos.monto_dolar %></td>
+                                    <td></td>
+                                <% } else if (fondos.destino === 'universidad') { %>
+                                    <td></td>
+                                    <td></td>
+                                    <td class="monto"><%= fondos.monto_peso %></td>
+                                <% } %>
+                                <td><%= fondos.fecha_carga_formateada %></td>
+                                <td>
+                                    <a href="#" class="btn btn-outline-info btnEditarFondo" data-id="<%= fondos.id_fondo %>" data-name="<%= fondos.nombre_categoria_fondo %>" data-monto="<%= fondos.monto %>">Editar</a>
+                                    <a href="#" class="btn btn-outline-danger btnBorrarFondo" data-id="<%= fondos.id_fondo %>" data-name="<%= fondos.nombre_categoria_fondo %>">Borrar</a>
+                                </td>
+                            </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
 <%} else { %>
     <div class="flex justify-center items-center h-screen">
         <div class="text-center">
@@ -135,19 +141,24 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="formAgregarFondo" action="/agregar-fondo" method="post">
+                <form id="formAgregarFondo" action="/cargar-fondo" method="post">
                     <div class="mb-3">
                         <label for="fondoCategoria" class="form-label">Fondo Categoría</label>
                         <select name="idCategoriaFondo" id="fondoCategoria" class="form-select">
                             <% resultadosCategorias.forEach((resCat) => { %>
-                                <option value="<%= resCat.id_categoria_fondo %>"><%= resCat.nombre_categoria_fondo %></option>
+                                <option value="<%= resCat.id_categoria_fondo %>" data-destino="<%= resCat.destino %>"><%= resCat.nombre_categoria_fondo %></option>
                             <% }); %>
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label for="montoFondo" class="form-label">Monto</label>
-                        <input type="number" step="any" class="form-control" id="montoFondo" name="montoFondo" required>
+                    <div class="mb-3" id="montoPesosDiv">
+                        <label for="montoPeso" class="form-label">Monto en Pesos</label>
+                        <input type="number" step="any" class="form-control" id="montoPeso" name="montoPeso">
                     </div>
+                    <div class="mb-3" id="montoDolarDiv" style="display: none;">
+                        <label for="montoDolar" class="form-label">Monto en Dólares</label>
+                        <input type="number" step="any" class="form-control" id="montoDolar" name="montoDolar">
+                    </div>
+                    <input type="hidden" id="destinoSelect" name="destinoSelect">
                     <button type="submit" class="btn btn-primary">Crear</button>
                 </form>
             </div>
@@ -268,6 +279,72 @@
                 }
             });
         });
+        document.addEventListener("DOMContentLoaded", function() {
+                        function calculateTotals() {
+                            let totalMontoFundacionPeso = 0;
+                            let totalMontoFundacionDolar = 0;
+                            let totalMontoUniversidadPeso = 0;
+                            
+                            document.querySelectorAll('tbody tr').forEach(function(row) {
+                                const montoFundacionPeso = parseFloat(row.cells[2].innerText) || 0;
+                                const montoFundacionDolar = parseFloat(row.cells[3].innerText) || 0;
+                                const montoUniversidadPeso = parseFloat(row.cells[4].innerText) || 0;
+                                
+                                totalMontoFundacionPeso += montoFundacionPeso;
+                                totalMontoFundacionDolar += montoFundacionDolar;
+                                totalMontoUniversidadPeso += montoUniversidadPeso;
+                            });
+                            
+                            document.getElementById('totalMontoFundacionPeso').innerText = totalMontoFundacionPeso.toFixed(2);
+                            document.getElementById('totalMontoFundacionDolar').innerText = totalMontoFundacionDolar.toFixed(2);
+                            document.getElementById('totalMontoUniversidadPeso').innerText = totalMontoUniversidadPeso.toFixed(2);
+                        }
+                        
+                        calculateTotals();
+});
+document.addEventListener("DOMContentLoaded", function() {
+    const fondoCategoriaSelect = document.getElementById("fondoCategoria");
+    const montoPesosDiv = document.getElementById("montoPesosDiv");
+    const montoDolarDiv = document.getElementById("montoDolarDiv");
+    const montoPesoInput = document.getElementById("montoPeso");
+    const montoDolarInput = document.getElementById("montoDolar");
+    const destinoSelectInput = document.getElementById("destinoSelect");
+
+    fondoCategoriaSelect.addEventListener("change", function() {
+        const selectedOption = fondoCategoriaSelect.options[fondoCategoriaSelect.selectedIndex];
+        const destino = selectedOption.getAttribute("data-destino");
+
+        destinoSelectInput.value = destino;
+
+        if (destino === "universidad") {
+            montoPesosDiv.style.display = "block";
+            montoDolarDiv.style.display = "none";
+            montoDolarInput.value = ""; // Limpiar campo de dólares
+            montoPesoInput.disabled = false;
+        } else if (destino === "fundacion") {
+            montoPesosDiv.style.display = "block";
+            montoDolarDiv.style.display = "block";
+            montoPesoInput.disabled = false;
+            montoDolarInput.disabled = false;
+        }
+    });
+
+    montoPesoInput.addEventListener("input", function() {
+        if (montoPesoInput.value !== "") {
+            montoDolarInput.disabled = true;
+        } else {
+            montoDolarInput.disabled = false;
+        }
+    });
+
+    montoDolarInput.addEventListener("input", function() {
+        if (montoDolarInput.value !== "") {
+            montoPesoInput.disabled = true;
+        } else {
+            montoPesoInput.disabled = false;
+        }
+    });
+});
 </script>
 <script src="resources/js/jsformat.js"></script>
 </body>
