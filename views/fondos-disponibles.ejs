@@ -98,7 +98,7 @@
                                 <td class="monto"><strong id="totalMontoFundacionPeso"></strong></td>
                                 <td class="monto"><strong id="totalMontoFundacionDolar"></strong></td>
                                 <td class="monto"><strong id="totalMontoUniversidadPeso"></strong></td>
-                                <td></td>
+                                <td class="monto"></td>
                                 <td></td>
                             </tr>
                             <% resultadosFondos.forEach(function(fondos) { %>
@@ -108,10 +108,10 @@
                                 <% if (fondos.destino === 'fundacion') { %>
                                     <td class="monto"><%= fondos.monto_peso %></td>
                                     <td class="monto"><%= fondos.monto_dolar %></td>
-                                    <td></td>
+                                    <td class="monto"></td>
                                 <% } else if (fondos.destino === 'universidad') { %>
-                                    <td></td>
-                                    <td></td>
+                                    <td class="monto"></td>
+                                    <td class="monto"></td>
                                     <td class="monto"><%= fondos.monto_peso %></td>
                                 <% } %>
                                 <td><%= fondos.fecha_carga_formateada %></td>
