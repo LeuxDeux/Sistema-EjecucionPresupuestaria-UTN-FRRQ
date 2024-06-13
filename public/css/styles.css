@@ -97,12 +97,14 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 /* Estilo personalizado para el botón agregar fondo */
-#btnAgregarFondo, #btnCrearCategoria, .btnCargarFactura, .btnCargarIngreso, .editar-categoria {
+#btnAgregarFondo, #btnCrearCategoria, .btnCargarFactura, .btnCargarIngreso, .editar-categoria, .btnDescargarFactura, .baja-factura, .btnEditarIngreso,
+.btnAccionFactura, .btnSeleccionarFondo, .btnEditarFondo {
     color: #127cc1; /* Cambia el color del texto */
     border-color: #127cc1; /* Cambia el color del borde */
 }
 
-#btnAgregarFondo:hover, #btnCrearCategoria:hover, .btnCargarFactura:hover, .btnCargarIngreso:hover, .editar-categoria:hover {
+#btnAgregarFondo:hover, #btnCrearCategoria:hover, .btnCargarFactura:hover, .btnCargarIngreso:hover, .editar-categoria:hover, .btnDescargarFactura:hover,
+.baja-factura:hover, .btnEditarIngreso:hover, .btnAccionFactura:hover, .btnSeleccionarFondo:hover, .btnEditarFondo:hover {
     color: #ffffff; /* Cambia el color del texto al pasar el ratón */
     background-color: #127cc1; /* Cambia el color de fondo al pasar el ratón */
     border-color: #127cc1; /* Cambia el color del borde al pasar el ratón */
@@ -112,12 +114,12 @@ input[type=number]::-webkit-outer-spin-button {
     background-color: #127cc1;
     border-color: #127cc1;
 }
-.borrar-categoria {
+.borrar-categoria, .borrar-factura, .btnBorrarFondo {
     color: red;
     background-color: #fff;
     border-color: rgb(213, 91, 91);
 }
-.borrar-categoria:hover {
+.borrar-categoria:hover, .borrar-factura:hover, .btnBorrarFondo:hover {
     color: #fff;
     background-color: red;
     border-color: red;
