@@ -97,12 +97,12 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 /* Estilo personalizado para el botón agregar fondo */
-#btnAgregarFondo, #btnCrearCategoria, .btnCargarFactura, .btnCargarIngreso {
+#btnAgregarFondo, #btnCrearCategoria, .btnCargarFactura, .btnCargarIngreso, .editar-categoria {
     color: #127cc1; /* Cambia el color del texto */
     border-color: #127cc1; /* Cambia el color del borde */
 }
 
-#btnAgregarFondo:hover, #btnCrearCategoria:hover, .btnCargarFactura:hover, .btnCargarIngreso:hover {
+#btnAgregarFondo:hover, #btnCrearCategoria:hover, .btnCargarFactura:hover, .btnCargarIngreso:hover, .editar-categoria:hover {
     color: #ffffff; /* Cambia el color del texto al pasar el ratón */
     background-color: #127cc1; /* Cambia el color de fondo al pasar el ratón */
     border-color: #127cc1; /* Cambia el color del borde al pasar el ratón */
@@ -111,4 +111,17 @@ input[type=number]::-webkit-outer-spin-button {
     color: #fff;
     background-color: #127cc1;
     border-color: #127cc1;
+}
+.borrar-categoria {
+    color: red;
+    background-color: #fff;
+    border-color: rgb(213, 91, 91);
+}
+.borrar-categoria:hover {
+    color: #fff;
+    background-color: red;
+    border-color: red;
+}
+.bgc-tr {
+    background-color: #127cc1;
 }
