@@ -85,3 +85,30 @@ input[type=number]::-webkit-outer-spin-button {
     color: #1e3a8a!important;
     background-color: #ffffff98;
 }
+#volver {
+    color: #127cc1; /* Cambia el color del texto */
+    border-color: #127cc1; /* Cambia el color del borde */
+}
+
+#volver:hover {
+    color: #fff; /* Cambia el color del texto al pasar el ratón */
+    background-color: #127cc1; /* Cambia el color de fondo al pasar el ratón */
+    border-color: #127cc1; /* Cambia el color del borde al pasar el ratón */
+}
+
+/* Estilo personalizado para el botón agregar fondo */
+#btnAgregarFondo, #btnCrearCategoria, .btnCargarFactura, .btnCargarIngreso {
+    color: #127cc1; /* Cambia el color del texto */
+    border-color: #127cc1; /* Cambia el color del borde */
+}
+
+#btnAgregarFondo:hover, #btnCrearCategoria:hover, .btnCargarFactura:hover, .btnCargarIngreso:hover {
+    color: #ffffff; /* Cambia el color del texto al pasar el ratón */
+    background-color: #127cc1; /* Cambia el color de fondo al pasar el ratón */
+    border-color: #127cc1; /* Cambia el color del borde al pasar el ratón */
+}
+.btnEditarFondo:hover {
+    color: #fff;
+    background-color: #127cc1;
+    border-color: #127cc1;
+}
