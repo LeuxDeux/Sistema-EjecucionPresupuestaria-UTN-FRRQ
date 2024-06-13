@@ -124,6 +124,10 @@ input[type=number]::-webkit-outer-spin-button {
     background-color: red;
     border-color: red;
 }
-.bgc-tr {
+.bgc-tr, .btnIrInicio, .btnIngresar, .btnRegistrarse {
     background-color: #127cc1;
+}
+.btnIrInicio:hover, .btnIngresar:hover, .btnRegistrarse:hover {
+    background-color: #1a8bd9;
+    border-color: #1a8bd9;
 }
