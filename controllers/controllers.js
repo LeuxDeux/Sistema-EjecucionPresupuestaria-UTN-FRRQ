@@ -123,8 +123,8 @@ exports.registrarUsuario = (req, res) => {
                         timer: 1500,
                         ruta: ''
                     });
-                    console.log(`APP.POST "/register". Se ha registrado el usuario: ${nombres} en la secretaria: ${nombreSecretaria}`);
-                    console.log('Redireccionando hacia index.ejs basándose en ruta: "vacio" y en sweetAlert en registro.ejs');
+                    //console.log(`APP.POST "/register". Se ha registrado el usuario: ${nombres} en la secretaria: ${nombreSecretaria}`);
+                    //console.log('Redireccionando hacia index.ejs basándose en ruta: "vacio" y en sweetAlert en registro.ejs');
                 });
             });
         });
@@ -157,7 +157,7 @@ exports.autentificacion = async (req, res) =>{ // METODO AUTENTIFICACIÓN
                 req.session.secretaria = results[0].secretaria_id;
                 req.session.id_usuario = results[0].id;
                 req.session.nombreSecretaria = results[0].nombre_secretaria;
-                console.log('Autentificación correcta del usuario: ' + req.session.nombre + ' perteneciente a la secretaria: ' + req.session.nombreSecretaria);
+                //console.log('Autentificación correcta del usuario: ' + req.session.nombre + ' perteneciente a la secretaria: ' + req.session.nombreSecretaria);
                 //Método if-else sujeto a cambios de si es admin o no ATENCION!!
                 if(req.session.secretaria == '1'){
                     res.render('login', {
@@ -176,7 +176,7 @@ exports.autentificacion = async (req, res) =>{ // METODO AUTENTIFICACIÓN
                         ruta: '',
                     });
                 }else{
-                    console.log(req.session.secretaria);
+                    //console.log(req.session.secretaria);
                     res.render('login', {
                         alert: true,
                         login: true,
@@ -238,7 +238,7 @@ exports.crearCategorias = (req, res) => {
                         return handleHttpResponse(res, 500, 'Ocurrió un error al procesar su solicitud, por favor intente nuevamente.')
                     }
                 } else {
-                    console.log('Categoría creada con éxito: ', nombre);
+                    //console.log('Categoría creada con éxito: ', nombre);
                     //this.categorias(req, res);
                     res.redirect('categorias?alertcreate=true')
                 }
@@ -318,7 +318,7 @@ exports.borrarCategoria = (req, res) => {
                     console.error('Error al borrar categoría', error);
                     return handleHttpResponse(res, 500, 'Ocurrió un error al borrar la categoría, intente nuevamente o comuníquese con el soporte');
                 } else {
-                    console.log('Categoría borrada con éxito');
+                    //('Categoría borrada con éxito');
                     // this.categorias(req, res);
                     res.redirect('categorias');
                 }
@@ -406,7 +406,7 @@ exports.cargarFactura = (req, res) => {
                             console.error('Error al insertar datos en la base de datos:', err);
                             return handleHttpResponse(res, 500, 'Error interno del servidor al insertar los datos en la base de datos.')
                         } else { // Si los datos se insertaron correctamente en la base de datos
-                            console.log('Datos insertados correctamente en la base de datos');
+                            //console.log('Datos insertados correctamente en la base de datos');
                             res.redirect('facturas?success=true'); // Redirigir a la página de inicio después de cargar la factura
                         }
                     });
@@ -461,7 +461,7 @@ exports.borrarFactura = (req, res) => {
                 console.error('Error al borrar la factura: ', error);
                 return handleHttpResponse(res, 500, 'Error al borrar la factura. Por favor comuníquese con el soporte');
             } else {
-                console.log('Factura borrada con éxito');
+                //console.log('Factura borrada con éxito');
                 // Después de borrar la factura, consultamos nuevamente las facturas de la base de datos
                  connection.query(facturasSelect, [req.session.secretaria], (error, resultsFacturas) => {  
                      if (error) {
@@ -524,7 +524,7 @@ exports.aceptarFactura = (req, res)=>{
                 console.error('Ha ocurrido un error al aceptar la factura: ', error);
                 return handleHttpResponse(res, 500, 'Error interno al cambiar el estado de la factura. Por favor comuníquese con el soporte');
             }else{
-                console.log('Factura aceptada correctamente: ', results1);
+                //console.log('Factura aceptada correctamente: ', results1);
                 this.analiticas(req, res);
             }
         });
@@ -541,7 +541,7 @@ exports.rechazarFactura = (req, res)=>{
                 console.error('Ha ocurrido un error al rechazar la factura: ', error);
                 return handleHttpResponse(res, 500, 'Error interno al cambiar el estado de la factura. Por favor comuníquese con el soporte');
             }else{
-                console.log('Factura rechazada correctamente: ', results1);
+                //console.log('Factura rechazada correctamente: ', results1);
                 this.analiticas(req, res);
             }
         });
@@ -659,7 +659,7 @@ exports.tablaGrafica = (req,res)=>{
                    nombreSecretaria: req.session.nombreSecretaria,
                    resultados: results
                 });
-                  console.log(`Nombre: ${req.session.nombre}, ID Usuario: ${req.session.id_usuario}, Secretaria: ${req.session.secretaria}, Objeto:`, results);
+                  //console.log(`Nombre: ${req.session.nombre}, ID Usuario: ${req.session.id_usuario}, Secretaria: ${req.session.secretaria}, Objeto:`, results);
             }
         });
     }else{
@@ -698,7 +698,7 @@ exports.facturasActivasBL = (req, res)=>{
                 console.error('Ha ocurrido un error al dar de baja las facturas activas (aceptadas): ', error);
                 return handleHttpResponse(res, 500, 'Error al dar de baja las facturas aceptadas desde la base de datos. Por favor comuníquese con el soporte');
             }else{
-                console.log(results);
+                //console.log(results);
                 // this.facturasActivas(req, res);
                 res.redirect('facturas-activas');
             }
@@ -854,7 +854,7 @@ exports.cargarFondo = (req, res) => {
     if (req.session.loggedin) {
         const { idCategoriaFondo, montoPeso, montoDolar, destinoSelect } = req.body;
         // const destino = req.body.destino; // Agregar la obtención del destino desde req.body
-        console.log(destinoSelect);
+        //console.log(destinoSelect);
         let query;
         let values;
 
@@ -896,7 +896,7 @@ exports.editarFondo = (req, res) => {
                         console.warn('No se encontró ninguna fila para actualizar con id_categoria_fondo:', editarIdCategoriaFondo);
                         return handleHttpResponse(res, 404, 'No se encontró ninguna fila para actualizar.');
                     }
-                    console.log('Fondo actualizado con éxito:', results);
+                    //console.log('Fondo actualizado con éxito:', results);
                     res.redirect('fondos-disponibles');
                 }
             }
@@ -921,7 +921,7 @@ exports.borrarFondo = (req, res) => {
                         console.warn('No se encontró ninguna fila para borrar con id_categoria_fondo:', borrarIdCategoriaFondo);
                         return handleHttpResponse(res, 404, 'No se encontró ninguna fila para borrar.');
                     }
-                    console.log('Fondo borrado con éxito:', results);
+                    //console.log('Fondo borrado con éxito:', results);
                     res.redirect('fondos-disponibles');
                 }
             }
