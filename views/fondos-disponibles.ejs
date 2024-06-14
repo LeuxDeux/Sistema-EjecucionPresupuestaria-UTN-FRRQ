@@ -116,7 +116,7 @@
                                 <% } %>
                                 <td><%= fondos.fecha_carga_formateada %></td>
                                 <td>
-                                    <a href="#" class="btn btn-outline-info btnEditarFondo" data-id="<%= fondos.id_fondo %>" data-name="<%= fondos.nombre_categoria_fondo %>" data-monto="<%= fondos.monto %>">Editar</a>
+                                    <a href="#" class="btn btn-outline-info btnEditarFondo" data-id="<%= fondos.id_fondo %>" data-name="<%= fondos.nombre_categoria_fondo %>" data-destino="<%= fondos.destino %>" data-monto-peso="<%= fondos.monto_peso %>" data-monto-dolar="<%= fondos.monto_dolar %>">Editar</a>
                                     <a href="#" class="btn btn-outline-danger btnBorrarFondo" data-id="<%= fondos.id_fondo %>" data-name="<%= fondos.nombre_categoria_fondo %>">Borrar</a>
                                 </td>
                             </tr>
@@ -181,10 +181,12 @@
                         <input type="text" class="form-control" id="editarFondoCategoria" name="editarFondoCategoria" readonly>
                     </div>
                     <div class="mb-3">
-                        <label for="editarMontoFondo" class="form-label">Monto</label>
+                        <label for="editarMontoFondo" class="form-label" id="editarMontoFondoLabel"></label>
                         <input type="number" step="any" class="form-control" id="editarMontoFondo" name="editarMontoFondo" required>
                     </div>
-                    <input type="hidden" id="editarIdCategoriaFondo" name="editarIdCategoriaFondo">
+                    <input type="hidden" id="editarIdFondo" name="editarIdFondo">
+                    <input type="hidden" id="editarDestino" name="editarDestino">
+                    <input type="hidden" id="moneda" name="moneda">
                     <button type="submit" class="btn btn-primary">Actualizar</button>
                 </form>
             </div>
@@ -223,17 +225,17 @@
             $('#modalAgregarFondo').modal('show');
         });
 
-        $('.btnEditarFondo').click(function() {
-            var id = $(this).data('id');
-            var name = $(this).data('name');
-            var monto = $(this).data('monto');
+        // $('.btnEditarFondo').click(function() {
+        //     var id = $(this).data('id');
+        //     var name = $(this).data('name');
+        //     var monto = $(this).data('monto');
 
-            $('#editarIdCategoriaFondo').val(id);
-            $('#editarFondoCategoria').val(name);
-            $('#editarMontoFondo').val(monto);
+        //     $('#editarIdCategoriaFondo').val(id);
+        //     $('#editarFondoCategoria').val(name);
+        //     $('#editarMontoFondo').val(monto);
 
-            $('#modalEditarFondo').modal('show');
-        });
+        //     $('#modalEditarFondo').modal('show');
+        // });
 
         $('.btnBorrarFondo').click(function() {
             var id = $(this).data('id');
@@ -345,6 +347,44 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 });
+document.addEventListener('DOMContentLoaded', function () {
+        const btnsEditarFondo = document.querySelectorAll('.btnEditarFondo');
+        const modalEditarFondo = new bootstrap.Modal(document.getElementById('modalEditarFondo'));
+        const editarFondoCategoria = document.getElementById('editarFondoCategoria');
+        const editarMontoFondoLabel = document.getElementById('editarMontoFondoLabel');
+        const editarMontoFondo = document.getElementById('editarMontoFondo');
+        const editarIdFondo = document.getElementById('editarIdFondo');
+        const editarDestino = document.getElementById('editarDestino');
+        const moneda = document.getElementById('moneda');
+
+        btnsEditarFondo.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const idFondo = this.getAttribute('data-id');
+                const name = this.getAttribute('data-name');
+                const destino = this.getAttribute('data-destino');
+                const montoPeso = this.getAttribute('data-monto-peso');
+                const montoDolar = this.getAttribute('data-monto-dolar');
+
+                editarFondoCategoria.value = name;
+                editarIdFondo.value = idFondo;
+                editarDestino.value = destino;
+
+                if (destino === 'universidad') {
+                    editarMontoFondoLabel.textContent = 'Universidad - Monto en Pesos';
+                    editarMontoFondo.value = montoPeso;
+                    editarMontoFondo.style.display = 'block';
+                } else if (destino === 'fundacion') {
+                    editarMontoFondoLabel.textContent = montoPeso ? 'Fundación - Monto en Pesos' : 'Fundación - Monto en Dólares';
+                    moneda.value = montoPeso ? 'PESO' : 'DOLAR';
+                    editarMontoFondo.value = montoPeso || montoDolar;
+                    editarMontoFondo.style.display = 'block';
+                    
+                }
+
+                modalEditarFondo.show();
+            });
+        });
+    });
 </script>
 <script src="resources/js/jsformat.js"></script>
 </body>
