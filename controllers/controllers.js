@@ -882,25 +882,33 @@ exports.cargarFondo = (req, res) => {
 };
 exports.editarFondo = (req, res) => {
     if (req.session.loggedin) {
-        const { editarIdCategoriaFondo, editarMontoFondo } = req.body;
-
-        connection.query(
-            'UPDATE `fondos_disponibles` SET `monto` = ? WHERE `id_fondo` = ?',
-            [editarMontoFondo, editarIdCategoriaFondo],
-            (error, results) => {
-                if (error) {
-                    console.error('Ha ocurrido un error al actualizar el fondo disponible: ', error);
-                    return handleHttpResponse(res, 500, 'Error interno al actualizar el fondo. Por favor comuníquese con el soporte');
-                } else {
-                    if (results.affectedRows === 0) {
-                        console.warn('No se encontró ninguna fila para actualizar con id_categoria_fondo:', editarIdCategoriaFondo);
-                        return handleHttpResponse(res, 404, 'No se encontró ninguna fila para actualizar.');
-                    }
-                    //console.log('Fondo actualizado con éxito:', results);
-                    res.redirect('fondos-disponibles');
-                }
+        const { editarDestino, editarMontoFondo, editarIdFondo, moneda } = req.body;
+        let query = '';
+        let values = [];
+        if (editarDestino === 'universidad') {
+            query = 'UPDATE `fondos_disponibles` SET `monto_peso` = ? WHERE `id_fondo` = ?';
+            values = [editarMontoFondo, editarIdFondo];
+        } else if (editarDestino === 'fundacion') {
+            if(moneda === 'PESO'){
+                query = 'UPDATE `fondos_disponibles` SET `monto_peso` = ? WHERE `id_fondo` = ?';
+                values = [editarMontoFondo, editarIdFondo];
+            } else if(moneda === 'DOLAR'){
+                query = 'UPDATE `fondos_disponibles` SET `monto_dolar` = ? WHERE `id_fondo` = ?';
+                values = [editarMontoFondo, editarIdFondo];
             }
-        );
+        }
+        connection.query(query, values, (error, results) => {
+            if (error) {
+                console.error('Ha ocurrido un error al actualizar el fondo disponible: ', error);
+                return handleHttpResponse(res, 500, 'Error interno al actualizar el fondo. Por favor comuníquese con el soporte');
+            } else {
+                if (results.affectedRows === 0) {
+                    console.warn('No se encontró ninguna fila para actualizar con id_fondo:', idFondo);
+                    return handleHttpResponse(res, 404, 'No se encontró ninguna fila para actualizar.');
+                }
+                res.redirect('fondos-disponibles');
+            }
+        });
     } else {
         res.render('login');
     }
