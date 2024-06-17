@@ -56,11 +56,17 @@
         </div>
     </div>
 
-    <!-- Grafico torta para todas las secretarías -->
-    <div id="containerSecretariasPie" style="width:100%; height:400px;"></div>
+    <div class="container mt-5">
+        <div class="row">
+            <!-- Grafico torta para todas las secretarías -->
+            <div id="containerSecretariasPie" class="col-md-6" style="height:400px;"></div>
 
-    <!-- Gráfico barra que contrapone los ingresos y egresos de cada secretaría-->
-    <div id="containerSecretariasBar" style="width:100%; height:400px;"></div>
+            <!-- Gráfico barra que contrapone los ingresos y egresos de cada secretaría-->
+            <div id="containerSecretariasBar" class="col-md-6" style="height:400px; "></div>
+        </div>
+    </div>
+
+
 
     <!-- Gráfico drilldown -->
     <div id="containerSecretariasBar2" style="width:100%; height:400px;"></div>
@@ -157,6 +163,7 @@
         //Tabla para secretarias//
         // Variable para almacenar la última secretaría seleccionada
         var ultimaSecretariaSeleccionada = null;
+        var contenedoresSecretariasOcultos = false;
 
         // Función para generar las filas de la tabla
         function generarFilas(resultados) {
@@ -196,19 +203,41 @@
                 var row = $('<tr>');
 
                 // Se convierte el nombre de la secretaría un enlace
+                $.each(resumenPorSecretaria, function(secretaria, resumen) {
+                var total = resumen.ingresos - resumen.egresos;
+
+                var row = $('<tr>');
+
+                // Se convierte el nombre de la secretaría un enlace
                 var link = $('<a href="#">').text(secretaria).on('click', function(e) {
                     e.preventDefault();
+
                     // Verificamos si la misma secretaría está seleccionada
                     if (ultimaSecretariaSeleccionada === secretaria) {
                         $('#tablaCategoriasContainer').toggleClass('hidden');
                         $('#containerEgresos').toggleClass('hidden');
                         $('#containerIngresos').toggleClass('hidden');
+                        
+                        // Alternar visibilidad de los contenedores de gráficos de secretarías
+                        $('#containerSecretariasPie').toggleClass('hidden');
+                        $('#containerSecretariasBar').toggleClass('hidden');
+                        $('#containerSecretariasBar2').toggleClass('hidden');
                     } else {
+                        // Ocultar los contenedores de gráficos de secretarías
+                        if (!contenedoresSecretariasOcultos) {
+                            $('#containerSecretariasPie').addClass('hidden');
+                            $('#containerSecretariasBar').addClass('hidden');
+                            $('#containerSecretariasBar2').addClass('hidden');
+                            contenedoresSecretariasOcultos = true;
+                        }
+
                         // Llamamos a la función para actualizar los gráficos con la secretaría seleccionada
                         actualizarGraficoEgresosPorSecretaria(secretaria);
                         actualizarGraficoIngresosPorSecretaria(secretaria);
-                        // Llamamo a la función para generar la tabla de categorías
+                        // Llamamos a la función para generar la tabla de categorías
                         generarTablaCategorias(secretaria, resultados);
+
+                        // Mostrar los contenedores de categorías, egresos e ingresos
                         $('#tablaCategoriasContainer').removeClass('hidden');
                         $('#containerEgresos').removeClass('hidden');
                         $('#containerIngresos').removeClass('hidden');
@@ -217,6 +246,14 @@
                     // Actualizar la última secretaría seleccionada
                     ultimaSecretariaSeleccionada = secretaria;
                 });
+
+                row.append($('<td>').append(link));
+                row.append($('<td>').text(formatearMoneda(resumen.egresos)));
+                row.append($('<td>').text(formatearMoneda(resumen.ingresos)));
+                row.append($('<td>').text(formatearMoneda(total)));
+
+                $('#tablaSecretariasBody').append(row);
+            });
 
                 $('<td>').append(link).appendTo(row);
                 $('<td>').text(formatearMoneda(resumen.egresos)).appendTo(row); // Formatear número
