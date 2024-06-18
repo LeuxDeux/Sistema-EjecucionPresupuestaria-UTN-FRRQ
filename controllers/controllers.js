@@ -9,6 +9,21 @@ const queryAnaliticas = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS f
 const facturasAceptadas = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE f.estado = "aceptado" AND f.visibilidad = "visible" ORDER BY f.fecha_carga DESC';
 const facturasSelect = 'SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE u.secretaria_id = ? AND f.visibilidad = "visible"';
 const categoriasSelect = 'SELECT id, nombre FROM categorias WHERE secretaria_id = ?';
+const sumaMontosFacturasAct =  `
+SELECT 
+    (SELECT SUM(f.monto) 
+     FROM facturas f 
+     WHERE f.estado = "aceptado" AND f.visibilidad = "visible") AS total_general,
+    (SELECT SUM(f.monto) 
+     FROM facturas f 
+     WHERE f.estado = "aceptado" AND f.visibilidad = "visible" AND f.destino = "fundacion") AS total_fundacion,
+    (SELECT SUM(f.monto) 
+     FROM facturas f 
+     WHERE f.estado = "aceptado" AND f.visibilidad = "visible" AND f.destino = "universidad") AS total_universidad;
+`;
+// const sumaGeneralFacturasVisibles = 'SELECT SUM(f.monto) AS total_general FROM facturas f WHERE f.estado = "aceptado" AND f.visibilidad = "visible";'
+// const sumaFundacionFacturasVisibles = 'SELECT SUM(f.monto) AS total_fundacion FROM facturas f WHERE f.estado = "aceptado" AND f.visibilidad = "visible" AND f.destino = "fundacion";'
+// const sumaUniversidadFacturasVisibles = 'SELECT SUM(f.monto) AS total_universidad FROM facturas f WHERE f.estado = "aceptado" AND f.visibilidad = "visible" AND f.destino = "universidad";'
 // Función de utilidad para manejar respuestas HTTP
 // function handleHttpResponse(res, statusCode, message) {
 //     res.status(statusCode).send(`
@@ -666,29 +681,39 @@ exports.tablaGrafica = (req,res)=>{
         res.render('login');
     }
 }
-exports.facturasActivas = (req, res)=>{
-    if(req.session.loggedin){
-        connection.query(facturasAceptadas, (error, results)=>{
-            if(error){
+exports.facturasActivas = (req, res) => {
+    if (req.session.loggedin) {
+        connection.query(facturasAceptadas, (error, results) => {
+            if (error) {
                 console.error('Ha ocurrido un error al cargar las facturas activas (aceptadas): ', error);
                 return handleHttpResponse(res, 500, 'Error al cargar las facturas aceptadas desde la base de datos. Por favor comuníquese con el soporte');
-            }else{
+            } else {
                 // res.send(results);
-                res.render('facturas-activas', {
-                    login: true,
-                    nombre: req.session.nombre,
-                    id_usuario: req.session.id_usuario,
-                    secretaria: req.session.secretaria,
-                    nombreSecretaria: req.session.nombreSecretaria,
-                    resultados: results
+                connection.query(sumaMontosFacturasAct, (sumaMontosError, totalSumaMontos) => {
+                    if (sumaMontosError) {
+                        console.error('Ha ocurrido un error al sumar todas las facturas activas: ', sumaMontosError);
+                        return handleHttpResponse(res, 500, 'Error al sumar todas las facturas activas. Por favor comuníquese con el soporte');
+                    } else {   
+                        console.log(totalSumaMontos);
+                        res.render('facturas-activas', {
+                            login: true,
+                            nombre: req.session.nombre,
+                            id_usuario: req.session.id_usuario,
+                            secretaria: req.session.secretaria,
+                            nombreSecretaria: req.session.nombreSecretaria,
+                            resultados: results,
+                            totalGeneral: totalSumaMontos[0].total_general,
+                            totalFundacion: totalSumaMontos[0].total_fundacion,
+                            totalUniversidad: totalSumaMontos[0].total_universidad
+                        });
+                    }
                 });
-                //console.log(results);
             }
         });
-    }else{
+    } else {
         res.render('login');
     }
-}
+};
 exports.facturasActivasBL = (req, res)=>{
     if(req.session.loggedin){
         const idFactura = req.body.id;
