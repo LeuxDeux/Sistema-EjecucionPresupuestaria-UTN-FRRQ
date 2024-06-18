@@ -47,7 +47,7 @@ exports.root = (req, res) => {
                 console.error("Error en la consulta SQL:", error);
                 res.status(500).send("Error en la consulta SQL");
             } else {
-                console.log("Resultados de la consulta:", results);
+                // console.log("Resultados de la consulta:", results);
                 res.render('index', {
                     login: true,
                     nombre: req.session.nombre,
