@@ -109,6 +109,24 @@
             </tr>
         </thead>
         <tbody>
+            <tr style="background-color: #3789c092;">
+                <td><strong>MONTO TOTAL</strong></td>
+                <td></td>
+                <td class="monto"><strong><%= totalGeneral %></strong></td>
+                <td colspan="4"></td>
+            </tr>
+            <tr style="background-color: #3789c092;">
+                <td><strong>MONTO TOTAL FUNDACION</strong></td>
+                <td></td>
+                <td class="monto"><strong><%= totalFundacion %></strong></td>
+                <td colspan="4"></td>
+            </tr>
+            <tr style="background-color: #3789c092;">
+                <td><strong>MONTO TOTAL UNIVERSIDAD</strong></td>
+                <td></td>
+                <td class="monto"><strong><%= totalUniversidad %></strong></td>
+                <td colspan="4"></td>
+            </tr>
             <!-- Iterar sobre las facturas aprobadas-->
             <% resultados.forEach(function(factura) { %>
                 <tr class="fila-factura" data-id="<%= factura.id %>">
