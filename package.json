@@ -1,13 +1,14 @@
 {
-  "name": "utn-sistema",
+  "name": "sistema-ejecucion-presupuestaria-utn-frrq",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Sistema de carga de egresos, ingresos, fondos y exposición de gráficos para la UTN-FRRq",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Lautaro Zacarias & Matias Goldaraz",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
