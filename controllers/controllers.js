@@ -24,67 +24,13 @@ SELECT
 // const sumaGeneralFacturasVisibles = 'SELECT SUM(f.monto) AS total_general FROM facturas f WHERE f.estado = "aceptado" AND f.visibilidad = "visible";'
 // const sumaFundacionFacturasVisibles = 'SELECT SUM(f.monto) AS total_fundacion FROM facturas f WHERE f.estado = "aceptado" AND f.visibilidad = "visible" AND f.destino = "fundacion";'
 // const sumaUniversidadFacturasVisibles = 'SELECT SUM(f.monto) AS total_universidad FROM facturas f WHERE f.estado = "aceptado" AND f.visibilidad = "visible" AND f.destino = "universidad";'
-// Función de utilidad para manejar respuestas HTTP
-// function handleHttpResponse(res, statusCode, message) {
-//     res.status(statusCode).send(`
-//         <h2>Error ${statusCode}</h2>
-//         <p>${message}</p>
-//         <a href="/">Volver a la página principal</a>
-//     `);
-// }
 function handleHttpResponse(res, statusCode, message) {
     res.status(statusCode).render('error', {
         statusCode: statusCode,
         message: message
     });
 }
-/* 
-//////////////////////
-CONTROLLERS USUARIOS
-//////////////////////
-*/
 //CREAR USUARIO
-//BETA
-//  exports.registrarUsuario = async (req, res) => { // METODO REGISTRO
-//     const usuario = req.body.usuario; // Obtener los datos del formulario
-//     const nombres = req.body.nombres; 
-//     const secretaria = req.body.secretaria;
-//     const contraseña = req.body.contraseña;
-//     const email = req.body.email;
-//     let contraseñaHash = await bcryptjs.hash(contraseña, 8);
-//     connection.query('INSERT INTO usuarios SET ?', {
-//         nombres: nombres,
-//         email: email,
-//         password: contraseñaHash,
-//         secretaria_id: secretaria,
-//         usuario: usuario
-//     }, async (error, results) => {
-//         if (error) {
-//             throw error;
-//         } else {
-//             // Renderizar la plantilla 'registro.ejs' pasando 'results' junto con las variables relacionadas con el mensaje de alerta
-//             connection.query('SELECT * FROM secretarias', (error, resultsSecretarias) => {
-//                 if (error) {
-//                     throw error;
-//                 } else {
-//                     res.render('registro', {
-//                         results: resultsSecretarias, // Pasar 'resultsSecretarias' que contiene las secretarías
-//                         alert: true,
-//                         alertTitle: "Registro",
-//                         alertMessage: "¡Registro Exitoso!",
-//                         alertIcon: 'success',
-//                         showConfirmButton: false,
-//                         timer: 1500,
-//                         ruta: ''
-//                     });
-//                     console.log('Valor de secretaria:', secretaria);
-//                     console.log('APP.POST "/register". Se ha registrado el usuario: ' + nombres + ' en la secretaria: ' + resultsSecretarias.find(sec => sec.id === parseInt(secretaria)).nombre); // Muestra el nombre de usuario y la secretaria en la que se registro
-//                     console.log('Redireccionando hacia index.ejs basandose en ruta: "vacio" y en sweetAlert en registro.ejs')
-//                 }
-//             });
-//         }
-//     });
-// };
 //CON MANEJO TRYCATCH
 exports.registrarUsuario = (req, res) => {
     const usuario = req.body.usuario;
@@ -376,18 +322,12 @@ exports.facturas = (req, res) => {
                             categorias: resultsCategorias, // Resultados de la consulta de categorías
                             estados: estadosUnicos
                         });
-                        //console.log(resultsFacturas);
                     }
                 });
             }
         });
     } else {
         res.render('login');
-        // res.render('index', {
-        //     login: false,
-        //     nombre: 'Debe iniciar sesión',
-        //     secretaria: ''
-        // });
     }
 };
 
@@ -539,7 +479,6 @@ exports.aceptarFactura = (req, res)=>{
                 console.error('Ha ocurrido un error al aceptar la factura: ', error);
                 return handleHttpResponse(res, 500, 'Error interno al cambiar el estado de la factura. Por favor comuníquese con el soporte');
             }else{
-                //console.log('Factura aceptada correctamente: ', results1);
                 this.analiticas(req, res);
             }
         });
@@ -556,7 +495,6 @@ exports.rechazarFactura = (req, res)=>{
                 console.error('Ha ocurrido un error al rechazar la factura: ', error);
                 return handleHttpResponse(res, 500, 'Error interno al cambiar el estado de la factura. Por favor comuníquese con el soporte');
             }else{
-                //console.log('Factura rechazada correctamente: ', results1);
                 this.analiticas(req, res);
             }
         });
@@ -588,7 +526,6 @@ exports.ingresoGanancia = (req, res)=>{
                         nombreSecretaria: req.session.nombreSecretaria,
                         categorias: resultsCategorias
                         });
-                        //console.log(`Nombre: ${req.session.nombre}, ID Usuario: ${req.session.id_usuario}, Secretaria: ${req.session.secretaria}, Resultados de ingresos:`, resultsIngresos);
                     }
                 });
             }
@@ -614,7 +551,6 @@ exports.cargarIngreso = (req, res) => {
                     console.error('Error al insertar el ingreso: ', error);
                     return handleHttpResponse(res, 500, 'Error interno del servidor al cargar el ingreso. Por favor comuníquese con el soporte');
                 } else {
-                    // this.ingresoGanancia(req, res);
                     res.redirect('ingresos?success=true');
                 }
             }
@@ -674,7 +610,6 @@ exports.tablaGrafica = (req,res)=>{
                    nombreSecretaria: req.session.nombreSecretaria,
                    resultados: results
                 });
-                  //console.log(`Nombre: ${req.session.nombre}, ID Usuario: ${req.session.id_usuario}, Secretaria: ${req.session.secretaria}, Objeto:`, results);
             }
         });
     }else{
@@ -723,8 +658,6 @@ exports.facturasActivasBL = (req, res)=>{
                 console.error('Ha ocurrido un error al dar de baja las facturas activas (aceptadas): ', error);
                 return handleHttpResponse(res, 500, 'Error al dar de baja las facturas aceptadas desde la base de datos. Por favor comuníquese con el soporte');
             }else{
-                //console.log(results);
-                // this.facturasActivas(req, res);
                 res.redirect('facturas-activas');
             }
         });
@@ -769,52 +702,6 @@ exports.cargarFondoCategoria = (req, res)=>{
         res.render('login');
     }
 }
-
-
-
-
-
-////////////////////////////////
-// exports.fondosDisponibles = (req, res) => {
-//     if (req.session.loggedin) {
-//         const queryFondosDisponibles = `
-//             SELECT cf.nombre_categoria_fondo, fd.monto, DATE_FORMAT(fd.fecha_carga, "%d/%m/%Y") AS fecha_carga_formateada, fd.id_fondo
-//             FROM fondos_disponibles fd
-//             JOIN categorias_fondos cf ON fd.id_categoria_fondo = cf.id_categoria_fondo
-//             WHERE WEEK(fd.fecha_carga) = WEEK(CURDATE()) AND YEAR(fd.fecha_carga) = YEAR(CURDATE());
-//         `;
-//         const queryCategoriasFondos = 'SELECT * FROM categorias_fondos';
-
-//         // Ejecutar la primera consulta
-//         connection.query(queryFondosDisponibles, (errorFondos, resultadosFondos) => {
-//             if (errorFondos) {
-//                 console.error('Ha ocurrido un error al cargar los fondos disponibles: ', errorFondos);
-//                 return handleHttpResponse(res, 500, 'Error interno al cargar los fondos disponibles');
-//             } else {
-//                 // Ejecutar la segunda consulta
-//                 connection.query(queryCategoriasFondos, (errorCategorias, resultadosCategorias) => {
-//                     if (errorCategorias) {
-//                         console.error('Ha ocurrido un error al cargar las categorías de fondos: ', errorCategorias);
-//                         return handleHttpResponse(res, 500, 'Error interno al cargar las categorías de fondos');
-//                     } else {
-//                         // Renderizar la vista con los resultados de ambas consultas
-//                         res.render('fondos-disponibles', {
-//                             login: true,
-//                             nombre: req.session.nombre,
-//                             id_usuario: req.session.id_usuario,
-//                             secretaria: req.session.secretaria,
-//                             nombreSecretaria: req.session.nombreSecretaria,
-//                             resultadosFondos: resultadosFondos,
-//                             resultadosCategorias: resultadosCategorias
-//                         });
-//                     }
-//                 });
-//             }
-//         });
-//     } else {
-//         res.render('login');
-//     }
-// }
 exports.fondosDisponibles = (req, res) => {
     if (req.session.loggedin) {
         const queryFondosDisponibles = `
@@ -860,21 +747,7 @@ exports.fondosDisponibles = (req, res) => {
         res.render('login');
     }
 };
-// exports.cargarFondo = (req, res) => {
-//     if (req.session.loggedin) {
-//         const { idCategoriaFondo, montoFondo } = req.body;
-//         connection.query('INSERT INTO `fondos_disponibles` (`id_categoria_fondo`, `monto`) VALUES (?, ?)', [idCategoriaFondo, montoFondo], (error, results) => {
-//             if (error) {
-//                 console.error('Ha ocurrido un error al cargar los fondos disponibles: ', error);
-//                 return handleHttpResponse(res, 500, 'Error interno al ingresar un nuevo fondo. Por favor comuníquese con el soporte');
-//             } else {
-//                 res.redirect('fondos-disponibles');
-//             }
-//         });
-//     } else {
-//         res.render('login');
-//     }
-// }
+
 exports.cargarFondo = (req, res) => {
     if (req.session.loggedin) {
         const { idCategoriaFondo, montoPeso, montoDolar, destinoSelect } = req.body;
@@ -954,7 +827,6 @@ exports.borrarFondo = (req, res) => {
                         console.warn('No se encontró ninguna fila para borrar con id_categoria_fondo:', borrarIdCategoriaFondo);
                         return handleHttpResponse(res, 404, 'No se encontró ninguna fila para borrar.');
                     }
-                    //console.log('Fondo borrado con éxito:', results);
                     res.redirect('fondos-disponibles');
                 }
             }
