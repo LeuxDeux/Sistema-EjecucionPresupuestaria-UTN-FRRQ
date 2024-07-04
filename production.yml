@@ -1,0 +1,21 @@
+version: '3'
+services:
+  frontend:
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    volumes:
+      - ./:/frontend
+    command: ./script/start_prod.sh
+  db:
+    image: mysql
+    volumes:
+      - mysql:/var/lib/mysql
+    env_file: "./env/.env"
+    ports:
+      - '3307:3306'
+
+volumes:
+  mysql:
+    driver: local
