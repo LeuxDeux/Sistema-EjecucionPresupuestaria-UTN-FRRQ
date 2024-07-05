@@ -92,8 +92,6 @@
                             </table>
                         </div>
 
-                        
-
                         <!-- Contenedor para los gráficos de torta -->
                         <div class="container mt-5">
                             <div class="row">
@@ -368,10 +366,18 @@
             // Objeto para almacenar los egresos e ingresos por secretaría
             var resumenPorSecretaria = {};
 
+            // Totales
+            var totalEgresos = 0;
+            var totalIngresos = 0;
+            var totalNeto = 0;
+
             // Iteramos sobre los resultados y sumamos egresos e ingresos por secretaría
             $.each(resultados, function(index, resultado) {
                 var perdida = parseFloat(resultado.perdida) || 0; // Validar y parsear pérdida
                 var ganancia = parseFloat(resultado.ganancia) || 0; // Validar y parsear ganancia
+
+                totalEgresos += perdida;
+                totalIngresos += ganancia;
 
                 if (resumenPorSecretaria[resultado.nombre_secretaria]) {
                     resumenPorSecretaria[resultado.nombre_secretaria].egresos += perdida;
@@ -384,36 +390,32 @@
                 }
             });
 
+            totalNeto = totalIngresos - totalEgresos;
+
             // Función para formatear los números del monto
             function formatearMoneda(numero) {
                 return '$' + numero.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,').replace('.', ',');
             }
 
-            // Pegamos limpiada del el contenido existente de la tabla
+            // Limpiamos el contenido existente de la tabla
             tbody.empty();
 
-            // Se itera sobre el objeto resumenPorSecretaria y generar una fila por cada secretaría
+            // Iteramos sobre el objeto resumenPorSecretaria y generar una fila por cada secretaría
             $.each(resumenPorSecretaria, function(secretaria, resumen) {
                 var total = resumen.ingresos - resumen.egresos;
 
                 var row = $('<tr>');
 
-                // Se convierte el nombre de la secretaría un enlace
-                $.each(resumenPorSecretaria, function(secretaria, resumen) {
-                var total = resumen.ingresos - resumen.egresos;
-
-                var row = $('<tr>');
-
-                // Se convierte el nombre de la secretaría un enlace
+                // Esto es para convertir el nombre de la secretaría en enlace
                 var link = $('<a href="#">').text(secretaria).on('click', function(e) {
                     e.preventDefault();
 
-                    // Verificamos si la misma secretaría está seleccionada
+                    // Verificar si la misma secretaría está seleccionada
                     if (ultimaSecretariaSeleccionada === secretaria) {
                         $('#tablaCategoriasContainer').toggleClass('hidden');
                         $('#containerEgresos').toggleClass('hidden');
                         $('#containerIngresos').toggleClass('hidden');
-                        
+
                         // Alternar visibilidad de los contenedores de gráficos de secretarías
                         $('#containerSecretariasPie').toggleClass('hidden');
                         $('#containerSecretariasBar').toggleClass('hidden');
@@ -427,10 +429,10 @@
                             contenedoresSecretariasOcultos = true;
                         }
 
-                        // Llamamos a la función para actualizar los gráficos con la secretaría seleccionada
+                        // Llamar a la función para actualizar los gráficos con la secretaría seleccionada
                         actualizarGraficoEgresosPorSecretaria(secretaria);
                         actualizarGraficoIngresosPorSecretaria(secretaria);
-                        // Llamamos a la función para generar la tabla de categorías
+                        // Llamar a la función para generar la tabla de categorías
                         generarTablaCategorias(secretaria, resultados);
 
                         // Mostrar los contenedores de categorías, egresos e ingresos
@@ -439,7 +441,7 @@
                         $('#containerIngresos').removeClass('hidden');
                     }
 
-                    // Actualizar la última secretaría seleccionada
+                    // Se actualiza la última secretaría seleccionada
                     ultimaSecretariaSeleccionada = secretaria;
                 });
 
@@ -451,13 +453,13 @@
                 $('#tablaSecretariasBody').append(row);
             });
 
-                $('<td>').append(link).appendTo(row);
-                $('<td>').text(formatearMoneda(resumen.egresos)).appendTo(row); // Formatear número
-                $('<td>').text(formatearMoneda(resumen.ingresos)).appendTo(row);// Formatear número
-                $('<td>').text(formatearMoneda(total)).appendTo(row); // Formatear número
-
-                tbody.append(row);
-            });
+            // Agregamos la fila de totales para las secretarías Generales
+            var totalRow = $('<tr class="font-weight-bold bg-light" style="background-color: #3789c092;">');
+            totalRow.append($('<td>').text('Total').css('background-color', '#3789c092'));
+            totalRow.append($('<td>').text(formatearMoneda(totalEgresos)).css('background-color', '#3789c092'));
+            totalRow.append($('<td>').text(formatearMoneda(totalIngresos)).css('background-color', '#3789c092'));
+            totalRow.append($('<td>').text(formatearMoneda(totalNeto)).css('background-color', '#3789c092'));
+            tbody.append(totalRow);
         }
 
         // Función para generar la tabla de categorías para una secretaría seleccionada
@@ -471,10 +473,18 @@
             // Objeto para almacenar los egresos e ingresos por categoría
             var resumenPorCategoria = {};
 
+            // Totales
+            var totalEgresos = 0;
+            var totalIngresos = 0;
+            var totalNeto = 0;
+
             // Iteramos sobre los datos filtrados y sumar egresos e ingresos por categoría
             $.each(datosSecretaria, function(index, resultado) {
                 var perdida = parseFloat(resultado.perdida) || 0; // Validar y parsear pérdida
                 var ganancia = parseFloat(resultado.ganancia) || 0; // Validar y parsear ganancia
+
+                totalEgresos += perdida;
+                totalIngresos += ganancia;
 
                 if (resumenPorCategoria[resultado.nombre_categoria]) {
                     resumenPorCategoria[resultado.nombre_categoria].egresos += perdida;
@@ -487,16 +497,18 @@
                 }
             });
 
-            // Se limpia el contenido existente de la tabla
+            totalNeto = totalIngresos - totalEgresos;
+
+            // Limpiamos el contenido existente de la tabla
             tbody.empty();
             thead.empty();
 
             // Generamos el encabezado de la tabla
-            var headerRow = $('<tr>');
+            var headerRow = $('<tr class="text-white bgc-tr">');
             $('<th scope="col">').text(secretaria).appendTo(headerRow);
-            $('<th scope="col">').text('Egresos').appendTo(headerRow);
-            $('<th scope="col">').text('Ingresos').appendTo(headerRow);
-            $('<th scope="col">').text('Ingreso Neto').appendTo(headerRow);
+            $('<th scope="col">').text('EGRESOS').appendTo(headerRow);
+            $('<th scope="col">').text('INGRESOS').appendTo(headerRow);
+            $('<th scope="col">').text('INGRESO NETO').appendTo(headerRow);
             thead.append(headerRow);
 
             // Función para formatear los números como moneda
@@ -504,7 +516,7 @@
                 return '$' + numero.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,').replace('.', ',');
             }
 
-            // Iterar sobre el objeto resumenPorCategoria y generar una fila por cada categoría
+            // Iteramos sobre el objeto resumenPorCategoria y generar una fila por cada categoría
             $.each(resumenPorCategoria, function(categoria, resumen) {
                 var total = resumen.ingresos - resumen.egresos;
 
@@ -517,6 +529,14 @@
 
                 tbody.append(row);
             });
+
+            // Agregamos la fila de totales para las categorías de la secretaría que se seleccionó
+            var totalRow = $('<tr class="font-weight-bold bg-light" style="background-color: #3789c092;">');
+            totalRow.append($('<td>').text('Total').css('background-color', '#3789c092'));
+            totalRow.append($('<td>').text(formatearMoneda(totalEgresos)).css('background-color', '#3789c092'));
+            totalRow.append($('<td>').text(formatearMoneda(totalIngresos)).css('background-color', '#3789c092'));
+            totalRow.append($('<td>').text(formatearMoneda(totalNeto)).css('background-color', '#3789c092'));
+            tbody.append(totalRow);
         }
 
         // Función para obtener los datos de egresos de una secretaría para el gráfico de torta

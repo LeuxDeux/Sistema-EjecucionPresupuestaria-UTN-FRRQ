@@ -84,6 +84,7 @@ exports.registrarUsuario = (req, res) => {
                         timer: 1500,
                         ruta: ''
                     });
+                    console.log(results);
                     //console.log(`APP.POST "/register". Se ha registrado el usuario: ${nombres} en la secretaria: ${nombreSecretaria}`);
                     //console.log('Redireccionando hacia index.ejs basándose en ruta: "vacio" y en sweetAlert en registro.ejs');
                 });
@@ -552,6 +553,7 @@ exports.cargarIngreso = (req, res) => {
                     return handleHttpResponse(res, 500, 'Error interno del servidor al cargar el ingreso. Por favor comuníquese con el soporte');
                 } else {
                     res.redirect('ingresos?success=true');
+                    console.log(results);
                 }
             }
         );

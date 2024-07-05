@@ -9,7 +9,7 @@ connection.connect((error) => {
     if(error){
         throw error;
     }else{
-        //console.log('Conectado correctamente a la base de datos');
+        console.log('Conectado correctamente a la base de datos');
     }
 });
 
