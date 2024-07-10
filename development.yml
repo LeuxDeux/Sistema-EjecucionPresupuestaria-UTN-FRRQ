@@ -4,15 +4,17 @@ services:
     build:
       dockerfile: Dockerfile
     ports:
-      - 3000:3000
+      - 4000:3000
     volumes:
       - ./:/frontend
-    command: ./script/start_dev.sh
   db:
     image: mysql
     volumes:
       - mysql:/var/lib/mysql
     env_file: "./env/.env"
+    environment: 
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=$MYSQLDB_DATABASE
     ports:
       - '3307:3306'
 

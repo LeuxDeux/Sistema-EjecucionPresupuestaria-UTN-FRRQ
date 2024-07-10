@@ -1,0 +1,35 @@
+version: '3'
+services:
+  frontend:
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    volumes:
+      - ./:/frontend
+    env_file:
+      - ./env/.env
+    depends_on:
+      - db
+    networks:
+      - backend-network
+
+  db:
+    image: mysql:5.7
+    volumes:
+      - mysql:/var/lib/mysql
+      - ./my.cnf:/etc/mysql/conf.d/my.cnf
+    env_file:
+      - ./env/.env
+    ports:
+      - 3307:3306
+    networks:
+      - backend-network
+
+volumes:
+  mysql:
+    driver: local
+
+networks:
+  backend-network:
+    driver: bridge
