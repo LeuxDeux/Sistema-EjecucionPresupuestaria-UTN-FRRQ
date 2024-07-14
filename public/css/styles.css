@@ -161,7 +161,7 @@ input[type=number]::-webkit-outer-spin-button {
         padding: 4px; /* Reducir aún más el padding */
         margin: 5px;
     }
-    .btnDescargarFactura, .btnAccionFactura {
+    .btnDescargarFactura, .btnAccionFactura, .borrar-factura {
         padding: 2px;
         font-size: 14px;
     }
