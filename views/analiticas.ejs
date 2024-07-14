@@ -77,13 +77,14 @@
                                     </ul>
                                 </nav>
                             <% } %>
-<div class="container">
+<div class="container container-table">
     <a href="/" class="btn btn-outline-primary mt-4" id="volver"><i class="bx bxs-chevron-left bx-md"></i></a>
     <!-- Sección para mostrar información -->
         <div class="mb-3 mt-2">
             <input type="text" class="form-control" id="filtroAnaliticas" placeholder="Buscar facturas en proceso...">
         </div>
-    <table class="table table-bordered table-striped text-center mt-4">
+            <div class="table-responsive">
+    <table class="table table-bordered table-striped text-center mt-4 table-small">
         <thead>
             <tr class="bgc-tr text-white">
                 <th scope="col" style="display: none;">ID</th>
@@ -104,7 +105,7 @@
                 <tr>
                     <td style="display: none;"><%= factura.id %></td>
                     <td><%= factura.fecha_formateada %></td>
-                    <td><a href="/descargar-archivo/<%= factura.id %>"><%= factura.nombre_factura %></a></td>
+                    <td class="maxspace"><a href="/descargar-archivo/<%= factura.id %>"><%= factura.nombre_factura %></a></td>
                     <td><%= factura.nombre_categoria %></td>
                     <td class="monto"><%= factura.monto %></td>
                     <!-- <td><%= factura.estado %></td> -->
@@ -119,6 +120,7 @@
             <% }); %>
         </tbody>
     </table>
+</div>
 </div>
 <%} else { %>
     <div class="flex justify-center items-center h-screen">

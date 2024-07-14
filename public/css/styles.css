@@ -9,6 +9,12 @@ html {
   font-weight: 700;
   font-style: normal;
 }
+html, body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    width: 100%;
+}
 #sidebarToggle {
     font-size: 24px; /* Cambiar el tamaño del botón */
 }
@@ -136,4 +142,27 @@ input[type=number]::-webkit-outer-spin-button {
 .btnIrInicio:hover, .btnIngresar:hover, .btnRegistrarse:hover {
     background-color: #1a8bd9;
     border-color: #1a8bd9;
+}
+.maxspace {
+    max-width: 200px; /* Ajusta este valor según sea necesario */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;  
+}
+@media (max-width: 1800px) and (min-width: 960px) {
+    .container-table {
+        overflow-x: auto;
+    }
+    .table-small {
+        font-size: 14px; /* Reducir aún más el tamaño de la fuente */
+    }
+
+    .table-small th, .table-small td {
+        padding: 4px; /* Reducir aún más el padding */
+        margin: 5px;
+    }
+    .btnDescargarFactura, .btnAccionFactura, .borrar-factura, .baja-factura {
+        padding: 2px;
+        font-size: 14px;
+    }
 }

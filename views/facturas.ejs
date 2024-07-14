@@ -99,7 +99,7 @@
     <div class="mb-3">
         <input type="text" class="form-control" id="filtroFactura" placeholder="Buscar factura...">
     </div>
-    <table class="table table-bordered table-striped text-center mt-4 dataTable" id="miTabla">
+    <table class="table table-bordered table-striped text-center mt-4 dataTable table-small" id="miTabla">
         <thead>
             <tr class="bgc-tr text-white">
                 <th scope="col" style="display: none;">ID</th>
@@ -122,7 +122,7 @@
                 <tr>
                     <td style="display: none;"><%= factura.id %></td>
                     <td><%= factura.fecha_formateada %></td>
-                    <td><a href="/descargar-archivo/<%= factura.id %>"><%= factura.nombre_factura %></a></td>
+                    <td class="maxspace"><a href="/descargar-archivo/<%= factura.id %>"><%= factura.nombre_factura %></a></td>
                     <td style="display: none;"><%= factura.categoria_id %></td>
                     <td class="monto"><%= factura.monto %></td>
                     <td><%= factura.estado %></td>
