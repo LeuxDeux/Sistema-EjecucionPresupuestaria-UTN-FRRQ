@@ -2,4 +2,4 @@
 
 npm install
 
-nodemon app
+node app
