@@ -137,3 +137,9 @@ input[type=number]::-webkit-outer-spin-button {
     background-color: #1a8bd9;
     border-color: #1a8bd9;
 }
+.maxspace {
+    max-width: 200px; /* Ajusta este valor según sea necesario */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;  
+}
