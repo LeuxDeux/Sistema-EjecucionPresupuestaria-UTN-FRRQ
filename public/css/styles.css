@@ -181,21 +181,30 @@ input[type=number]::-webkit-outer-spin-button {
     }
     /* estilo para menu hamburguesa desplegar */
     #sidebar {
-        display: none;
         position: fixed;
-        left: 0;
+        left: -250px; /* Inicialmente fuera de la pantalla */
         top: 0;
         height: 100%;
-        z-index: 1000;
+        z-index: 1001;
+        width: 250px; /* Ancho del sidebar */
+        background-color: #127cc1; /* Color de fondo del sidebar */
+        overflow-x: hidden; /* Desactivar el scroll horizontal */
+        transition: left 0.3s ease-in-out; /* Transición suave */
+        opacity: 0; /* Inicialmente invisible */
+        transition: left 0.3s ease-in-out, opacity 0.3s ease-in-out;
     }
-
+    
     #sidebar.show {
-        display: block;
+        left: 0; /* Mover el sidebar a la vista */
+        opacity: 1; /* Hacer visible el sidebar */
     }
-
+    
     #sidebarToggle {
         display: block;
+        cursor: pointer; /* Cambiar el cursor para indicar que es un botón */
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 1000; /* Asegura que el botón esté por encima del sidebar */
     }
 }
-
-
