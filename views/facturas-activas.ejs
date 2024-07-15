@@ -43,7 +43,7 @@
         <% if(secretaria == 1){ %>
     <div class="flex min-h-screen">
         <!-- Botón para desplegar la sidebar en los celulares -->
-        <button id="sidebarToggle" class="block md:hidden bg-blue-700 text-white py-2 px-4">
+        <button id="sidebarToggle" class="block md:hidden text-white py-2 px-4" style="background-image: linear-gradient(to bottom, #127cc1, #fff);">
             <span class="material-icons">menu</span>
         </button>
         
@@ -90,13 +90,13 @@
                         </ul>
                     </nav>
                 <% } %>
-<div class="container">
+<div class="container container-table">
     <a href="/" class="btn btn-outline-primary mt-4" id="volver"><i class="bx bxs-chevron-left bx-md"></i></a>
     <!-- Sección para mostrar información -->
         <div class="mb-3 mt-2">
             <input type="text" class="form-control" id="filtroFacturasActivas" placeholder="Buscar facturas activas...">
         </div>
-    <table class="table table-bordered table-striped text-center mt-4">
+    <table class="table table-bordered table-striped text-center mt-4 table-small">
         <thead>
             <tr class="bgc-tr text-white">
                 <th scope="col">Fecha de Carga</th>
@@ -259,6 +259,36 @@ $(document).ready(function(){
                 }
             });
         });
+        document.addEventListener('DOMContentLoaded', () => {
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+
+    let isSidebarHovered = false;
+
+sidebarToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('show');
+});
+
+sidebar.addEventListener('mouseenter', () => {
+    isSidebarHovered = true;
+});
+
+sidebar.addEventListener('mouseleave', () => {
+    isSidebarHovered = false;
+    sidebar.classList.remove('show');
+});
+
+sidebarToggle.addEventListener('mouseenter', () => {
+    isSidebarHovered = true;
+    sidebar.classList.add('show');
+});
+
+sidebarToggle.addEventListener('mouseleave', () => {
+    if (!isSidebarHovered) {
+        sidebar.classList.remove('show');
+    }
+});
+});
 </script>
 </body>
 </html>

@@ -34,7 +34,7 @@
                 <!-- Contenedor principal -->
                 <div class="flex min-h-screen">
                     <!-- Botón para desplegar la sidebar en los celulares -->
-                    <button id="sidebarToggle" class="block md:hidden bg-blue-700 text-white py-2 px-4">
+                    <button id="sidebarToggle" class="block md:hidden text-white py-2 px-4" style="background-image: linear-gradient(to bottom, #127cc1, #fff);">
                         <span class="material-icons">menu</span>
                     </button>
                     
@@ -139,7 +139,7 @@
                 <!-- Contenedor principal -->
                 <div class="flex min-h-screen">
                     <!-- Botón para desplegar la sidebar en los celulares -->
-                    <button id="sidebarToggle" class="block md:hidden bg-blue-700 text-white py-2 px-4">
+                    <button id="sidebarToggle" class="block md:hidden text-white py-2 px-4" style="background-image: linear-gradient(to bottom, #127cc1, #fff);">
                         <span class="material-icons">menu</span>
                     </button>
 
@@ -921,6 +921,36 @@
                 series: drilldownSeries
             }
         });
+        document.addEventListener('DOMContentLoaded', () => {
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+
+    let isSidebarHovered = false;
+
+sidebarToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('show');
+});
+
+sidebar.addEventListener('mouseenter', () => {
+    isSidebarHovered = true;
+});
+
+sidebar.addEventListener('mouseleave', () => {
+    isSidebarHovered = false;
+    sidebar.classList.remove('show');
+});
+
+sidebarToggle.addEventListener('mouseenter', () => {
+    isSidebarHovered = true;
+    sidebar.classList.add('show');
+});
+
+sidebarToggle.addEventListener('mouseleave', () => {
+    if (!isSidebarHovered) {
+        sidebar.classList.remove('show');
+    }
+});
+});
     </script>
 </body>
 </html>
