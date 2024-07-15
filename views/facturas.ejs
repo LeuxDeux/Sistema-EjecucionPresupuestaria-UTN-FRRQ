@@ -32,12 +32,13 @@
         </div>
     </div>
     <% if (login) { %>
+        <div class="flex min-h-screen">
+            <!-- Botón para desplegar la sidebar en los celulares -->
+            <button id="sidebarToggle" class="block md:hidden text-white py-2 px-4" style="background-image: linear-gradient(to bottom, #127cc1, #fff);">
+                <span class="material-icons">menu</span>
+            </button>
         <% if(secretaria == 1){ %>
-    <div class="flex min-h-screen">
-        <!-- Botón para desplegar la sidebar en los celulares -->
-        <button id="sidebarToggle" class="block md:hidden bg-blue-700 text-white py-2 px-4">
-            <span class="material-icons">menu</span>
-        </button>
+    
         
         <!-- Sidebar -->
         <nav id="sidebar" class="bg-blue-700 w-64 flex-shrink-0 hidden md:block shadow-md" style="background-image: linear-gradient(to bottom, #127cc1, #fff);">
@@ -68,9 +69,9 @@
                 <!-- Contenedor principal -->
                 <div class="flex min-h-screen">
                     <!-- Botón para desplegar la sidebar en los celulares -->
-                    <button id="sidebarToggle" class="block md:hidden bg-blue-700 text-white py-2 px-4" style="background-image: #127cc1;">
+                    <!-- <button id="sidebarToggle" class="block md:hidden bg-blue-700 text-white py-2 px-4" style="background-image: #127cc1;">
                         <span class="material-icons">menu</span>
-                    </button>
+                    </button> -->
                     
                     <!-- Sidebar -->
                     <nav id="sidebar" class="bg-blue-700 w-64 flex-shrink-0 hidden md:block shadow-md" style="background-image: linear-gradient(to bottom, #127cc1, #FFFFFF);">
@@ -82,7 +83,8 @@
                         </ul>
                     </nav>
                 <% } %>
-<div class="container">
+                
+<div class="container container-table">
     <a href="/" class="btn btn-outline-primary mt-4" id="volver"><i class="bx bxs-chevron-left bx-md"></i></a>
     <a href="#" class="btn btn-outline-primary mt-4 btnCargarFactura"><i class="bx bxs-plus-circle bx-md"></i></a>
     <!-- Sección para mostrar información -->
@@ -420,6 +422,36 @@ $(document).ready(function() {
                 }
             });
         });
+        document.addEventListener('DOMContentLoaded', () => {
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+
+    let isSidebarHovered = false;
+
+sidebarToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('show');
+});
+
+sidebar.addEventListener('mouseenter', () => {
+    isSidebarHovered = true;
+});
+
+sidebar.addEventListener('mouseleave', () => {
+    isSidebarHovered = false;
+    sidebar.classList.remove('show');
+});
+
+sidebarToggle.addEventListener('mouseenter', () => {
+    isSidebarHovered = true;
+    sidebar.classList.add('show');
+});
+
+sidebarToggle.addEventListener('mouseleave', () => {
+    if (!isSidebarHovered) {
+        sidebar.classList.remove('show');
+    }
+});
+});
 </script>
 <script src="resources/js/jsformat.js"></script>
 </body>
