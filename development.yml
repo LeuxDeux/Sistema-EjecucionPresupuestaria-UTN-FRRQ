@@ -7,7 +7,7 @@ services:
       - 3000:3000
     volumes:
       - ./:/frontend
-    command: ./script/start_prod.sh
+    command: ./script/start_dev.sh
   db:
     image: mysql
     volumes:
