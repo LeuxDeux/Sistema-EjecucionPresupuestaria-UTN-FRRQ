@@ -7,7 +7,7 @@ services:
       - 3000:3000
     volumes:
       - ./:/frontend
-    command: ./script/start_prod.sh
+    command: /bin/sh -c "npm install && node app.js" 
   db:
     image: mysql
     volumes:
