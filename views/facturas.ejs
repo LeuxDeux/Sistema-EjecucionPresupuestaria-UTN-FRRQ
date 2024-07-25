@@ -180,6 +180,7 @@
                     <div class="mb-3">
                         <label for="pdf" class="form-label">Archivo PDF</label>
                         <input type="file" id="pdf" name="pdf" class="form-control" accept=".pdf" required>
+                        <div class="form-text text-danger" id="fileSizeError" style="display:none;">El archivo debe ser menor a 5MB.</div>
                     </div>
                     <div class="mb-3">
                         <label for="destino" class="form-label">Destino</label>
@@ -449,6 +450,21 @@ sidebarToggle.addEventListener('mouseenter', () => {
 sidebarToggle.addEventListener('mouseleave', () => {
     if (!isSidebarHovered) {
         sidebar.classList.remove('show');
+    }
+});
+document.getElementById('formCargarFactura').addEventListener('submit', function(event) {
+    var pdfInput = document.getElementById('pdf');
+    var fileSizeError = document.getElementById('fileSizeError');
+    fileSizeError.style.display = 'none';
+
+    if (pdfInput.files.length > 0) {
+        var file = pdfInput.files[0];
+        var maxSize = 5 * 1024 * 1024; // 5MB en bytes
+
+        if (file.size > maxSize) {
+            fileSizeError.style.display = 'block';
+            event.preventDefault();
+        }
     }
 });
 });

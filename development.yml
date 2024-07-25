@@ -7,7 +7,7 @@ services:
       - 3000:3000
     volumes:
       - ./:/frontend
-    command: ./script/start_dev.sh
+    command: /bin/sh -c "npm install && nodemon app.js" 
   db:
     image: mysql
     volumes:
