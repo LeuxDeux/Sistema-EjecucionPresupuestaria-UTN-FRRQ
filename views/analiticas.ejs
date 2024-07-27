@@ -99,7 +99,7 @@
                 <th scope="col">Acciones</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="facturasTableBody">
             <!-- Iterar sobre las facturas -->
             <% facturas.sort((a, b) => new Date(b.fecha_carga) - new Date(a.fecha_carga)).forEach(function(factura) { %>
                 <tr>
@@ -153,109 +153,120 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 <script>
     $(document).ready(function() {
-        $('#btn-borrar-factura').click(function(event) {
-            event.preventDefault(); // Evitar que el enlace recargue la página
-            var facturaId = $(this).data('id');
-            // Realizar aquí la lógica para eliminar la factura con ID facturaId
-            // Por ejemplo, hacer una petición AJAX al servidor para eliminar la factura
-            // y luego recargar la tabla de facturas.
-        });
-    });
-    $(document).ready(function() {
-        $('.btnCargarFactura').click(function() {
-        // Obtener el ID de la categoría asociada al botón "Seleccionar" clickeado
-        var categoriaId = $(this).data('id');
-        // Preseleccionar la categoría en el formulario de carga de facturas
-        $('#categoria').val(categoriaId);
-        var fechaInput = document.getElementById('fechaActual');
-        // Obtener la fecha actual como un objeto de fecha
-        var fechaActual = new Date();
-        // Formatear la fecha actual como una cadena en el formato deseado 
-        var fechaFormateada = fechaActual.getFullYear() + '-' +
-                              ('0' + (fechaActual.getMonth() + 1)).slice(-2) + '-' +
-                              ('0' + fechaActual.getDate()).slice(-2) + ' ' +
-                              ('0' + fechaActual.getHours()).slice(-2) + ':' +
-                              ('0' + fechaActual.getMinutes()).slice(-2) + ':' +
-                              ('0' + fechaActual.getSeconds()).slice(-2);
+    function cargarFacturas() {
+        $.ajax({
+            url: '/api/facturas',
+            method: 'GET',
+            success: function(data) {
+                // Limpiar el cuerpo de la tabla
+                data.sort((a, b) => new Date(b.fecha_carga) - new Date(a.fecha_carga));
+                $('#facturasTableBody').empty();
 
-        // Asignar la fecha formateada al campo de entrada de texto
-        fechaInput.value = fechaFormateada;
-        $('#modalCargarFactura').modal('show');
+                // Agregar nuevas filas a la tabla
+                data.forEach(function(factura) {
+                    $('#facturasTableBody').append(`
+                        <tr>
+                            <td style="display: none;">${factura.id}</td>
+                            <td>${factura.fecha_formateada}</td>
+                            <td class="maxspace"><a href="/descargar-archivo/${factura.id}">${factura.nombre_factura}</a></td>
+                            <td>${factura.nombre_categoria}</td>
+                            <td class="monto">${factura.monto}</td>
+                            <td>${factura.nombre_usuario}</td>
+                            <td>${factura.nombre_secretaria}</td>
+                            <td>${factura.destino}</td>
+                            <td>
+                                <a href="/descargar-archivo/${factura.id}" class="btn btn-outline-info btnDescargarFactura" data-id="${factura.id}">Descargar</a>
+                                <a href="#" class="btn btn-outline-info btn-accion btnAccionFactura" data-id="${factura.id}" data-nombre="${factura.nombre_factura}" data-monto="${factura.monto}" data-bs-toggle="modal" data-bs-target="#modalAccion">Acción</a>
+                            </td>
+                        </tr>
+                    `);
+                });
+            },
+            error: function() {
+                console.error('Error al cargar las facturas');
+            }
         });
-    });
-    // Cuando se hace clic en un botón de acción
-    $('.btn-accion').click(function() {
-        // Obtener el ID de la factura asociada al botón "Acción" clickeado
+    }
+
+    // Cargar las facturas al cargar la página
+    cargarFacturas();
+
+    // Actualizar las facturas cada 10 segundos (puedes ajustar el intervalo según sea necesario)
+    setInterval(cargarFacturas, 10000);
+
+    // Evento delegado para manejar botones de acción en elementos dinámicos
+    $('#facturasTableBody').on('click', '.btn-accion', function() {
         var facturaNombreFactura = $(this).data('nombre');
         var facturaMonto = $(this).data('monto');
         var facturaId = $(this).data('id');
+
         // Actualizar el texto del modal con información sobre la factura seleccionada
         $('#modalAccion .modal-body p').html('¿Qué acción desea realizar sobre la factura: <a href="/descargar-archivo/' + facturaId + '">' + facturaNombreFactura + '</a> por un monto de $' + facturaMonto);
         $('#modalAccion #btnAceptar').attr('href', '/aceptar-factura/' + facturaId);
         $('#modalAccion #btnRechazar').attr('href', '/rechazar-factura/' + facturaId);
-        console.log(facturaId);
-    });
-    $(document).ready(function() {
-        // Función para filtrar categorías
-        $('#filtroAnaliticas').on('input', function() {
-            var valor = $(this).val().toLowerCase(); // Obtener el valor del filtro y convertirlo a minúsculas
-            $('tbody tr').filter(function() { // Filtrar las filas de la tabla
-                $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1); // Mostrar u ocultar las filas según el valor del filtro
-            });
-        });
-    });
-    $(document).ready(function(){
-            $('#sidebarToggle').click(function(){
-                $('#sidebar').toggleClass('hidden');
-            });
-        });
 
-        //Script para cambiar entre el submenú minimizado y desplegado junto con la flecha ">" "v"
-        document.addEventListener("DOMContentLoaded", function() {
-            const toggleFacturas = document.getElementById("toggleFacturas");
-            const submenuFacturas = document.getElementById("submenuFacturas");
-            const arrowIcon = document.getElementById("arrowIcon");
+        console.log('Factura ID:', facturaId);
+    });
 
-            toggleFacturas.addEventListener("click", function() {
-                if (submenuFacturas.style.display === "none") {
-                    submenuFacturas.style.display = "block";
-                    arrowIcon.textContent = "v";
-                } else {
-                    submenuFacturas.style.display = "none";
-                    arrowIcon.textContent = ">";
-                }
-            });
+    // Función para filtrar facturas
+    $('#filtroAnaliticas').on('input', function() {
+        var valor = $(this).val().toLowerCase(); // Obtener el valor del filtro y convertirlo a minúsculas
+        $('#facturasTableBody tr').filter(function() { // Filtrar las filas de la tabla
+            $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1); // Mostrar u ocultar las filas según el valor del filtro
         });
-        document.addEventListener('DOMContentLoaded', () => {
+    });
+
+    // Mostrar/Ocultar sidebar en dispositivos móviles
+    $('#sidebarToggle').click(function(){
+        $('#sidebar').toggleClass('hidden');
+    });
+
+    // Script para cambiar entre el submenú minimizado y desplegado junto con la flecha ">" "v"
+    const toggleFacturas = document.getElementById("toggleFacturas");
+    const submenuFacturas = document.getElementById("submenuFacturas");
+    const arrowIcon = document.getElementById("arrowIcon");
+
+    toggleFacturas.addEventListener("click", function() {
+        if (submenuFacturas.style.display === "none") {
+            submenuFacturas.style.display = "block";
+            arrowIcon.textContent = "v";
+        } else {
+            submenuFacturas.style.display = "none";
+            arrowIcon.textContent = ">";
+        }
+    });
+
+    // Lógica para manejar el comportamiento del sidebar
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebar = document.getElementById('sidebar');
-
     let isSidebarHovered = false;
 
-sidebarToggle.addEventListener('click', () => {
-    sidebar.classList.toggle('show');
-});
+    sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('show');
+    });
 
-sidebar.addEventListener('mouseenter', () => {
-    isSidebarHovered = true;
-});
+    sidebar.addEventListener('mouseenter', () => {
+        isSidebarHovered = true;
+    });
 
-sidebar.addEventListener('mouseleave', () => {
-    isSidebarHovered = false;
-    sidebar.classList.remove('show');
-});
-
-sidebarToggle.addEventListener('mouseenter', () => {
-    isSidebarHovered = true;
-    sidebar.classList.add('show');
-});
-
-sidebarToggle.addEventListener('mouseleave', () => {
-    if (!isSidebarHovered) {
+    sidebar.addEventListener('mouseleave', () => {
+        isSidebarHovered = false;
         sidebar.classList.remove('show');
-    }
+    });
+
+    sidebarToggle.addEventListener('mouseenter', () => {
+        isSidebarHovered = true;
+        sidebar.classList.add('show');
+    });
+
+    sidebarToggle.addEventListener('mouseleave', () => {
+        if (!isSidebarHovered) {
+            sidebar.classList.remove('show');
+        }
+    });
 });
-});
+
+
 </script>
 <script src="resources/js/jsformat.js"></script>
 </body>
