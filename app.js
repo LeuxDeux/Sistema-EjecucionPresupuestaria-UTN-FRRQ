@@ -110,3 +110,19 @@ app.get('/fondos-disponibles', crud.fondosDisponibles);
 app.post('/agregar-fondo', crud.cargarFondo);
 app.post('/editar-fondo', crud.editarFondo);
 app.post('/borrar-fondo', crud.borrarFondo);
+
+app.get('/api/facturas', (req, res) => {
+    if (req.session.loggedin && req.session.secretaria == '1') {
+        connection.query('SELECT f.*, DATE_FORMAT(f.fecha_carga, "%d/%m/%Y") AS fecha_formateada, u.nombres AS nombre_usuario, c.nombre AS nombre_categoria, sec.nombre AS nombre_secretaria FROM facturas f JOIN usuarios u ON f.usuario_id = u.id JOIN categorias c ON f.categoria_id = c.id JOIN secretarias sec ON u.secretaria_id = sec.id WHERE f.estado = "en proceso"', (error, results) => {  
+            if (error) {
+                console.error('Ha ocurrido un error interno al consultar con la base de datos: ', error);
+                return res.status(500).json({ error: 'Error interno del servidor' });
+            } else {
+                // Envía los resultados como JSON
+                res.json(results);
+            }
+        });
+    } else {
+        res.status(401).json({ error: 'No autorizado' });
+    }
+});
