@@ -1,5 +1,6 @@
 const express = require('express');
 const dotenv = require('dotenv');
+const path = require('path');
 const cookieParser = require('cookie-parser');
 const mysql = require('mysql2');
 const multer = require('multer'); // Importar Multer para manejar la carga de archivos
@@ -23,6 +24,12 @@ app.use(session({
     resave: true,            //guarda la sesion aunque no haya cambios
     saveUninitialized:true   //guarda la cookie aunque no haya sido inicializada previamente
 }));
+
+// Ruta al directorio 'build'
+app.use(express.static(path.join(__dirname, 'build'), { dotfiles: 'allow' }));
+
+
+
 
 //cookies
 // app.use(cookieParser());

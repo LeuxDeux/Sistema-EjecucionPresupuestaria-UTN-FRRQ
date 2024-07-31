@@ -162,7 +162,7 @@ CREATE TABLE `ingresos` (
   `fecha_ingreso` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `nombre_ingreso` varchar(100) NOT NULL,
   `categoria_id` int NOT NULL,
-  `monto` decimal(10,2) NOT NULL,
+  `monto` decimal(20,2) NOT NULL,
   `usuario_id` int NOT NULL,
   `secretaria_id` int NOT NULL,
   PRIMARY KEY (`id_ingreso`),
@@ -205,7 +205,7 @@ CREATE TABLE `secretarias` (
 
 LOCK TABLES `secretarias` WRITE;
 /*!40000 ALTER TABLE `secretarias` DISABLE KEYS */;
-INSERT INTO `secretarias` VALUES (1,'Administrativa'),(2,'Subsecretaría Administrativa'),(3,'Académica'),(4,'Subsecretaria Académica'),(5,'Extensión Universitaria'),(6,'Subsecretaria de Extensión Universitaria'),(7,'Ciencia y Tecnologia'),(8,'Mantenimiento'),(9,'Subsecretaria en Mantenimiento');
+INSERT INTO `secretarias` VALUES (1,'Administrativa'),(3,'Académica'),(5,'Extensión Universitaria'),(7,'Ciencia y Tecnologia'),(8,'Mantenimiento');
 /*!40000 ALTER TABLE `secretarias` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -237,7 +237,7 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES (1,'Lautaro Zacarias','yoyoyzacarias@gmail.com','$2a$08$uY81NFhP7Rgr0jrvjm0wVO.Rv/8PkONgMb5B74lY1UcgCwGYoRNf6',1,'LeuxDeux'),(2,'Sasha Lujan Bais','sasham.lb@gmail.com','$2a$08$67x/FQqrxX8uBlPwDSJJ9uUjOh/fuKF5TeAD9zzE9cBD9lJm2OR8y',1,'xayahlb27'),(3,'Juancho','juancho@gmail.com','$2a$08$g./dkcNkQY8k4DgHegqm4efjcgu3ZD7j09TUfq2.O2f8yik1AYu8m',9,'juancho'),(4,'Jose Antonio','joseantonio@email.com','$2a$08$B3mH2Uh10iGjv4WHKetXjOF2vO8cFl3iy9n4Yk6mo0yZxc.MrqeGK',8,'joseantonio'),(5,'Mati','admin@demo.com','$2a$08$qmWavNNPH2g/wzJrWUv1Xe5OZTSZ848yDX9BjrGBXa6Vn/c1CQh0m',7,'crack'),(6,'Dios','admin1@gmail.com','$2a$08$FDZkZIIJzwEVltyj9OgAuuD/Xj.56R6xskxMWJ/x.bDv/xwf2z1ya',1,'admin'),(7,'Carlos','carlos123@gmail.com','$2a$08$YqdX3p8MoEtwzO3y/bGZl.UWHG.Mszjyu.BQd2nu2FuazTrSgRBvq',1,'carlos'),(8,'Carlos1','carlos1123@gmail.com','$2a$08$7BasI8rLsTfw49a/BBnJreGuez2lVxnq7FbAsvAVK4nMlNGCwOp2m',4,'carlos1'),(9,'Carlos2','carlos222@gmail.com','$2a$08$q0A/6bReHpUUWJa3kbfHq.nQl5KVcehRNdNPr5AerjSI7lGObRFeG',2,'carlo2'),(11,'Carlos11','carlitos1@gmail.com','$2a$08$0lqunXQ3BxxjJ351Aywkle7QkT7wWkyGjqGL2kZsI8v12icZ5r2X2',8,'carlos11'),(12,'pruebita','pruebita@gmail.com','$2a$08$MjrbqKiJe4hTc5igEvA8iOu2r81AxhJo4n3fa1Py9077gWxC0gSrq',8,'ptuebita'),(13,'prueba1','prueba1@gmail.com','$2a$08$xmtzgpYIWotgWOtV1hNfKu8WZ3ffM5pN54wSle4f9JMyuq64C3JfG',8,'prueba1'),(14,'carlos3','carlos3@gmail.com','$2a$08$i8HhEeeD/0Na59nYCO6MV.Mptm.C1kOQxNjN1WH2lipvqEQ3.w0xu',7,'carlos3'),(15,'Miguel','miguel@gmail.com','$2a$08$JH3MwV69ZYqGi.Wfk3sTT.U1IR92.J9GO5iKZ7w0s0LVzkWZmkpfu',8,'miguel'),(16,'walter blanco','walter@gmail.com','$2a$08$.osxR9uTT1ktoUWKAEHtguJof8kjjD4Rrvd5xka1SuxF5RQzdOZhG',7,'walter'),(17,'Javier','javier@gmail.com','$2a$08$0bjDyy3UTQFEn41JnIAN.OnnTm6sw18dJszGXbQ2sRMrCLRILTSaW',1,'javier'),(18,'Valentin','valentin@gmail.com','$2a$08$1b6mHkTmf790YwSCwKXiFeHjnJthqCHij4FZ9oN3iDN8GJONDiQPa',8,'valentin'),(19,'milton','milton@gmail.com','$2a$08$afJCO9n3ljWJKJsqLS4w/eGF8V9UIH8YM6P1ahJ3FzbmfHOSGC7ge',5,'milton'),(20,'Subsec','asdasd@gmail.com','$2a$08$5NhPe.JYUoNyQho0lCj94eJsmx10YJJ0YzGCI0DlEKa3QfIpRSima',2,'subsec');
+INSERT INTO `usuarios` VALUES (1,'Lautaro Zacarias','yoyoyzacarias@gmail.com','$2a$08$uY81NFhP7Rgr0jrvjm0wVO.Rv/8PkONgMb5B74lY1UcgCwGYoRNf6',1,'LeuxDeux'),(2,'Sasha Lujan Bais','sasham.lb@gmail.com','$2a$08$67x/FQqrxX8uBlPwDSJJ9uUjOh/fuKF5TeAD9zzE9cBD9lJm2OR8y',1,'xayahlb27'),(4,'Jose Antonio','joseantonio@email.com','$2a$08$B3mH2Uh10iGjv4WHKetXjOF2vO8cFl3iy9n4Yk6mo0yZxc.MrqeGK',8,'joseantonio'),(5,'Mati','admin@demo.com','$2a$08$qmWavNNPH2g/wzJrWUv1Xe5OZTSZ848yDX9BjrGBXa6Vn/c1CQh0m',7,'crack'),(6,'Dios','admin1@gmail.com','$2a$08$FDZkZIIJzwEVltyj9OgAuuD/Xj.56R6xskxMWJ/x.bDv/xwf2z1ya',1,'admin'),(7,'Carlos','carlos123@gmail.com','$2a$08$YqdX3p8MoEtwzO3y/bGZl.UWHG.Mszjyu.BQd2nu2FuazTrSgRBvq',1,'carlos'),(11,'Carlos11','carlitos1@gmail.com','$2a$08$0lqunXQ3BxxjJ351Aywkle7QkT7wWkyGjqGL2kZsI8v12icZ5r2X2',8,'carlos11'),(12,'pruebita','pruebita@gmail.com','$2a$08$MjrbqKiJe4hTc5igEvA8iOu2r81AxhJo4n3fa1Py9077gWxC0gSrq',8,'ptuebita'),(13,'prueba1','prueba1@gmail.com','$2a$08$xmtzgpYIWotgWOtV1hNfKu8WZ3ffM5pN54wSle4f9JMyuq64C3JfG',8,'prueba1'),(14,'carlos3','carlos3@gmail.com','$2a$08$i8HhEeeD/0Na59nYCO6MV.Mptm.C1kOQxNjN1WH2lipvqEQ3.w0xu',7,'carlos3'),(15,'Miguel','miguel@gmail.com','$2a$08$JH3MwV69ZYqGi.Wfk3sTT.U1IR92.J9GO5iKZ7w0s0LVzkWZmkpfu',8,'miguel'),(16,'walter blanco','walter@gmail.com','$2a$08$.osxR9uTT1ktoUWKAEHtguJof8kjjD4Rrvd5xka1SuxF5RQzdOZhG',7,'walter'),(17,'Javier','javier@gmail.com','$2a$08$0bjDyy3UTQFEn41JnIAN.OnnTm6sw18dJszGXbQ2sRMrCLRILTSaW',1,'javier'),(18,'Valentin','valentin@gmail.com','$2a$08$1b6mHkTmf790YwSCwKXiFeHjnJthqCHij4FZ9oN3iDN8GJONDiQPa',8,'valentin'),(19,'milton','milton@gmail.com','$2a$08$afJCO9n3ljWJKJsqLS4w/eGF8V9UIH8YM6P1ahJ3FzbmfHOSGC7ge',5,'milton');
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -250,4 +250,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-07-04 10:20:50
+-- Dump completed on 2024-07-28 21:14:31
