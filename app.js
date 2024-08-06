@@ -133,3 +133,17 @@ app.get('/api/facturas', (req, res) => {
         res.status(401).json({ error: 'No autorizado' });
     }
 });
+app.get('/api/ingresos_secretarias', (req, res) =>{
+    if(req.session.loggedin && req.session.secretaria == '1') {
+        connection.query('SELECT ingresos.id_ingreso, ingresos.fecha_ingreso, DATE_FORMAT(ingresos.fecha_ingreso, "%d/%m/%Y") AS fecha_ingreso_formateada, ingresos.nombre_ingreso, categorias.nombre AS nombre_categoria, ingresos.monto, usuarios.nombres AS nombre_usuario, secretarias.nombre AS nombre_secretaria FROM ingresos JOIN categorias ON ingresos.categoria_id = categorias.id JOIN usuarios ON ingresos.usuario_id = usuarios.id JOIN secretarias ON ingresos.secretaria_id = secretarias.id ORDER BY ingresos.fecha_ingreso DESC;', (error, results) => {
+            if(error) {
+                console.error('Ha ocurrido un error interno al consultar con la base de datos: ', error);
+                return res.status(500).json({error: 'Error interno del servidor'});
+            }else{
+                res.json(results);
+            }
+        });
+    }else{
+        res.status(401).json({ error: 'No autorizado'});
+    }
+});
