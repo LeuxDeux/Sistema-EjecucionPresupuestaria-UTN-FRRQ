@@ -237,8 +237,14 @@ sidebarToggle.addEventListener('mouseleave', () => {
 });
     </script>
     <script>
+
+         // Función para formatear los valores del objeto resultados
+         function formatCurrency(value) {
+            return '$' + value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,').replace('.', ',');
+        }
+
         //Script para los gráficos de las demás secretarías que no son la de administración
-       document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function() {
             const dataContainer = document.getElementById('dataContainer');
             const resultados = JSON.parse(dataContainer.getAttribute('data-resultados'));
             const secretaria = "<%= secretaria %>";
@@ -265,12 +271,14 @@ sidebarToggle.addEventListener('mouseleave', () => {
             // Convertir los datos en un formato que Highcharts pueda usar
             const datosEgresos = Object.entries(egresosPorCategoria).map(([categoria, monto]) => ({
                 name: categoria,
-                y: monto
+                y: monto,
+                y_formatted: formatCurrency(monto)
             }));
 
             const datosIngresos = Object.entries(ingresosPorCategoria).map(([categoria, monto]) => ({
                 name: categoria,
-                y: monto
+                y: monto,
+                y_formatted: formatCurrency(monto)
             }));
 
             // Gráfico de Egresos
@@ -280,6 +288,24 @@ sidebarToggle.addEventListener('mouseleave', () => {
                 },
                 title: {
                     text: 'Egresos por Categoría'
+                },
+                tooltip: {
+                    pointFormat: '<b>{point.name}</b>: {point.y_formatted}'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            formatter: function() {
+                                return '<b>' + this.point.name + '</b>: ' + this.point.y_formatted;
+                            },
+                            style: {
+                                color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                            }
+                        }
+                    }
                 },
                 series: [{
                     name: 'Egresos',
@@ -295,6 +321,24 @@ sidebarToggle.addEventListener('mouseleave', () => {
                 },
                 title: {
                     text: 'Ingresos por Categoría'
+                },
+                tooltip: {
+                    pointFormat: '<b>{point.name}</b>: {point.y_formatted}'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            formatter: function() {
+                                return '<b>' + this.point.name + '</b>: ' + this.point.y_formatted;
+                            },
+                            style: {
+                                color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                            }
+                        }
+                    }
                 },
                 series: [{
                     name: 'Ingresos',
@@ -322,9 +366,6 @@ sidebarToggle.addEventListener('mouseleave', () => {
         var secretarias = Object.keys(datosPorSecretaria);
         var ganancias = Object.values(datosPorSecretaria).map(data => data.ganancia);
         var perdidas = Object.values(datosPorSecretaria).map(data => data.perdida);
-
-
-        console.log(datosPorSecretaria)
         
         //Aray para almacenar los datos de ganancias y pérdidas por secretaría
         var datosPorSecretaria = [];
@@ -334,8 +375,8 @@ sidebarToggle.addEventListener('mouseleave', () => {
             datosPorSecretaria.push({
                 name: secretarias[i],
                 y: ganancias[i] + perdidas[i], // Sumamos ganancias y pérdidas para cada secretaría
-                ganancias: ganancias[i], // Agregamos las ganancias como propiedad
-                perdidas: perdidas[i] // Agregamos las pérdidas como propiedad
+                ganancias: formatCurrency(ganancias[i]), // Agregamos las ganancias como propiedad
+                perdidas: formatCurrency(perdidas[i]) // Agregamos las pérdidas como propiedad
             });
         }
 
@@ -424,7 +465,7 @@ sidebarToggle.addEventListener('mouseleave', () => {
 
             // Función para formatear los números del monto
             function formatearMoneda(numero) {
-                return '$' + numero.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,').replace('.', ',');
+                return numero.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,').replace('.', ',');
             }
 
             // Limpiamos el contenido existente de la tabla
@@ -543,7 +584,7 @@ sidebarToggle.addEventListener('mouseleave', () => {
 
             // Función para formatear los números como moneda
             function formatearMoneda(numero) {
-                return '$' + numero.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,').replace('.', ',');
+                return numero.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,').replace('.', ',');
             }
 
             // Iteramos sobre el objeto resumenPorCategoria y generar una fila por cada categoría
@@ -634,14 +675,22 @@ sidebarToggle.addEventListener('mouseleave', () => {
                         cursor: 'pointer',
                         dataLabels: {
                             enabled: true,
-                            format: '<b>{point.name}</b>: {point.y}'
+                            formatter: function() {
+                                return '<b>' + this.point.name + '</b>: ' + formatCurrency(this.point.y);
+                            }
                         }
                     }
                 },
                 series: [{
                     name: 'Egreso',
                     colorByPoint: true,
-                    data: datosSecretaria
+                    data: datosSecretaria.map(function(data) {
+                        return {
+                            name: data.name,
+                            y: data.y,
+                            formattedY: formatCurrency(data.y)
+                        };
+                    })
                 }],
                 responsive: {
                     rules: [{
@@ -656,6 +705,9 @@ sidebarToggle.addEventListener('mouseleave', () => {
                             }
                         }
                     }]
+                },
+                tooltip: {
+                    pointFormat: '<b>{point.name}</b>: {point.formattedY}'
                 }
             });
         }
@@ -677,14 +729,22 @@ sidebarToggle.addEventListener('mouseleave', () => {
                         cursor: 'pointer',
                         dataLabels: {
                             enabled: true,
-                            format: '<b>{point.name}</b>: {point.y}'
+                            formatter: function() {
+                                return '<b>' + this.point.name + '</b>: ' + formatCurrency(this.point.y);
+                            }
                         }
                     }
                 },
                 series: [{
                     name: 'Ingreso',
                     colorByPoint: true,
-                    data: datosSecretaria
+                    data: datosSecretaria.map(function(data) {
+                        return {
+                            name: data.name,
+                            y: data.y,
+                            formattedY: formatCurrency(data.y)
+                        };
+                    })
                 }],
                 responsive: {
                     rules: [{
@@ -699,6 +759,9 @@ sidebarToggle.addEventListener('mouseleave', () => {
                             }
                         }
                     }]
+                },
+                tooltip: {
+                    pointFormat: '<b>{point.name}</b>: {point.formattedY}'
                 }
             });
         }
@@ -753,12 +816,19 @@ sidebarToggle.addEventListener('mouseleave', () => {
                 min: 0,
                 title: {
                     text: 'Monto'
+                },
+                labels: {
+                    formatter: function() {
+                        return formatCurrency(this.value);
+                    }
                 }
             },
             tooltip: {
                 shared: true,
                 headerFormat: '<b>{point.x}</b><br/>',
-                pointFormat: '{series.name}: ${point.y}<br/>'
+                pointFormatter: function() {
+                    return this.series.name + ': ' + formatCurrency(this.y) + '<br/>';
+                }
             },
             plotOptions: {
                 column: {
@@ -953,5 +1023,16 @@ sidebarToggle.addEventListener('mouseleave', () => {
         });
         
     </script>
+     <style>
+        #tablaCategoriasBody tr td:not(:first-child)::before{
+            content: '$';
+            margin-right: 5px;
+        }
+
+        #tablaSecretariasBody tr td:not(:first-child)::before{
+            content: '$';
+            margin-right: 5px;
+        }
+    </style>
 </body>
 </html>
