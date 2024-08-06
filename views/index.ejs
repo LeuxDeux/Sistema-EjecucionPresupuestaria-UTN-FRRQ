@@ -14,8 +14,10 @@
 <body>
     <% if (login) { %>
         <% if(secretaria == 1){ %>
-            <!-- Div oculto para contener los datos -->
+            <!-- Div oculto para contener los datos de las secretarías -->
             <div id="dataContainer" style="display: none;" data-resultados="<%= JSON.stringify(resultados) %>"></div>
+            <!-- Div oculto para contener los datos de los fondos -->
+            <div id="dataContainer2" style="display: none;" data-resultados-fondos="<%= JSON.stringify(resultadosFondos) %>"></div>
             <div class="flex flex-col min-h-screen">
                 <!-- Encabezados -->
                 <p style="display: none;"><%= secretaria %></p>
@@ -75,7 +77,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="tablaSecretariasBody">
-                                    <!-- Los datos de la tabla se generarán acá con el JS de abajo  línea 132 a 178-->
+                                    <!-- Los datos de la tabla se generarán acá con el JS de abajo -->
                                 </tbody>
                             </table>
                         </div>
@@ -90,6 +92,26 @@
                                     <!-- Filas generadas dinámicamente -->
                                 </tbody>
                             </table>
+                        </div>
+
+                        <!-- Contenedor de la tabla de fondos -->
+                        <div class="flex-1">
+                            <div id="tablaFondosContainer" class="container mt-5">
+                                <h2 class="text-center">Tabla de Fondos</h2>
+                                <table class="table table-bordered table-striped text-center mt-4">
+                                    <thead>
+                                        <tr class="text-white bgc-tr">
+                                            <th scope="col">CATEGORÍA</th>
+                                            <th scope="col">MONTO FUNDACIÓN PESO</th>
+                                            <th scope="col">MONTO FUNDACIÓN DOLAR</th>
+                                            <th scope="col">MONTO UNIVERSIDAD PESO</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tablaFondosBody">
+                                        <!-- Los datos de la tabla se generarán acá con el JS de abajo -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
 
                         <!-- Contenedor para los gráficos de torta -->
@@ -348,7 +370,7 @@ sidebarToggle.addEventListener('mouseleave', () => {
             });
         });
 
-        // Obtenemos los datos del div
+        // Obtenemos los datos del div para las secretarías
         var dataContainer = document.getElementById('dataContainer');
         var resultados = JSON.parse(dataContainer.getAttribute('data-resultados'));
         
@@ -491,14 +513,14 @@ sidebarToggle.addEventListener('mouseleave', () => {
                         $('#containerSecretariasPie').toggleClass('hidden');
                         $('#containerSecretariasBar').toggleClass('hidden');
                         $('#containerSecretariasBar2').toggleClass('hidden');
+
+                        // Ocultar/Mostrar la tabla de fondos
+                        $('#tablaFondosContainer').toggleClass('hidden');
                     } else {
                         // Ocultar los contenedores de gráficos de secretarías
-                        if (!contenedoresSecretariasOcultos) {
-                            $('#containerSecretariasPie').addClass('hidden');
-                            $('#containerSecretariasBar').addClass('hidden');
-                            $('#containerSecretariasBar2').addClass('hidden');
-                            contenedoresSecretariasOcultos = true;
-                        }
+                        $('#containerSecretariasPie').addClass('hidden');
+                        $('#containerSecretariasBar').addClass('hidden');
+                        $('#containerSecretariasBar2').addClass('hidden');
 
                         // Llamar a la función para actualizar los gráficos con la secretaría seleccionada
                         actualizarGraficoEgresosPorSecretaria(secretaria);
@@ -510,10 +532,14 @@ sidebarToggle.addEventListener('mouseleave', () => {
                         $('#tablaCategoriasContainer').removeClass('hidden');
                         $('#containerEgresos').removeClass('hidden');
                         $('#containerIngresos').removeClass('hidden');
+
+                        // Ocultar la tabla de fondos
+                        $('#tablaFondosContainer').addClass('hidden');
                     }
 
                     // Se actualiza la última secretaría seleccionada
                     ultimaSecretariaSeleccionada = secretaria;
+
                 });
 
                 row.append($('<td>').append(link));
@@ -533,6 +559,7 @@ sidebarToggle.addEventListener('mouseleave', () => {
             tbody.append(totalRow);
         }
 
+        ////////////////////////////////////////////////////////////////////////////////
         // Función para generar la tabla de categorías para una secretaría seleccionada
         function generarTablaCategorias(secretaria, resultados) {
             var tbody = $('#tablaCategoriasBody');
@@ -610,6 +637,87 @@ sidebarToggle.addEventListener('mouseleave', () => {
             tbody.append(totalRow);
         }
 
+        ////////////////////////
+        //Tabla para los Fondos
+        // Obtenemos los datos del div para los fondos
+        var dataContainer2 = document.getElementById('dataContainer2');
+        var resultadosFondos = JSON.parse(dataContainer2.getAttribute('data-resultados-fondos'));
+
+        console.log('Resultados Fondos:', resultadosFondos); // Verificar que los datos están presentes
+
+        // Función para generar la tabla de fondos
+        function generarTablaFondos(resultadosFondos) {
+            var tbody = $('#tablaFondosBody');
+
+            // Objeto para almacenar los montos por categoría
+            var resumenPorCategoria = {};
+
+            // Totales
+            var totalPeso = 0;
+            var totalDolar = 0;
+            var totalUniversidadPeso = 0;
+
+            // Iteramos sobre los resultados y sumamos los montos por categoría
+            $.each(resultadosFondos, function(index, fondo) {
+                var montoPeso = parseFloat(fondo.monto_peso) || 0;
+                var montoDolar = parseFloat(fondo.monto_dolar) || 0;
+
+                // Sumar al total según el destino
+                if (fondo.destino === 'universidad') {
+                    totalUniversidadPeso += montoPeso;
+                } else {
+                    totalPeso += montoPeso;
+                    totalDolar += montoDolar;
+                }
+
+                // Agregar los montos a la categoría correspondiente
+                if (!resumenPorCategoria[fondo.nombre_categoria_fondo]) {
+                    resumenPorCategoria[fondo.nombre_categoria_fondo] = {
+                        montoFundacionPeso: 0,
+                        montoFundacionDolar: 0,
+                        montoUniversidadPeso: 0
+                    };
+                }
+
+                if (fondo.destino === 'universidad') {
+                    resumenPorCategoria[fondo.nombre_categoria_fondo].montoUniversidadPeso += montoPeso;
+                } else {
+                    resumenPorCategoria[fondo.nombre_categoria_fondo].montoFundacionPeso += montoPeso;
+                    resumenPorCategoria[fondo.nombre_categoria_fondo].montoFundacionDolar += montoDolar;
+                }
+            });
+
+            // Limpiamos el contenido existente de la tabla
+            tbody.empty();
+
+            // Iteramos sobre el objeto resumenPorCategoria y generamos una fila por cada categoría
+            $.each(resumenPorCategoria, function(categoria, montos) {
+                var row = $('<tr>');
+
+                row.append($('<td>').text(categoria));
+                row.append($('<td>').text(formatearMoneda(montos.montoFundacionPeso)));
+                row.append($('<td>').text(formatearMoneda(montos.montoFundacionDolar)));
+                row.append($('<td>').text(formatearMoneda(montos.montoUniversidadPeso)));
+
+                tbody.append(row);
+            });
+
+            // Agregamos la fila de totales
+            var totalRow = $('<tr class="font-weight-bold bg-light" style="background-color: #3789c092;">');
+            totalRow.append($('<td>').text('TOTAL').css('background-color', '#3789c092'));
+            totalRow.append($('<td>').text(formatearMoneda(totalPeso)).css('background-color', '#3789c092'));
+            totalRow.append($('<td>').text(formatearMoneda(totalDolar)).css('background-color', '#3789c092'));
+            totalRow.append($('<td>').text(formatearMoneda(totalUniversidadPeso)).css('background-color', '#3789c092'));
+            tbody.append(totalRow);
+        }
+
+        // Función para formatear los números como moneda
+        function formatearMoneda(numero) {
+            return numero.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,').replace('.', ',');
+        }
+
+        // Generar la tabla al cargar la página
+        generarTablaFondos(resultadosFondos);
         // Función para obtener los datos de egresos de una secretaría para el gráfico de torta
         function obtenerDatosParaPieChart(secretaria, resultados) {
             const datosSecretaria = resultados.filter(item => item.nombre_secretaria === secretaria && parseFloat(item.perdida) > 0);
@@ -1030,6 +1138,10 @@ sidebarToggle.addEventListener('mouseleave', () => {
         }
 
         #tablaSecretariasBody tr td:not(:first-child)::before{
+            content: '$';
+            margin-right: 5px;
+        }
+        #tablaFondosBody tr td:not(:first-child)::before{
             content: '$';
             margin-right: 5px;
         }
