@@ -262,7 +262,7 @@ sidebarToggle.addEventListener('mouseleave', () => {
 
          // Función para formatear los valores del objeto resultados
          function formatCurrency(value) {
-            return '$' + value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,').replace('.', ',');
+            return '$' + value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
         }
 
         //Script para los gráficos de las demás secretarías que no son la de administración
@@ -487,7 +487,7 @@ sidebarToggle.addEventListener('mouseleave', () => {
 
             // Función para formatear los números del monto
             function formatearMoneda(numero) {
-                return numero.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,').replace('.', ',');
+                return numero.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
             }
 
             // Limpiamos el contenido existente de la tabla
@@ -611,7 +611,7 @@ sidebarToggle.addEventListener('mouseleave', () => {
 
             // Función para formatear los números como moneda
             function formatearMoneda(numero) {
-                return numero.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,').replace('.', ',');
+                return numero.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
             }
 
             // Iteramos sobre el objeto resumenPorCategoria y generar una fila por cada categoría
@@ -713,7 +713,7 @@ sidebarToggle.addEventListener('mouseleave', () => {
 
         // Función para formatear los números como moneda
         function formatearMoneda(numero) {
-            return numero.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,').replace('.', ',');
+            return numero.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
         }
 
         // Generar la tabla al cargar la página
@@ -1116,8 +1116,9 @@ sidebarToggle.addEventListener('mouseleave', () => {
                 pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>${point.y:,.2f}</b><br/>',
                 formatter: function() {
                     const value = revertirTransformacion(this.y);
+                    const formattedValue = value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
                     return '<span style="font-size:11px">' + this.series.name + '</span><br>' +
-                        '<span style="color:' + this.point.color + '">' + this.point.name + '</span>: <b>$' + value.toFixed(2) + '</b><br/>';
+                        '<span style="color:' + this.point.color + '">' + this.point.name + '</span>: <b>$' + formattedValue + '</b><br/>';
                 }
             },
             series: [{
