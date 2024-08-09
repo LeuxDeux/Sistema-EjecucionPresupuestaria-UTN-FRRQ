@@ -170,7 +170,7 @@
                             <td>${factura.fecha_formateada}</td>
                             <td class="maxspace"><a href="/descargar-archivo/${factura.id}">${factura.nombre_factura}</a></td>
                             <td>${factura.nombre_categoria}</td>
-                            <td class="monto">${factura.monto}</td>
+                            <td class="monto">${formatMonto(parseFloat(factura.monto))}</td> <!-- Formateo del monto -->
                             <td>${factura.nombre_usuario}</td>
                             <td>${factura.nombre_secretaria}</td>
                             <td>${factura.destino}</td>
@@ -187,7 +187,12 @@
             }
         });
     }
-
+    function formatMonto(monto) {
+    return monto.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+    }
     // Cargar las facturas al cargar la página
     cargarFacturas();
 
