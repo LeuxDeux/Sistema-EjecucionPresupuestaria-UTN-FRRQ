@@ -631,7 +631,7 @@ exports.facturasActivas = (req, res) => {
                         console.error('Ha ocurrido un error al sumar todas las facturas activas: ', sumaMontosError);
                         return handleHttpResponse(res, 500, 'Error al sumar todas las facturas activas. Por favor comuníquese con el soporte');
                     } else {   
-                        console.log(totalSumaMontos);
+                        // console.log(totalSumaMontos);
                         res.render('facturas-activas', {
                             login: true,
                             nombre: req.session.nombre,
