@@ -191,3 +191,25 @@ app.get('/api/semanas-disponibles', (req, res) => {
         }
     });
 });
+app.get('/api/fondos-disponibles-todos', (req, res) => {
+    // Aquí deberías obtener todos los datos sin filtrar por semana
+    // Asegúrate de adaptar esta consulta a tu base de datos
+    const query = `SELECT 
+    cf.nombre_categoria_fondo, 
+    COALESCE(fd.monto_peso, 0) AS total_monto_peso,
+    COALESCE(fd.monto_dolar, 0) AS total_monto_dolar,
+    WEEK(fd.fecha_carga, 1) AS semana, 
+    YEAR(fd.fecha_carga) AS año
+FROM 
+    fondos_disponibles fd
+JOIN 
+    categorias_fondos cf ON fd.id_categoria_fondo = cf.id_categoria_fondo
+ORDER BY 
+    año DESC, semana DESC;`;
+    connection.query(query, (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(results);
+    });
+});
