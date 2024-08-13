@@ -117,6 +117,7 @@ app.get('/fondos-disponibles', crud.fondosDisponibles);
 app.post('/agregar-fondo', crud.cargarFondo);
 app.post('/editar-fondo', crud.editarFondo);
 app.post('/borrar-fondo', crud.borrarFondo);
+app.get('/fondos-registros', crud.registroFondos);
 
 app.get('/api/facturas', (req, res) => {
     if (req.session.loggedin && req.session.secretaria == '1') {
@@ -146,4 +147,47 @@ app.get('/api/ingresos_secretarias', (req, res) =>{
     }else{
         res.status(401).json({ error: 'No autorizado'});
     }
+});
+app.get('/api/fondos-disponibles-semana', (req, res) => {
+    const { semana } = req.query;
+    if(!semana) {
+        return res.status(400).json({ error: 'Falta el parámetro semana' });
+    }
+    const query = `
+        SELECT 
+            nombre_categoria_fondo, 
+            COALESCE(total_monto_peso, 0) AS total_monto_peso, 
+            COALESCE(total_monto_dolar, 0) AS total_monto_dolar,  
+            semana, 
+            año
+        FROM 
+            vista_registro_fondos_disponibles
+        WHERE 
+            CONCAT(año, '-W', semana) = ?
+    `;
+    connection.query(query, [semana], (error, resultados) => {
+        if (error) {
+            console.error('Error al obtener los fondos disponibles: ', error);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+
+        // Enviar los resultados como respuesta
+        res.json(resultados);
+    });
+});
+app.get('/api/semanas-disponibles', (req, res) => {
+    const query = `
+        SELECT DISTINCT CONCAT(YEAR(fecha_carga), '-W', WEEK(fecha_carga, 1)) AS semana
+        FROM fondos_disponibles
+        ORDER BY semana DESC;
+    `;
+    
+    connection.query(query, (error, results) => {
+        if (error) {
+            console.error('Error al obtener semanas disponibles:', error);
+            res.status(500).json({ error: 'Error al obtener semanas disponibles' });
+        } else {
+            res.json(results.map(row => row.semana));
+        }
+    });
 });
