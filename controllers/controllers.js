@@ -837,3 +837,44 @@ exports.borrarFondo = (req, res) => {
         res.render('login');
     }
 };
+exports.registroFondos = (req, res) => {
+    if (req.session.loggedin) {
+        // const queryRegistroFondos = `
+        // SELECT 
+        //     cf.nombre_categoria_fondo, 
+        //     SUM(fd.monto_peso) AS total_monto_peso, 
+        //     SUM(fd.monto_dolar) AS total_monto_dolar, 
+        //     WEEK(fd.fecha_carga, 1) AS semana, 
+        //     YEAR(fd.fecha_carga) AS año
+        // FROM 
+        //     fondos_disponibles fd
+        // JOIN 
+        //     categorias_fondos cf ON fd.id_categoria_fondo = cf.id_categoria_fondo
+        // GROUP BY 
+        //     cf.nombre_categoria_fondo, semana, año
+        // ORDER BY 
+        //     año DESC, semana DESC;
+        // `;
+        const queryRegistroFondos = `SELECT * FROM vista_registro_fondos_disponibles;`
+        
+        // Ejecutar la primera consulta
+        connection.query(queryRegistroFondos, (errorFondos, resultadosRegistrosFondos) => {
+            if (errorFondos) {
+                console.error('Ha ocurrido un error al cargar los fondos disponibles: ', errorFondos);
+                return handleHttpResponse(res, 500, 'Error interno al cargar los fondos disponibles');
+            } else {
+                // Renderizar la vista con los resultados de ambas consultas
+                res.render('fondos-registros', {
+                    login: true,
+                    nombre: req.session.nombre,
+                    id_usuario: req.session.id_usuario,
+                    secretaria: req.session.secretaria,
+                    nombreSecretaria: req.session.nombreSecretaria,
+                    resultados: resultadosRegistrosFondos
+                });
+            }
+        });
+    } else {
+        res.render('login');
+    }
+};
