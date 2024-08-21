@@ -148,6 +148,7 @@ app.get('/api/ingresos_secretarias', (req, res) =>{
         res.status(401).json({ error: 'No autorizado'});
     }
 });
+//espera un parámetro semana en la consulta y devuelve los fondos disponibles de esa semana.
 app.get('/api/fondos-disponibles-semana', (req, res) => {
     const { semana } = req.query;
     if(!semana) {
@@ -155,15 +156,15 @@ app.get('/api/fondos-disponibles-semana', (req, res) => {
     }
     const query = `
         SELECT 
-            nombre_categoria_fondo, 
-            COALESCE(total_monto_peso, 0) AS total_monto_peso, 
-            COALESCE(total_monto_dolar, 0) AS total_monto_dolar,  
-            semana, 
-            año
-        FROM 
-            vista_registro_fondos_disponibles
-        WHERE 
-            CONCAT(año, '-W', semana) = ?
+    nombre_categoria_fondo, 
+    COALESCE(total_monto_peso, 0) AS total_monto_peso, 
+    COALESCE(total_monto_dolar, 0) AS total_monto_dolar,  
+    semana, 
+    año
+FROM 
+    vista_registro_fondos_disponibles
+WHERE 
+    semana COLLATE utf8mb4_unicode_ci = ?
     `;
     connection.query(query, [semana], (error, resultados) => {
         if (error) {
@@ -171,14 +172,14 @@ app.get('/api/fondos-disponibles-semana', (req, res) => {
             return res.status(500).json({ error: 'Error interno del servidor' });
         }
 
-        // Enviar los resultados como respuesta
         res.json(resultados);
     });
 });
+//devuelve una lista de semanas disponibles.
 app.get('/api/semanas-disponibles', (req, res) => {
     const query = `
-        SELECT DISTINCT CONCAT(YEAR(fecha_carga), '-W', WEEK(fecha_carga, 1)) AS semana
-        FROM fondos_disponibles
+        SELECT DISTINCT semana
+        FROM vista_registro_fondos_disponibles
         ORDER BY semana DESC;
     `;
     
@@ -191,15 +192,21 @@ app.get('/api/semanas-disponibles', (req, res) => {
         }
     });
 });
+//devuelve todos los fondos sin filtrar por semana.
 app.get('/api/fondos-disponibles-todos', (req, res) => {
     // Aquí deberías obtener todos los datos sin filtrar por semana
-    // Asegúrate de adaptar esta consulta a tu base de datos
     const query = `SELECT 
     cf.nombre_categoria_fondo, 
     COALESCE(fd.monto_peso, 0) AS total_monto_peso,
     COALESCE(fd.monto_dolar, 0) AS total_monto_dolar,
-    WEEK(fd.fecha_carga, 1) AS semana, 
-    YEAR(fd.fecha_carga) AS año
+    #WEEK(fd.fecha_carga, 1) AS semana, 
+    YEAR(fd.fecha_carga) AS año,
+    CONCAT(
+        WEEK(fd.fecha_carga, 1), ' - (', 
+        DATE_FORMAT(STR_TO_DATE(CONCAT(YEAR(fd.fecha_carga), WEEK(fd.fecha_carga, 0), ' Monday'), '%X%V %W'), '%d-%m-%y'), ' / ',
+        DATE_FORMAT(DATE_ADD(STR_TO_DATE(CONCAT(YEAR(fd.fecha_carga), WEEK(fd.fecha_carga, 0), ' Monday'), '%X%V %W'), INTERVAL 6 DAY), '%d-%m-%y'),
+        ')'
+    ) AS semana
 FROM 
     fondos_disponibles fd
 JOIN 
