@@ -80,7 +80,7 @@ exports.root = (req, res) => {
                     resultados: resultados1,
                     resultadosFondos: resultados2
                 });
-                // console.log(resultados1, resultados2);
+                console.log(resultados1, resultados2);
             })
             .catch((error) => {
                 console.error("Error en la consulta SQL:", error);

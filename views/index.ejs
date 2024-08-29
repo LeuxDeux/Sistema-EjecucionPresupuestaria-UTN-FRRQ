@@ -185,6 +185,9 @@
 
                                 <!-- Gráfico torta para los ingresos de la secretaría seleccionada -->
                                 <div id="containerIngresos" class="col-md-6" style="height:400px;"></div>
+
+                                <!-- Contenedor para el gráfico de columnas -->
+                                <div id="containerColumnas" style="width: 100%; height: 400px;"></div>
                             </div>
                         </div>
                     </div>
@@ -370,11 +373,87 @@ sidebarToggle.addEventListener('mouseleave', () => {
             });
         });
 
+        document.addEventListener('DOMContentLoaded', function() {
+            const dataContainer = document.getElementById('dataContainer');
+            const resultados = JSON.parse(dataContainer.getAttribute('data-resultados'));
+            const nombreSecretaria = "<%= nombreSecretaria %>";
+
+            // Filtrar datos por la secretaría seleccionada
+            const datosFiltrados = resultados.filter(item => item.nombre_secretaria === nombreSecretaria);
+
+            // Calcular la ganancia total y la pérdida total
+            const totalGanancia = datosFiltrados
+                .filter(item => item.tipo === 'ingreso')
+                .reduce((acc, item) => acc + parseFloat(item.ganancia), 0);
+
+            const totalPerdida = datosFiltrados
+                .filter(item => item.tipo === 'egreso')
+                .reduce((acc, item) => acc + parseFloat(item.perdida), 0);
+
+            // Crear el gráfico de columnas
+            Highcharts.chart('containerColumnas', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: 'Ganancia y Pérdida de ' + nombreSecretaria
+                },
+                xAxis: {
+                    categories: ['Ganancia', 'Pérdida'],
+                    title: {
+                        text: 'Tipo'
+                    }
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: 'Monto'
+                    },
+                    labels: {
+                        formatter: function() {
+                            return formatCurrency(this.value);
+                        }
+                    }
+                },
+                tooltip: {
+                    pointFormat: '<b>{point.y_formatted}</b>'
+                },
+                plotOptions: {
+                    column: {
+                        dataLabels: {
+                            enabled: true,
+                            formatter: function() {
+                                return formatCurrency(this.y);
+                            }
+                        }
+                    }
+                },
+                series: [{
+                    name: 'Monto',
+                    data: [
+                        {
+                            name: 'Ganancia',
+                            y: totalGanancia,
+                            y_formatted: formatCurrency(totalGanancia),
+                            color: 'green'
+                        },
+                        {
+                            name: 'Pérdida',
+                            y: totalPerdida,
+                            y_formatted: formatCurrency(totalPerdida),
+                            color: 'red'
+                        }
+                    ]
+                }]
+            });
+        });
+
         // Obtenemos los datos del div para las secretarías
         var dataContainer = document.getElementById('dataContainer');
         var resultados = JSON.parse(dataContainer.getAttribute('data-resultados'));
-        
-        //Reducimos los datos de las secretarias en grupos por cada una de ganancia y perdida
+
+        //Gráfico de ingreso neto por secretaría
+        // Reducimos los datos de las secretarias en grupos por cada una de ganancia y perdida
         var datosPorSecretaria = resultados.reduce((acc, item) => {
             if (!acc[item.nombre_secretaria]) {
                 acc[item.nombre_secretaria] = { ganancia: 0, perdida: 0 };
@@ -384,34 +463,36 @@ sidebarToggle.addEventListener('mouseleave', () => {
             return acc;
         }, {});
 
-        // Obtenemos los nombres de las secretarias y los datos de ganancia y pérdida
-        var secretarias = Object.keys(datosPorSecretaria);
-        var ganancias = Object.values(datosPorSecretaria).map(data => data.ganancia);
-        var perdidas = Object.values(datosPorSecretaria).map(data => data.perdida);
-        
-        //Aray para almacenar los datos de ganancias y pérdidas por secretaría
-        var datosPorSecretaria = [];
+        // Creamos un array para almacenar los datos filtrados
+        var datosFiltrados = [];
 
-        // Recorremos cada secretaría y agregamos sus datos al array
-        for (var i = 0; i < secretarias.length; i++) {
-            datosPorSecretaria.push({
-                name: secretarias[i],
-                y: ganancias[i] + perdidas[i], // Sumamos ganancias y pérdidas para cada secretaría
-                ganancias: formatCurrency(ganancias[i]), // Agregamos las ganancias como propiedad
-                perdidas: formatCurrency(perdidas[i]) // Agregamos las pérdidas como propiedad
-            });
+        // Recorremos cada secretaría, calculamos el ingreso neto y filtramos las secretarías con ingreso neto positivo
+        for (var secretaria in datosPorSecretaria) {
+            var ganancia = datosPorSecretaria[secretaria].ganancia;
+            var perdida = datosPorSecretaria[secretaria].perdida;
+            var ingresoNeto = ganancia - perdida; // Calculamos el ingreso neto
+
+            if (ingresoNeto > 0) { // Solo incluimos las secretarías con ingreso neto positivo
+                datosFiltrados.push({
+                    name: secretaria,
+                    y: ingresoNeto, // Usamos el ingreso neto para el gráfico
+                    ingresoNeto: formatCurrency(ingresoNeto), // Formateamos el ingreso neto
+                    ganancias: formatCurrency(ganancia), // Incluimos las ganancias
+                    perdidas: formatCurrency(perdida) // Incluimos las pérdidas
+                });
+            }
         }
 
-        // Creamos el grafico con los datos de cada secretaria
+        // Creamos el gráfico con los datos filtrados
         Highcharts.chart('containerSecretariasPie', {
             chart: {
-                type: 'pie' // Es el tipo de grafico
+                type: 'pie' // Tipo de gráfico
             },
             title: {
-                text: 'Ganancias y pérdidas por secretaría'
+                text: 'Ingreso neto por secretaría'
             },
             tooltip: {
-                pointFormat: '<b>{point.name}</b>: <br>Ganancias: {point.ganancias}, Pérdidas: {point.perdidas}' // Formato del tooltip para mostrar ganancias y pérdidas
+                pointFormat: '<b>{point.name}</b>: <br>Ingreso Neto: {point.ingresoNeto}, Ganancias: {point.ganancias}, Pérdidas: {point.perdidas}' // Formato del tooltip para mostrar ingreso neto, ganancias y pérdidas
             },
             plotOptions: {
                 pie: {
@@ -419,7 +500,7 @@ sidebarToggle.addEventListener('mouseleave', () => {
                     cursor: 'pointer',
                     dataLabels: {
                         enabled: true,
-                        format: '<b>{point.name}</b>: <br>Ganancias: {point.ganancias}, Pérdidas: {point.perdidas}', // Formato de las etiquetas de datos para mostrar ganancias y pérdidas
+                        format: '<b>{point.name}</b>: <br>Ingreso Neto: {point.ingresoNeto}, Ganancias: {point.ganancias}, Pérdidas: {point.perdidas}', // Formato de las etiquetas de datos para mostrar ingreso neto, ganancias y pérdidas
                         style: {
                             color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
                         }
@@ -427,9 +508,9 @@ sidebarToggle.addEventListener('mouseleave', () => {
                 }
             },
             series: [{
-                name: 'Ganancias y pérdidas',
+                name: 'Ingreso Neto',
                 colorByPoint: true,
-                data: datosPorSecretaria // Utilizamos los datos agrupados por secretaría
+                data: datosFiltrados // Utilizamos los datos filtrados por secretaría
             }],
             responsive: {
                 rules: [{
@@ -884,7 +965,7 @@ sidebarToggle.addEventListener('mouseleave', () => {
         });
 
         
-        //Grafico de Barras de secretarias//
+        //Grafico de Barras de ingreso y egreso por secretarias//
         // Función para calcular los egresos por secretaría
         function calcularEgresosPorSecretaria(resultados) {
             return resultados.reduce(function(acc, item) {
@@ -909,16 +990,49 @@ sidebarToggle.addEventListener('mouseleave', () => {
         var egresosPorSecretaria = calcularEgresosPorSecretaria(resultados);
         var ingresosPorSecretaria = calcularIngresosPorSecretaria(resultados);
 
-        // Se crea el gráfico de barras
+        // Función para ajustar los valores apilados para que no sobrepasen el valor máximo
+        function ajustarApilamiento(ingresosPorSecretaria, egresosPorSecretaria) {
+            return Object.keys(ingresosPorSecretaria).map(function(secretaria) {
+                var ingresos = ingresosPorSecretaria[secretaria] || 0;
+                var egresos = egresosPorSecretaria[secretaria] || 0;
+
+                // Determinar cuál es mayor
+                var max = Math.max(ingresos, egresos);
+                var min = Math.min(ingresos, egresos);
+
+                // Ajustar los valores apilados
+                var ingresoAjustado, egresoAjustado;
+
+                if (ingresos >= egresos) {
+                    ingresoAjustado = ingresos - egresos;
+                    egresoAjustado = egresos;
+                } else {
+                    ingresoAjustado = ingresos;
+                    egresoAjustado = egresos - ingresos;
+                }
+
+                return {
+                    secretaria: secretaria,
+                    ingresosOriginales: ingresos,
+                    egresosOriginales: egresos,
+                    ingresoAjustado: ingresoAjustado,
+                    egresoAjustado: egresoAjustado
+                };
+            });
+        }
+
+        // Ajustamos los valores de apilamiento
+        var valoresAjustados = ajustarApilamiento(ingresosPorSecretaria, egresosPorSecretaria);
+
         Highcharts.chart('containerSecretariasBar', {
             chart: {
                 type: 'column'
             },
             title: {
-                text: 'Egresos e ingresos por secretaría'
+                text: 'Ingresos Neto por Secretaría'
             },
             xAxis: {
-                categories: Object.keys(egresosPorSecretaria) // Se usa las categorías (nombres de las secretarías)
+                categories: Object.keys(egresosPorSecretaria) // Se usan las categorías (nombres de las secretarías)
             },
             yAxis: {
                 min: 0,
@@ -933,9 +1047,31 @@ sidebarToggle.addEventListener('mouseleave', () => {
             },
             tooltip: {
                 shared: true,
-                headerFormat: '<b>{point.x}</b><br/>',
-                pointFormatter: function() {
-                    return this.series.name + ': ' + formatCurrency(this.y) + '<br/>';
+                formatter: function() {
+                    var secretaria = this.points[0].series.options.dataSecretaria[this.points[0].point.index];
+                    var valores = valoresAjustados.find(function(item) {
+                        return item.secretaria === secretaria;
+                    });
+
+                    var ingresoNeto = valores.ingresosOriginales - valores.egresosOriginales;
+
+                    var tooltipText = `<b>${secretaria}</b><br/>`;
+
+                    // Verificar si ambas series están visibles
+                    var ingresoNetoVisible = this.points.some(point => point.series.name === 'Ingreso Neto' && point.y !== null);
+                    var egresosVisible = this.points.some(point => point.series.name === 'Egresos' && point.y > 0);
+
+                    if (ingresoNetoVisible && egresosVisible) {
+                        tooltipText += `Ingresos: ${formatCurrency(valores.ingresosOriginales)}<br/>`;
+                        tooltipText += `Egresos: ${formatCurrency(valores.egresosOriginales)}<br/>`;
+                        tooltipText += `Ingreso Neto: ${formatCurrency(ingresoNeto)}<br/>`;
+                    } else if (ingresoNetoVisible) {
+                        tooltipText += `Ingreso Neto: ${formatCurrency(ingresoNeto)}<br/>`;
+                    } else if (egresosVisible) {
+                        tooltipText += `Egresos: ${formatCurrency(valores.egresosOriginales)}<br/>`;
+                    }
+
+                    return tooltipText;
                 }
             },
             plotOptions: {
@@ -945,17 +1081,20 @@ sidebarToggle.addEventListener('mouseleave', () => {
             },
             series: [{
                     pointWidth: 100,
-                    name: 'Ingresos',
-                    data: Object.keys(ingresosPorSecretaria).map(function(secretaria) {
-                        return ingresosPorSecretaria[secretaria] || 0; // Se usan los montos de ingresos acumulados
+                    name: 'Ingreso Neto',
+                    data: valoresAjustados.map(function(item) {
+                        // El ingreso neto es la diferencia entre ingresos y egresos
+                        return item.ingresosOriginales - item.egresosOriginales;
                     }),
-                    color: 'green' 
+                    dataSecretaria: Object.keys(ingresosPorSecretaria), // Guardar las secretarías en la serie para usarlas en el tooltip
+                    color: 'green'
                 }, {
                     pointWidth: 100,
                     name: 'Egresos',
-                    data: Object.keys(egresosPorSecretaria).map(function(secretaria) {
-                        return egresosPorSecretaria[secretaria] || 0; // Se usan los montos de egresos acumulados
+                    data: valoresAjustados.map(function(item) {
+                        return item.egresoAjustado;
                     }),
+                    dataSecretaria: Object.keys(egresosPorSecretaria), // Guardar las secretarías en la serie para usarlas en el tooltip
                     color: 'red'
                 }]
         });
