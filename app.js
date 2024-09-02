@@ -148,6 +148,11 @@ app.get('/api/ingresos_secretarias', (req, res) =>{
         res.status(401).json({ error: 'No autorizado'});
     }
 });
+//Comienzo de endpoints para evolución en graficos Chart.js/HighCharts de registros-fondos
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
 //espera un parámetro semana en la consulta y devuelve los fondos disponibles de esa semana.
 app.get('/api/fondos-disponibles-semana', (req, res) => {
     const { semana } = req.query;
@@ -220,3 +225,38 @@ ORDER BY
         res.json(results);
     });
 });
+app.get('/api/fondos-evolucion', (req, res) => {
+    const query = `
+        SELECT 
+            cf.nombre_categoria_fondo, 
+            WEEK(fd.fecha_carga, 1) AS semana, 
+            YEAR(fd.fecha_carga) AS año,
+            COALESCE(SUM(fd.monto_peso), 0) AS total_monto_peso,
+            COALESCE(SUM(fd.monto_dolar), 0) AS total_monto_dolar
+        FROM 
+            fondos_disponibles fd
+        JOIN 
+            categorias_fondos cf ON fd.id_categoria_fondo = cf.id_categoria_fondo
+        GROUP BY 
+            cf.nombre_categoria_fondo, 
+            semana, 
+            año
+        ORDER BY 
+            cf.nombre_categoria_fondo, 
+            año, 
+            semana;
+    `;
+    
+    connection.query(query, (err, results) => {
+        if (err) {
+            console.error('Error al obtener la evolución de fondos: ', err);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+        res.json(results);
+    });
+});
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+//Final de endpoints para evolución en graficos Chart.js/HighCharts de registros-fondos
