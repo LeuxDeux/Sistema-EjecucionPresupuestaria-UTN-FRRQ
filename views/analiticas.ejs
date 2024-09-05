@@ -130,7 +130,7 @@
         </div>
     </div>
 <% } %>
-<!-- Modal para acción -->
+<!-- Modal de Acción -->
 <div class="modal fade" id="modalAccion" tabindex="-1" aria-labelledby="modalAccionLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -140,15 +140,37 @@
         </div>
         <div class="modal-body">
           <p>¿Qué acción desea realizar sobre la factura seleccionada?</p>
+          <div class="mb-3">
+            <label for="codigoInput" class="form-label"></label>
+            <input type="text" class="form-control" id="codigoInput" placeholder="Ingrese el código">
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <a href="/aceptar-factura/" class="btn btn-success" id="btnAceptar">Aceptar</a>
+          <button type="button" class="btn btn-success" id="btnConfirmarAccion">Aceptar</button>
           <a href="/rechazar-factura/" class="btn btn-danger" id="btnRechazar">Rechazar</a>
         </div>
       </div>
     </div>
-  </div>
+</div>
+<!-- Modal para confirmación -->
+<div class="modal fade" id="modalConfirmacion" tabindex="-1" aria-labelledby="modalConfirmacionLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalConfirmacionLabel">Confirmar Acción</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p id="confirmacionMensaje"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <a href="/aceptar-factura/" class="btn btn-success" id="btnAceptar">Aceptar</a>
+        </div>
+      </div>
+    </div>
+</div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 <script>
@@ -206,12 +228,31 @@
         var facturaId = $(this).data('id');
 
         // Actualizar el texto del modal con información sobre la factura seleccionada
-        $('#modalAccion .modal-body p').html('¿Qué acción desea realizar sobre la factura: <a href="/descargar-archivo/' + facturaId + '">' + facturaNombreFactura + '</a> por un monto de $' + facturaMonto);
-        $('#modalAccion #btnAceptar').attr('href', '/aceptar-factura/' + facturaId);
+        $('#modalAccion .modal-body p').html('¿Qué acción desea realizar sobre la factura: <a href="/descargar-archivo/' + facturaId + '" class="text-blue-500">' + facturaNombreFactura + '</a> por un monto de <strong>$' + facturaMonto + '</strong>');
+        // $('#modalAccion #btnAceptar').attr('href', '/aceptar-factura/' + facturaId);
+        $('#btnConfirmarAccion').off('click').on('click', function() {
+        var codigo = $('#codigoInput').val(); // Obtener el valor del código ingresado
+
+        if (!codigo) {
+            alert('Por favor ingrese un código.');
+            return;
+        }
+
+        // Actualizar el mensaje de confirmación en el modal de confirmación
+        $('#confirmacionMensaje').html('¿Está seguro que desea aceptar la factura: <a href="/descargar-archivo/' + facturaId + '" class="text-blue-500">' + facturaNombreFactura + '</a> por un monto de <strong>$' + facturaMonto + '</strong> con el código <strong>' + codigo + '</strong>?');
+        
+        // Actualizar el href del botón "Aceptar" en el modal de confirmación
+        $('#modalConfirmacion #btnAceptar').attr('href', '/aceptar-factura/' + facturaId + '?codigo=' + encodeURIComponent(codigo));
+
+        // Mostrar el modal de confirmación
+        $('#modalAccion').modal('hide'); // Ocultar el modal de acción
+        $('#modalConfirmacion').modal('show'); // Mostrar el modal de confirmación
+    });
         $('#modalAccion #btnRechazar').attr('href', '/rechazar-factura/' + facturaId);
 
-        console.log('Factura ID:', facturaId);
-    });
+    console.log('Factura ID Modal Confirmacion:', facturaId);
+    console.log('Código:', codigo);
+});
 
     // Función para filtrar facturas
     $('#filtroAnaliticas').on('input', function() {
