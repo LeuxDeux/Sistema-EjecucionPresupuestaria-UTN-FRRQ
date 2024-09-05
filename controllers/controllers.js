@@ -471,19 +471,31 @@ exports.analiticas = (req, res) => {
         res.render('login');
     }
 }
-exports.aceptarFactura = (req, res)=>{
-    if(req.session.loggedin){
+exports.aceptarFactura = (req, res) => {
+    if (req.session.loggedin) {
         const idFactura = req.params.id;
         const estado = 'aceptado';
-        connection.query('UPDATE facturas SET estado = ? WHERE id = ?', [estado, idFactura], (error, results1)=>{
-            if(error){
-                console.error('Ha ocurrido un error al aceptar la factura: ', error);
-                return handleHttpResponse(res, 500, 'Error interno al cambiar el estado de la factura. Por favor comuníquese con el soporte');
-            }else{
-                this.analiticas(req, res);
+        const codigo = req.query.codigo; // Obtener el código del cuerpo de la solicitud
+
+        if (!codigo) {
+            return handleHttpResponse(res, 400, 'Código no proporcionado.');
+        }
+
+        // Realizar la actualización en la base de datos
+        console.log(codigo);
+        connection.query(
+            'UPDATE facturas SET estado = ?, codigo = ? WHERE id = ?',
+            [estado, codigo, idFactura],
+            (error, results1) => {
+                if (error) {
+                    console.error('Ha ocurrido un error al aceptar la factura: ', error);
+                    return handleHttpResponse(res, 500, 'Error interno al cambiar el estado de la factura. Por favor comuníquese con el soporte');
+                } else {
+                 this.analiticas(req, res); // Llamar a la función de analíticas si es necesario
+                }
             }
-        });
-    }else{
+        );
+    } else {
         res.render('login');
     }
 }
