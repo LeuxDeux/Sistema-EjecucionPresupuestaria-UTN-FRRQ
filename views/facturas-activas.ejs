@@ -68,6 +68,12 @@
                 <li><a href="/logout" class="block py-2 px-4 text-white hover-links">Cerrar Sesión</a></li>
             </ul>
         </nav>
+        <% } else if(secretaria == 14) { %>
+            <nav id="sidebar" class="bg-blue-700 w-64 flex-shrink-0 hidden md:block shadow-md" style="background-image: linear-gradient(to bottom, #127cc1, #127cc1);">
+                <ul class="py-4">
+                    <li><a href="/logout" class="block py-2 px-4 text-white hover-links">Cerrar Sesión</a></li>
+                </ul>
+            </nav>
         <% }else{ %>
             <div class="flex flex-col min-h-screen">
                 <!-- Encabezados -->
@@ -91,7 +97,11 @@
                     </nav>
                 <% } %>
 <div class="container container-table">
-    <a href="/" class="btn btn-outline-primary mt-4" id="volver"><i class="bx bxs-chevron-left bx-md"></i></a>
+    <% if(secretaria == 14) { %>
+    <% }else{ %>
+        <a href="/" class="btn btn-outline-primary mt-4" id="volver"><i class="bx bxs-chevron-left bx-md"></i></a>
+    <% } %>
+    
     <!-- Sección para mostrar información -->
         <div class="mb-3 mt-2">
             <input type="text" class="form-control" id="filtroFacturasActivas" placeholder="Buscar facturas activas...">
