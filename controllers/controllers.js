@@ -139,7 +139,8 @@ exports.autentificacion = async (req, res) =>{ // METODO AUTENTIFICACIÓN
                     });
                    
                     } else if (req.session.secretaria == '14'){
-                        this.facturasActivas(req, res);
+                        // this.facturasActivas(req, res);
+                        res.redirect('facturas-activas');
                     }else{
                     //console.log(req.session.secretaria);
                     res.render('login', {
