@@ -378,10 +378,9 @@ sidebarToggle.addEventListener('mouseleave', () => {
             const resultados = JSON.parse(dataContainer.getAttribute('data-resultados'));
             const nombreSecretaria = "<%= nombreSecretaria %>";
 
-            // Filtrar datos por la secretaría seleccionada
             const datosFiltrados = resultados.filter(item => item.nombre_secretaria === nombreSecretaria);
 
-            // Calcular la ganancia total y la pérdida total
+            // Se calcula la ganancia total y la pérdida total
             const totalGanancia = datosFiltrados
                 .filter(item => item.tipo === 'ingreso')
                 .reduce((acc, item) => acc + parseFloat(item.ganancia), 0);
@@ -390,16 +389,18 @@ sidebarToggle.addEventListener('mouseleave', () => {
                 .filter(item => item.tipo === 'egreso')
                 .reduce((acc, item) => acc + parseFloat(item.perdida), 0);
 
-            // Crear el gráfico de columnas
+            const ingresoNeto = totalGanancia - totalPerdida;
+
+            //Gráfico Ganancia Perdida e Ingreso neto de Secretaría
             Highcharts.chart('containerColumnas', {
                 chart: {
                     type: 'column'
                 },
                 title: {
-                    text: 'Ganancia y Pérdida de ' + nombreSecretaria
+                    text: 'Ganancia, Pérdida e Ingreso Neto de ' + nombreSecretaria
                 },
                 xAxis: {
-                    categories: ['Ganancia', 'Pérdida'],
+                    categories: ['Ganancia', 'Pérdida', 'Ingreso Neto'],
                     title: {
                         text: 'Tipo'
                     }
@@ -416,7 +417,7 @@ sidebarToggle.addEventListener('mouseleave', () => {
                     }
                 },
                 tooltip: {
-                    pointFormat: '<b>{point.y_formatted}</b>'
+                    pointFormat: '<b>{point.y_formatted}</b>',
                 },
                 plotOptions: {
                     column: {
@@ -430,6 +431,7 @@ sidebarToggle.addEventListener('mouseleave', () => {
                 },
                 series: [{
                     name: 'Monto',
+                    pointWidth: 100,
                     data: [
                         {
                             name: 'Ganancia',
@@ -442,11 +444,18 @@ sidebarToggle.addEventListener('mouseleave', () => {
                             y: totalPerdida,
                             y_formatted: formatCurrency(totalPerdida),
                             color: 'red'
+                        },
+                        {
+                            name: 'Ingreso Neto',
+                            y: ingresoNeto,
+                            y_formatted: formatCurrency(ingresoNeto),
+                            color: 'blue'
                         }
                     ]
                 }]
             });
         });
+
 
         // Obtenemos los datos del div para las secretarías
         var dataContainer = document.getElementById('dataContainer');
