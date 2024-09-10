@@ -138,7 +138,7 @@ exports.autentificacion = async (req, res) =>{ // METODO AUTENTIFICACIÓN
                         ruta: '',
                     });
                    
-                    } else if (req.session.secretaria == '14'){
+                    } else if (req.session.secretaria == '14' || req.session.secretaria == '13'){
                         // this.facturasActivas(req, res);
                         res.redirect('facturas-activas');
                     }else{
