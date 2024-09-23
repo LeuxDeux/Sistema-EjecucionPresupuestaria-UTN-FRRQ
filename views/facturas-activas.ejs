@@ -150,10 +150,33 @@
                     <td><%= factura.nombre_usuario %></td>
                     <td><%= factura.nombre_categoria %></td>
                     <td><%= factura.destino %></td>
-                    <td><%= factura.n_expediente %></td>
+                    <td>
+                        <!-- Mostrar el valor del número de expediente o un botón para asignar, dependiendo del rol -->
+                        <% if (secretaria === 13) { %>
+                            <% if (!factura.n_expediente) { %>
+                                <!-- Botón para asignar número de expediente si no está asignado -->
+                                <a href="#" class="btn btn-outline-warning asignar-expediente" data-id="<%= factura.id %>">
+                                    Asignar N°
+                                </a>
+                            <% } else { %>
+                                <!-- Mostrar el número de expediente cuando esté asignado -->
+                                <%= factura.n_expediente %>
+                            <% } %>
+                        <% } else { %>
+                            <!-- Mostrar el número de expediente para otros roles -->
+                            <%= factura.n_expediente %>
+                        <% } %>
+                    </td>
                     <td><%= factura.codigo %></td>
                     <td>
-                        <a href="#" class="btn btn-outline-info baja-factura" data-id="<%= factura.id %>">Dar de baja</a>
+                        <!-- Para todos los roles excepto el ID 13 -->
+                        <% if (factura.n_expediente != null) { %>
+                            <!-- Botón deshabilitado si no hay número de expediente -->
+                            <a href="#" class="btn btn-outline-info baja-factura" data-id="<%= factura.id %>"
+                               <%= !factura.n_expediente ? 'disabled' : '' %>>
+                                Dar de baja
+                            </a>
+                        <% } %>
                     </td>
                 </tr>
             <% }); %>
@@ -189,6 +212,50 @@
         </div>
     </div>
 </div>
+<!-- Modal para asignar el número de expediente -->
+<div class="modal fade" id="asignarExpedienteModal" tabindex="-1" role="dialog" aria-labelledby="asignarExpedienteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="asignarExpedienteModalLabel">Asignar Número de Expediente</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="numeroExpediente">Número de Expediente</label>
+                        <input type="text" class="form-control" id="numeroExpediente" placeholder="Ingrese el número de expediente" maxlength="12">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirmarExpediente">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal de confirmación -->
+<div class="modal fade" id="modalConfirmacionExpediente" tabindex="-1" aria-labelledby="modalConfirmacionExpedienteLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalConfirmacionExpedienteLabel">Confirmación</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p id="textoConfirmacion"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <!-- Este será el botón para el backend -->
+          <button type="button" class="btn btn-primary" id="confirmarFinal">Asignar Expediente</button>
+        </div>
+      </div>
+    </div>
+  </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
@@ -215,6 +282,44 @@
             $('#modalBLFactura').modal('show');
         });
         });
+        document.addEventListener("DOMContentLoaded", function() {
+    // Captura el click en el botón "Asignar Expediente"
+    document.querySelectorAll('.asignar-expediente').forEach(function(button) {
+        button.addEventListener('click', function(event) {
+            event.preventDefault(); // Evita que el enlace navegue a otro lado
+
+            const expedienteId = this.getAttribute("data-id"); // Captura el ID de la factura
+            console.log("Asignando expediente para ID: " + expedienteId);
+
+            // Limpiar el campo de entrada del modal cuando se abra
+            document.getElementById("numeroExpediente").value = "";
+
+            // Mostrar el modal
+            const modal = new bootstrap.Modal(document.getElementById('asignarExpedienteModal'));
+            modal.show();
+        });
+    });
+    // Evento para el botón "Guardar" en el primer modal
+    document.getElementById("confirmarExpediente").addEventListener('click', function() {
+        const numeroExpediente = document.getElementById("numeroExpediente").value;
+
+        // Validar que el número no esté vacío y no exceda los 12 caracteres
+        if (numeroExpediente && numeroExpediente.length <= 12) {
+            // Mostrar el número de expediente en el segundo modal
+            document.getElementById("textoConfirmacion").innerHTML = `¿Está seguro que desea asignar el número de expediente: <strong>${numeroExpediente}</strong>?`;
+
+            // Cerrar el primer modal antes de abrir el segundo
+            //const modalAsignarExpediente = bootstrap.Modal.getInstance(document.getElementById('asignarExpedienteModal'));
+            //modalAsignarExpediente.hide(); // Asegurarse de que el modal se cierra
+            const modalConfirmacionExpediente = new bootstrap.Modal(document.getElementById('modalConfirmacionExpediente'));
+            modalConfirmacionExpediente.show();
+        } else {
+            alert("Por favor, ingrese un número de expediente válido (máximo 12 caracteres).");
+        }
+    });
+});
+
+
     // $(document).ready(function() {
     //     var fechaInput = document.getElementById('fechaActual');
     //     // Obtener la fecha actual como un objeto de fecha
