@@ -683,6 +683,22 @@ exports.facturasActivasBL = (req, res)=>{
         res.render('login');
     }
 }
+exports.facturasActivasNExp = (req, res)=>{
+    if(req.session.loggedin){
+        const idFactura = req.body.idFactura;
+        const n_expediente = req.body.numeroExpediente;
+        connection.query('UPDATE facturas SET n_expediente = ? WHERE id = ?', [n_expediente, idFactura], (error, results)=>{
+            if(error){
+                console.error('Ha ocurrido un error al dar de baja las facturas activas (aceptadas): ', error);
+                return handleHttpResponse(res, 500, 'Error al dar de baja las facturas aceptadas desde la base de datos. Por favor comuníquese con el soporte');
+            }else{
+                res.redirect('facturas-activas');
+            }
+        });
+    }else{
+        res.render('login');
+    }
+}
 exports.fondosCategorias = (req, res)=>{
     if(req.session.loggedin){
         connection.query('SELECT * from categorias_fondos', (error, results)=>{
