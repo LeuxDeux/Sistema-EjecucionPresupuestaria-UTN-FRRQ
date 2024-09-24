@@ -178,10 +178,25 @@
                         <input type="number" step="any" id="monto" name="monto" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label for="pdf" class="form-label">Archivo PDF</label>
+                        <label for="pdf" class="form-label">PDF de Factura</label>
                         <input type="file" id="pdf" name="pdf" class="form-control" accept=".pdf" required>
                         <div class="form-text text-danger" id="fileSizeError" style="display:none;">El archivo debe ser menor a 5MB.</div>
                     </div>
+                    <!-- Checkbox para añadir documentación anexa -->
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="checkboxDocumentacion" name="checkboxDocumentacion">
+                        <label class="form-check-label" for="checkboxDocumentacion">Añadir documentación anexa</label>
+                    </div>
+
+                     <!-- Botón para añadir campos de Documentación Anexa -->
+                     <div class="mb-3" id="documentacionAnexaContainer" style="display: none;">
+                        <label for="documentacionAnexa" class="form-label">Documentación Anexa 1</label>
+                        <input type="file" id="documentacionAnexa" name="documentacionAnexa[]" class="form-control" accept=".pdf">
+                        <!-- Contenedor donde se añadirán más campos de archivos -->
+                        <div id="camposAnexos"></div>
+                        <button type="button" id="btnAgregarCampo" class="btn btn-sm btn-success mt-2">+ Añadir otro archivo</button>
+                    </div>
+
                     <div class="mb-3">
                         <label for="destino" class="form-label">Destino</label>
                         <select name="destino" id="destino" class="form-select" required>
@@ -286,6 +301,57 @@
             });
         });
     });
+    let contadorCampos = 2; // Contador para numerar los campos de documentación anexa
+    const maxCampos = 4; // Límite máximo de campos
+    // Mostrar/Ocultar sección de Documentación Anexa
+    document.getElementById('checkboxDocumentacion').addEventListener('change', function() {
+        const documentacionAnexaContainer = document.getElementById('documentacionAnexaContainer');
+        if (this.checked) {
+            documentacionAnexaContainer.style.display = 'block';
+        } else {
+            documentacionAnexaContainer.style.display = 'none';
+        }
+    });
+
+// Añadir campos de Documentación Anexa dinámicamente
+document.getElementById('btnAgregarCampo').addEventListener('click', function() {
+    if(contadorCampos <= maxCampos){
+
+    const camposAnexos = document.getElementById('camposAnexos');
+    
+    // Crear un nuevo campo de archivo
+    const nuevoCampo = document.createElement('div');
+    nuevoCampo.classList.add('mb-3');
+    nuevoCampo.innerHTML = `
+        <label for="documentacionAnexa${contadorCampos}" class="form-label">Documentación Anexa ${contadorCampos}</label>
+            <input type="file" id="documentacionAnexa${contadorCampos}" name="documentacionAnexa[]" class="form-control mt-2" accept=".pdf">
+            <button type="button" class="btn btn-sm btn-danger mt-2 btnQuitarCampo">- Quitar archivo</button>
+        `;
+    
+    // Añadir el nuevo campo al contenedor
+    camposAnexos.appendChild(nuevoCampo);
+
+     // Agregar funcionalidad para eliminar el campo
+     nuevoCampo.querySelector('.btnQuitarCampo').addEventListener('click', function() {
+            camposAnexos.removeChild(nuevoCampo);
+            contadorCampos--;
+            actualizarEtiquetas(); // Actualizar las etiquetas de los campos
+        });
+
+        contadorCampos++;
+    }else{
+        alert(`Solo puedes agregar un máximo de ${maxCampos} documentaciones anexas.`);
+    }
+});
+// Función para actualizar las etiquetas de los campos después de eliminar alguno
+function actualizarEtiquetas() {
+    const campos = document.querySelectorAll('#camposAnexos .mb-3 label');
+    let index = 1;
+    campos.forEach((campo) => {
+        campo.textContent = `Documentación Anexa ${index}`;
+        index++;
+    });
+}
     //BETA DE MENSAJES
 //     window.onload = function() {
 //     const urlParams = new URLSearchParams(window.location.search);
