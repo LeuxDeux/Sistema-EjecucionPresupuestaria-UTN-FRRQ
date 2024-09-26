@@ -338,14 +338,8 @@ exports.facturas = (req, res) => {
 
 //CARGAR FACTURAS
 exports.cargarFactura = (req, res) => {
-    if(req.session.loggedin){
-        const uploadedFile = req.file; // Obtener el archivo subido
-        const nombreFactura = uploadedFile.originalname; // Usar el nombre original del archivo como nombre de factura
-        const categoriaId = req.body.categoria; // Obtener el ID de la categoría seleccionada del cuerpo de la solicitud
-        const monto = req.body.monto; // Obtener el monto del cuerpo de la solicitud
-        const destino = req.body.destino;
-        const estado = 'en proceso'; // Valor predeterminado para el estado de la factura
-        const usuarioId = req.body.idUsuario; // Obtener el ID de usuario del cuerpo de la solicitud
+    if (req.session.loggedin) {
+        const uploadedFile = req.files['pdf'] ? req.files['pdf'][0] : null; // Obtener el archivo de la factura principal
 
         if (uploadedFile) { // Verificar si se ha subido un archivo
             const newPath = path.join('uploads', uploadedFile.originalname); // Construir la ruta completa del nuevo archivo
@@ -359,15 +353,48 @@ exports.cargarFactura = (req, res) => {
                     const fechaActual = new Date();
                     const fechaLocal = new Date(fechaActual.getTime() - (fechaActual.getTimezoneOffset() * 60000));
                     const fechaFormateada = fechaLocal.toISOString().slice(0, 19).replace('T', ' ');
+
+                    // Datos de la factura
+                    const nombreFactura = uploadedFile.originalname; // Usar el nombre original del archivo de la factura
+                    const categoriaId = req.body.categoria;
+                    const monto = req.body.monto;
+                    const estado = 'en proceso'; // Estado por defecto
+                    const usuarioId = req.body.idUsuario;
+                    const destino = req.body.destino;
+
                     const sql = 'INSERT INTO facturas (fecha_carga, nombre_factura, categoria_id, monto, estado, usuario_id, archivo_factura, destino) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+                    
                     // Insertar los datos de la factura en la base de datos
                     connection.query(sql, [fechaFormateada, nombreFactura, categoriaId, monto, estado, usuarioId, newPath, destino], (err, result) => {
                         if (err) { // Manejar errores si ocurren al insertar datos en la base de datos
                             console.error('Error al insertar datos en la base de datos:', err);
-                            return handleHttpResponse(res, 500, 'Error interno del servidor al insertar los datos en la base de datos.')
+                            return handleHttpResponse(res, 500, 'Error interno del servidor al insertar los datos en la base de datos.');
                         } else { // Si los datos se insertaron correctamente en la base de datos
-                            //console.log('Datos insertados correctamente en la base de datos');
-                            res.redirect('facturas?success=true'); // Redirigir a la página de inicio después de cargar la factura
+                            const facturaId = result.insertId; // Obtener el ID de la factura insertada
+
+                            // Ahora insertar la documentación anexa, si existe
+                            const documentacionAnexa = [
+                                req.files['documentacionAnexa'] ? req.files['documentacionAnexa'][0] : null,
+                                req.files['documentacionAnexaExtra1'] ? req.files['documentacionAnexaExtra1'][0] : null,
+                                req.files['documentacionAnexaExtra2'] ? req.files['documentacionAnexaExtra2'][0] : null,
+                                req.files['documentacionAnexaExtra3'] ? req.files['documentacionAnexaExtra3'][0] : null
+                            ];
+
+                            // Crear la carpeta 'uploads/documentacion_anexa' si no existe
+                            const documentacionAnexaDir = path.join('uploads', 'documentacion_anexa');
+                            if (!fs.existsSync(documentacionAnexaDir)) {
+                                fs.mkdirSync(documentacionAnexaDir, { recursive: true });
+                            }
+
+                            // Construir rutas completas para los documentos anexos
+                            const rutasDocumentacionAnexa = documentacionAnexa.map(doc => doc ? path.join(documentacionAnexaDir, doc.originalname) : null);
+
+                            if (rutasDocumentacionAnexa.some(doc => doc !== null)) {
+                                // Llamar a la función para insertar la documentación anexa
+                                insertarDocumentacionAnexa(facturaId, rutasDocumentacionAnexa, documentacionAnexa, res);
+                            } else {
+                                res.redirect('facturas?success=true');
+                            }
                         }
                     });
                 }
@@ -375,10 +402,44 @@ exports.cargarFactura = (req, res) => {
         } else { // Si no se ha subido ningún archivo
             return handleHttpResponse(res, 400, 'No se ha podido subir ningún archivo');
         }
-    }else{
+    } else {
         res.render('login');
     }
 };
+
+// Función para mover los archivos de la documentación anexa
+function insertarDocumentacionAnexa(facturaId, rutasDocumentacionAnexa, documentacionAnexa, res) {
+    // Mover archivos
+    documentacionAnexa.forEach((doc, index) => {
+        if (doc) {
+            fs.rename(doc.path, rutasDocumentacionAnexa[index], (error) => {
+                if (error) {
+                    console.error('Error al mover documentación anexa:', error);
+                }
+            });
+        }
+    });
+
+    // Insertar en la base de datos
+    const sql = `INSERT INTO documentacion_anexa (factura_id, documento_anexo, documento_anexo_extra_1, documento_anexo_extra_2, documento_anexo_extra_3)
+                 VALUES (?, ?, ?, ?, ?)`;
+
+    connection.query(sql, [
+        facturaId, 
+        rutasDocumentacionAnexa[0], 
+        rutasDocumentacionAnexa[1], 
+        rutasDocumentacionAnexa[2], 
+        rutasDocumentacionAnexa[3]
+    ], (err) => {
+        if (err) {
+            console.error('Error al insertar documentación anexa en la base de datos:', err);
+            return handleHttpResponse(res, 500, 'Error interno del servidor al insertar la documentación anexa.');
+        } else {
+            res.redirect('facturas?success=true'); // Redirigir a la página de inicio después de cargar la factura
+        }
+    });
+}
+
 
 //DESCARGAR PDF FACTURA
 exports.descargarArchivo = (req, res) => {
