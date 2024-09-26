@@ -40,15 +40,16 @@ app.use(express.static(path.join(__dirname, 'build'), { dotfiles: 'allow' }));
 //     next();
 // });
 // Configuración de almacenamiento para Multer
-const storage = multer.diskStorage({ // Función de almacenamiento en sistemas de archivos del servidor
+const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, 'uploads'); // Directorio donde se almacenarán los archivos
     },
     filename: function (req, file, cb) {
-        cb(null, file.originalname); // Nombre original del archivo
+        cb(null, file.originalname); // Usar el nombre original del archivo
     }
 });
 
+// Configurar Multer para manejar un archivo obligatorio (factura) y hasta 4 archivos opcionales (documentación anexa)
 const upload = multer({ storage: storage }); // Configurar Multer con la configuración de almacenamiento, se puede modificar para agregar filtro, tamaño y a que servicio se debe guardar
 app.listen(3000, ()=>{
     console.log("Server is running on port http://localhost:3000");
@@ -84,7 +85,13 @@ app.post('/borrar-categorias', crud.borrarCategoria);
 
 //FACTURAS
 app.get('/facturas', crud.facturas);
-app.post('/cargar-factura', upload.single('pdf'), crud.cargarFactura);
+app.post('/cargar-factura', upload.fields([
+    { name: 'pdf', maxCount: 1 }, // Archivo obligatorio
+    { name: 'documentacionAnexa', maxCount: 1 }, // Documentación opcional
+    { name: 'documentacionAnexaExtra1', maxCount: 1 },
+    { name: 'documentacionAnexaExtra2', maxCount: 1 },
+    { name: 'documentacionAnexaExtra3', maxCount: 1 }
+]), crud.cargarFactura);
 app.get('/descargar-archivo/:id', crud.descargarArchivo);
 app.post('/borrar-facturas', crud.borrarFactura);
 
