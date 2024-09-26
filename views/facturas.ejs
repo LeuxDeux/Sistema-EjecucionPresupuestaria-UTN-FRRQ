@@ -167,7 +167,6 @@
                     <div class="mb-3">
                         <label for="categoria" class="form-label">Categoría</label>
                         <select name="categoria" id="categoria" class="form-select">
-                            <!-- Iteración sobre las categorías disponibles -->
                             <% categorias.forEach((categoria) => { %>
                                 <option value="<%= categoria.id %>"><%= categoria.nombre %></option>
                             <% }); %>
@@ -184,17 +183,17 @@
                     </div>
                     <!-- Checkbox para añadir documentación anexa -->
                     <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="checkboxDocumentacion" name="checkboxDocumentacion">
+                        <input type="checkbox" class="form-check-input" id="checkboxDocumentacion" name="checkboxDocumentacion" onclick="toggleDocumentacionAnexa()">
                         <label class="form-check-label" for="checkboxDocumentacion">Añadir documentación anexa</label>
                     </div>
 
-                     <!-- Botón para añadir campos de Documentación Anexa -->
-                     <div class="mb-3" id="documentacionAnexaContainer" style="display: none;">
+                    <!-- Contenedor de Documentación Anexa -->
+                    <div class="mb-3" id="documentacionAnexaContainer" style="display: none;">
                         <label for="documentacionAnexa" class="form-label">Documentación Anexa 1</label>
-                        <input type="file" id="documentacionAnexa" name="documentacionAnexa[]" class="form-control" accept=".pdf">
+                        <input type="file" id="documentacionAnexa" name="documentacionAnexa" class="form-control" accept=".pdf">
                         <!-- Contenedor donde se añadirán más campos de archivos -->
                         <div id="camposAnexos"></div>
-                        <button type="button" id="btnAgregarCampo" class="btn btn-sm btn-success mt-2">+ Añadir otro archivo</button>
+                        <button type="button" id="btnAgregarCampo" class="btn btn-sm btn-success mt-2" onclick="agregarCampoAnexo()">+ Añadir otro archivo</button>
                     </div>
 
                     <div class="mb-3">
@@ -204,7 +203,6 @@
                             <option value="fundación">Fundación</option>
                         </select>
                     </div>
-                    <!-- Campos para mostrar el nombre del usuario y la fecha actual -->
                     <div class="mb-3">
                         <label for="nombreUsuario" class="form-label">Nombre del Usuario</label>
                         <input type="text" id="nombreUsuario" name="nombreUsuario" class="form-control" readonly value="<%= nombre %>">
@@ -216,6 +214,12 @@
                     </div>
                     <button type="submit" class="btn btn-primary">Cargar</button>
                 </form>
+
+                <!-- Formulario para cargar la documentación anexa -->
+<form id="formCargarDocumentacionAnexa" action="/cargar-documentacion-anexa" method="post" enctype="multipart/form-data" style="display:none;">
+    <div id="camposAnexosDocumentacion"></div>
+    <button type="submit" class="btn btn-primary">Cargar Documentación Anexa</button>
+</form>
             </div>
         </div>
     </div>
@@ -301,57 +305,71 @@
             });
         });
     });
-    let contadorCampos = 2; // Contador para numerar los campos de documentación anexa
     const maxCampos = 4; // Límite máximo de campos
-    // Mostrar/Ocultar sección de Documentación Anexa
-    document.getElementById('checkboxDocumentacion').addEventListener('change', function() {
-        const documentacionAnexaContainer = document.getElementById('documentacionAnexaContainer');
-        if (this.checked) {
-            documentacionAnexaContainer.style.display = 'block';
-        } else {
-            documentacionAnexaContainer.style.display = 'none';
-        }
-    });
 
-// Añadir campos de Documentación Anexa dinámicamente
+// Mostrar/Ocultar sección de Documentación Anexa
+document.getElementById('checkboxDocumentacion').addEventListener('change', function() {
+    const documentacionAnexaContainer = document.getElementById('documentacionAnexaContainer');
+    if (this.checked) {
+        documentacionAnexaContainer.style.display = 'block';
+    } else {
+        documentacionAnexaContainer.style.display = 'none';
+        resetDocumentacionAnexa(); // Limpiar los campos al desmarcar el checkbox
+    }
+});
+
+// Añadir campos de Documentación Anexa Extra dinámicamente
 document.getElementById('btnAgregarCampo').addEventListener('click', function() {
-    if(contadorCampos <= maxCampos){
-
     const camposAnexos = document.getElementById('camposAnexos');
-    
-    // Crear un nuevo campo de archivo
-    const nuevoCampo = document.createElement('div');
-    nuevoCampo.classList.add('mb-3');
-    nuevoCampo.innerHTML = `
-        <label for="documentacionAnexa${contadorCampos}" class="form-label">Documentación Anexa ${contadorCampos}</label>
-            <input type="file" id="documentacionAnexa${contadorCampos}" name="documentacionAnexa[]" class="form-control mt-2" accept=".pdf">
+    const numCamposActuales = document.querySelectorAll('#camposAnexos .mb-3').length;
+
+    if (numCamposActuales < maxCampos) {
+        const nuevoCampo = document.createElement('div');
+        nuevoCampo.classList.add('mb-3');
+
+        // El índice correcto se calcula con base en el número de campos existentes + 1
+        const nuevoIndice = numCamposActuales + 1;
+
+        nuevoCampo.innerHTML = `
+            <label for="documentacionAnexaExtra${nuevoIndice}" class="form-label">Documentación Anexa Extra ${nuevoIndice}</label>
+            <input type="file" id="documentacionAnexaExtra${nuevoIndice}" name="documentacionAnexaExtra${nuevoIndice}" class="form-control mt-2" accept="application/pdf">
             <button type="button" class="btn btn-sm btn-danger mt-2 btnQuitarCampo">- Quitar archivo</button>
         `;
-    
-    // Añadir el nuevo campo al contenedor
-    camposAnexos.appendChild(nuevoCampo);
 
-     // Agregar funcionalidad para eliminar el campo
-     nuevoCampo.querySelector('.btnQuitarCampo').addEventListener('click', function() {
+        // Añadir el nuevo campo al contenedor
+        camposAnexos.appendChild(nuevoCampo);
+
+        // Agregar funcionalidad para eliminar el campo
+        nuevoCampo.querySelector('.btnQuitarCampo').addEventListener('click', function() {
             camposAnexos.removeChild(nuevoCampo);
-            contadorCampos--;
-            actualizarEtiquetas(); // Actualizar las etiquetas de los campos
+            actualizarEtiquetas(); // Actualizar las etiquetas de los campos después de eliminar uno
         });
 
-        contadorCampos++;
-    }else{
+        actualizarEtiquetas(); // Actualizar etiquetas después de agregar un campo
+    } else {
         alert(`Solo puedes agregar un máximo de ${maxCampos} documentaciones anexas.`);
     }
 });
-// Función para actualizar las etiquetas de los campos después de eliminar alguno
+
+// Función para actualizar las etiquetas de los campos después de eliminar o agregar uno
 function actualizarEtiquetas() {
     const campos = document.querySelectorAll('#camposAnexos .mb-3 label');
-    let index = 1;
-    campos.forEach((campo) => {
-        campo.textContent = `Documentación Anexa ${index}`;
-        index++;
+    const inputs = document.querySelectorAll('#camposAnexos .mb-3 input[type="file"]');
+
+    campos.forEach((campo, idx) => {
+        const nuevoIndice = idx + 1; // Asignar el nuevo índice
+        campo.textContent = `Documentación Anexa Extra ${nuevoIndice}`;
+        inputs[idx].id = `documentacionAnexaExtra${nuevoIndice}`;
+        inputs[idx].name = `documentacionAnexaExtra${nuevoIndice}`;
     });
 }
+
+// Función para limpiar todos los campos de Documentación Anexa al desmarcar el checkbox
+function resetDocumentacionAnexa() {
+    const camposAnexos = document.getElementById('camposAnexos');
+    camposAnexos.innerHTML = ''; // Limpiar todos los campos adicionales
+}
+
     //BETA DE MENSAJES
 //     window.onload = function() {
 //     const urlParams = new URLSearchParams(window.location.search);
