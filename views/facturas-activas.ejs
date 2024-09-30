@@ -174,9 +174,10 @@
                             <!-- Botón deshabilitado si no hay número de expediente -->
                             <a href="#" class="btn btn-outline-info baja-factura" data-id="<%= factura.id %>"
                                <%= !factura.n_expediente ? 'disabled' : '' %>>
-                                Dar de baja
+                                Dar Baja
                             </a>
                         <% } %>
+                        <a href="#" class="btn btn-outline-info btnDescargarFactura" data-id="<%= factura.id %>" style="height: 2.5rem;" data-toggle="modal" data-target="#descargarModal" data-nombre-factura="<%= factura.nombre_factura %>">Descargar</a>
                     </td>
                 </tr>
             <% }); %>
@@ -260,6 +261,24 @@
       </div>
     </div>
   </div>
+  <!-- Modal -->
+<div class="modal fade" id="descargarModal" tabindex="-1" aria-labelledby="descargarModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="descargarModalLabel">Descargar Archivos</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p id="modal-factura"></p>
+          <div id="documentacion-anexa"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
@@ -274,6 +293,63 @@
 //         window.location.href = '/descargar-archivo/' + facturaId;
 //     });
 // });
+$(document).on('click', '.btnDescargarFactura', function () {
+    var facturaId = $(this).data('id');
+    var nombreFactura = $(this).data('nombre-factura');
+
+    // Actualizar el modal con el archivo principal de la factura
+    var facturaHtml = `<p>PDF Factura:</p><a href="/descargar-archivo/${facturaId}?tipo=factura" class="btn btn-link">${nombreFactura}</a>`;
+
+    // Limpiar el contenido previo de documentación anexa
+    $('#documentacion-anexa').html('');
+
+    // Hacer una petición AJAX para obtener la documentación anexa
+    $.ajax({
+        url: '/api/documentacion-anexa/' + facturaId, // Endpoint para obtener la documentación anexa
+        method: 'GET',
+        success: function (response) {
+            console.log(response); // Depuración: Verifica la respuesta en la consola
+            var docsHtml = '<p>PDF Documentación Anexa:</p>'; // Título para la documentación anexa
+
+            // Si se encuentra la documentación, mostramos los enlaces con los nombres de los archivos
+            if (response.documentacionAnexa) {
+                if (response.documentacionAnexa.documento_anexo) {
+                    var nombreArchivo1 = response.documentacionAnexa.documento_anexo.split('/').pop(); // Extrae solo el nombre del archivo
+                    docsHtml += `<a href="/descargar-documentacion-anexa/${facturaId}?anexo=1" class="btn btn-link">${nombreArchivo1}</a><br>`;
+                }
+                if (response.documentacionAnexa.documento_anexo_extra_1) {
+                    var nombreArchivo2 = response.documentacionAnexa.documento_anexo_extra_1.split('/').pop(); // Extrae solo el nombre del archivo
+                    docsHtml += `<p>PDF Documentación Anexa Extra 1:</p><a href="/descargar-documentacion-anexa/${facturaId}?anexo=2" class="btn btn-link">${nombreArchivo2}</a><br>`;
+                }
+                if (response.documentacionAnexa.documento_anexo_extra_2) {
+                    var nombreArchivo3 = response.documentacionAnexa.documento_anexo_extra_2.split('/').pop(); // Extrae solo el nombre del archivo
+                    docsHtml += `<p>PDF Documentación Anexa Extra 2:</p><a href="/descargar-documentacion-anexa/${facturaId}?anexo=3" class="btn btn-link">${nombreArchivo3}</a><br>`;
+                }
+                if (response.documentacionAnexa.documento_anexo_extra_3) {
+                    var nombreArchivo4 = response.documentacionAnexa.documento_anexo_extra_3.split('/').pop(); // Extrae solo el nombre del archivo
+                    docsHtml += `<p>PDF Documentación Anexa Extra 3:</p><a href="/descargar-documentacion-anexa/${facturaId}?anexo=4" class="btn btn-link">${nombreArchivo4}</a><br>`;
+                }
+
+                // Si se encontraron documentos anexos, los mostramos
+                if (docsHtml !== '<p>PDF Documentación Anexa:</p>') {
+                    $('#documentacion-anexa').html(docsHtml);
+                } else {
+                    $('#documentacion-anexa').html('<p>No hay documentación anexa disponible.</p>');
+                }
+            } else {
+                $('#documentacion-anexa').html('<p>No hay documentación anexa disponible.</p>');
+            }
+        },
+        error: function () {
+            $('#documentacion-anexa').html('<p>Error al cargar la documentación anexa.</p>');
+        }
+    });
+
+    // Mostrar el modal utilizando Bootstrap 5
+    var myModal = new bootstrap.Modal(document.getElementById('descargarModal'));
+    $('#modal-factura').html(facturaHtml); // Asegúrate de actualizar el contenido del modal aquí
+    myModal.show();
+});
     $(document).ready(function() {
         $('.baja-factura').click(function(event) {
             event.stopPropagation();

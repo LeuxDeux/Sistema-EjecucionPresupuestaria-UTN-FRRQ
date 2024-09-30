@@ -472,6 +472,84 @@ exports.descargarArchivo = (req, res) => {
         res.render('login');
     }
 };
+// Controlador para descargar la documentación anexa
+exports.descargarDocumentacionAnexa = (req, res) => {
+    if (req.session.loggedin) {
+        const facturaId = req.params.id; // ID de la factura
+        const anexoNum = req.query.anexo; // Número del documento anexo (1, 2, 3, etc.)
+
+        // Consulta para obtener la documentación anexa
+        const sqlAnexo = 'SELECT * FROM documentacion_anexa WHERE factura_id = ?';
+        connection.query(sqlAnexo, [facturaId], (err, result) => {
+            if (err) {
+                console.error('Error al obtener la documentación anexa:', err);
+                return handleHttpResponse(res, 500, 'Error interno del servidor al obtener la documentación anexa.');
+            }
+            if (result.length > 0) {
+                let archivoAnexo = '';
+                switch (anexoNum) {
+                    case '1':
+                        archivoAnexo = result[0].documento_anexo;
+                        break;
+                    case '2':
+                        archivoAnexo = result[0].documento_anexo_extra_1;
+                        break;
+                    case '3':
+                        archivoAnexo = result[0].documento_anexo_extra_2;
+                        break;
+                    case '4':
+                        archivoAnexo = result[0].documento_anexo_extra_3;
+                        break;
+                    default:
+                        return handleHttpResponse(res, 400, 'Documento anexo no encontrado.');
+                }
+
+                if (archivoAnexo) {
+                    // Extraemos el nombre del archivo desde la ruta completa
+                    nombreArchivo = archivoAnexo.split('\\').pop().split('/').pop(); // Funciona con ambos tipos de separadores
+
+                    res.setHeader('Content-Type', 'application/pdf');
+                    res.setHeader('Content-Disposition', `attachment; filename="${nombreArchivo}"`);
+                    fs.createReadStream(archivoAnexo).pipe(res);
+                } else {
+                    return handleHttpResponse(res, 400, 'Documento anexo no encontrado.');
+                }
+            } else {
+                return handleHttpResponse(res, 400, 'No se encontraron documentos anexos para esta factura.');
+            }
+        });
+    } else {
+        res.render('login');
+    }
+};
+
+// Controlador para obtener la documentación anexa
+exports.obtenerDocumentacionAnexa = (req, res) => {
+    const facturaId = req.params.id;
+
+    const sqlAnexo = 'SELECT documento_anexo, documento_anexo_extra_1, documento_anexo_extra_2, documento_anexo_extra_3 FROM documentacion_anexa WHERE factura_id = ?';
+    connection.query(sqlAnexo, [facturaId], (err, result) => {
+        if (err) {
+            console.error('Error al obtener la documentación anexa:', err);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+        
+        if (result.length > 0) {
+            // Reemplaza las barras invertidas por barras normales
+            const documentacionAnexa = result[0];
+            documentacionAnexa.documento_anexo = documentacionAnexa.documento_anexo?.replace(/\\/g, '/');
+            documentacionAnexa.documento_anexo_extra_1 = documentacionAnexa.documento_anexo_extra_1?.replace(/\\/g, '/');
+            documentacionAnexa.documento_anexo_extra_2 = documentacionAnexa.documento_anexo_extra_2?.replace(/\\/g, '/');
+            documentacionAnexa.documento_anexo_extra_3 = documentacionAnexa.documento_anexo_extra_3?.replace(/\\/g, '/');
+
+            res.json({ documentacionAnexa });
+        } else {
+            res.json({ documentacionAnexa: [] });
+        }
+    });
+};
+
+
 
 //BORRAR FACTURA 
 exports.borrarFactura = (req, res) => {

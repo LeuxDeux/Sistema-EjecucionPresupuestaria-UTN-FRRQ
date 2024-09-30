@@ -93,6 +93,8 @@ app.post('/cargar-factura', upload.fields([
     { name: 'documentacionAnexaExtra3', maxCount: 1 }
 ]), crud.cargarFactura);
 app.get('/descargar-archivo/:id', crud.descargarArchivo);
+app.get('/api/documentacion-anexa/:id', crud.obtenerDocumentacionAnexa);
+app.get('/descargar-documentacion-anexa/:id', crud.descargarDocumentacionAnexa);
 app.post('/borrar-facturas', crud.borrarFactura);
 
 //ANALITICAS
