@@ -146,6 +146,7 @@
                     <div class="mb-3">
                         <label for="fondoCategoria" class="form-label">Fondo Categoría</label>
                         <select name="idCategoriaFondo" id="fondoCategoria" class="form-select">
+                            <option value="default" selected disabled>Seleccione un Fondo</option>
                             <% resultadosCategorias.forEach((resCat) => { %>
                                 <option value="<%= resCat.id_categoria_fondo %>" data-destino="<%= resCat.destino %>"><%= resCat.nombre_categoria_fondo %></option>
                             <% }); %>
